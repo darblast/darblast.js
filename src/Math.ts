@@ -5,7 +5,26 @@ namespace Darblast {
 export namespace Math {
 
 
-export class vec2 {
+export interface ivec2 {
+  x: number;
+  y: number;
+}
+
+export interface ivec3 {
+  x: number;
+  y: number;
+  z: number;
+}
+
+export interface ivec4 {
+  x: number;
+  y: number;
+  z: number;
+  w: number;
+}
+
+
+export class vec2 implements ivec2 {
   public constructor(
       public x: number,
       public y: number) {}
@@ -137,7 +156,7 @@ export class vec2 {
 }
 
 
-export class vec3 {
+export class vec3 implements ivec3, ivec2 {
   public constructor(
       public x: number,
       public y: number,
@@ -279,7 +298,7 @@ export class vec3 {
 }
 
 
-export class vec4 {
+export class vec4 implements ivec4, ivec3, ivec2 {
   public constructor(
       public x: number,
       public y: number,
@@ -499,12 +518,15 @@ export class mat3 {
 }  // namespace Darblast
 
 
+type ivec2 = Darblast.Math.ivec2;
 type vec2 = Darblast.Math.vec2;
 const vec2 = Darblast.Math.vec2;
 
+type ivec3 = Darblast.Math.ivec3;
 type vec3 = Darblast.Math.vec3;
 const vec3 = Darblast.Math.vec3;
 
+type ivec4 = Darblast.Math.ivec4;
 type vec4 = Darblast.Math.vec4;
 const vec4 = Darblast.Math.vec4;
 
