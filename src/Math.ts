@@ -10,8 +10,16 @@ export class vec2 {
       public x: number,
       public y: number) {}
 
+  public static fromVec3(v: vec3): vec2 {
+    return new vec2(v.x, v.y);
+  }
+
   public clone(): vec2 {
     return new vec2(this.x, this.y);
+  }
+
+  public toVec3(z: number): vec3 {
+    return new vec3(this.x, this.y, z);
   }
 
   public add_(other: vec2): vec2 {
@@ -83,8 +91,16 @@ export class vec3 {
       public y: number,
       public z: number) {}
 
+  public static fromVec2(v: vec2, z: number): vec3 {
+    return new vec3(v.x, v.y, z);
+  }
+
   public clone(): vec3 {
     return new vec3(this.x, this.y, this.z);
+  }
+
+  public toVec2(): vec2 {
+    return new vec2(this.x, this.y);
   }
 
   public add_(other: vec3): vec3 {
