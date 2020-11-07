@@ -16,9 +16,7 @@ export type FieldType =
     'int32'   |
     'uint32'  |
     'float32' |
-    'float64' |
-    'int64'   |
-    'uint64';
+    'float64';
 
 
 export class FieldDefinition {
@@ -41,9 +39,6 @@ export class FieldDefinition {
       return 4;
     case 'float64':
       return 8;
-    case 'int64':
-    case 'uint64':
-      throw new Error('this version of Darblast does not support big integers');
     default:
       throw new Error(`invalid type in field definition: ${this.type}`);
     }
@@ -64,9 +59,6 @@ export class FieldDefinition {
       return 2;
     case 'float64':
       return 3;
-    case 'int64':
-    case 'uint64':
-      throw new Error('this version of Darblast does not support big integers');
     default:
       throw new Error(`invalid type in field definition: ${this.type}`);
     }
@@ -92,9 +84,6 @@ export class FieldDefinition {
       return Float32Array
     case 'float64':
       return Float64Array;
-    case 'int64':
-    case 'uint64':
-      throw new Error('this version of Darblast does not support big integers');
     default:
       throw new Error(`invalid type in field definition: ${this.type}`);
     }
@@ -238,8 +227,6 @@ export class RecordStore {
     uint32: Uint32Array,
     float32: Float32Array,
     float64: Float64Array,
-    int64: null,
-    uint64: null,
   };
 
   public constructor(fields: FieldDefinition[]) {
@@ -258,8 +245,6 @@ export class RecordStore {
       uint32: new Uint32Array(this._data),
       float32: new Float32Array(this._data),
       float64: new Float64Array(this._data),
-      int64: null,
-      uint64: null,
     };
   }
 
@@ -307,7 +292,7 @@ export class RecordStore {
     const field = definition.getField(name);
     const recordOffset = recordIndex * definition.byteSize;
     const index = recordOffset >>> field.logSize + fieldIndex;
-    return (this._views[field.type])![index];
+    return this._views[field.type][index];
   }
 
   public setField(
@@ -319,7 +304,7 @@ export class RecordStore {
     const field = definition.getField(name);
     const recordOffset = recordIndex * definition.byteSize;
     const index = recordOffset >>> field.logSize + fieldIndex;
-    (this._views[field.type])![index] = value;
+    this._views[field.type][index] = value;
     return this;
   }
 
