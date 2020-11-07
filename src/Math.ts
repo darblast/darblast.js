@@ -356,6 +356,40 @@ export class vec3 implements ivec3 {
     return this.rotate2(a, c.x / c.z, c.y / c.z);
   }
 
+  public rotate3_(
+      a: number,
+      nx: number, ny: number, nz: number,
+      cx: number = 0, cy: number = 0, cz: number = 0): vec3
+  {
+    const sin = GlobalMath.sin(a);
+    const cos = GlobalMath.cos(a);
+    const omc = 1 - cos;
+    const x = this.x - cx;
+    const y = this.y - cy;
+    const z = this.z - cz;
+    const dot = nx * x + ny * y + nz * z;
+    this.x = cx + nx * dot * omc + x * cos + (-nz * y + ny * z) * sin;
+    this.y = cy + ny * dot * omc + y * cos + (nz * x - nx * z) * sin;
+    this.z = cz + nz * dot * omc + z * cos + (-ny * x + nx * y) * sin;
+    return this;
+  }
+
+  public rotate3(
+    a: number,
+    nx: number, ny: number, nz: number,
+    cx: number = 0, cy: number = 0, cz: number = 0): vec3
+  {
+    return this.clone().rotate3_(a, nx, ny, nz, cx, cy, cz);
+  }
+
+  public rotate3v_(a: number, n: vec3, c: vec3): vec3 {
+    return this.rotate3_(a, n.x, n.y, n.z, c.x, c.y, c.z);
+  }
+
+  public rotate3v(a: number, n: vec3, c: vec3): vec3 {
+    return this.clone().rotate3_(a, n.x, n.y, n.z, c.x, c.y, c.z);
+  }
+
   public scale2_(x: number, y: number, cx: number = 0, cy: number = 0): vec3 {
     cx *= this.z;
     cy *= this.z;
