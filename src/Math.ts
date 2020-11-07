@@ -30,6 +30,10 @@ export class vec2 {
     return new vec4(this.x, this.y, z, w);
   }
 
+  public toHomogeneous(): vec3 {
+    return this.toVec3(1);
+  }
+
   public add_(other: vec2): vec2 {
     this.x += other.x;
     this.y += other.y;
@@ -117,6 +121,14 @@ export class vec3 {
 
   public toVec4(w: number): vec4 {
     return new vec4(this.x, this.y, this.z, w);
+  }
+
+  public toHomogeneous(): vec4 {
+    return this.toVec4(1);
+  }
+
+  public toStandard(): vec2 {
+    return this.toVec2().div_(this.z);
   }
 
   public add_(other: vec3): vec3 {
@@ -228,6 +240,10 @@ export class vec4 {
 
   public toVec3(): vec3 {
     return new vec3(this.x, this.y, this.z);
+  }
+
+  public toStandard(): vec3 {
+    return this.toVec3().div_(this.w);
   }
 
   public add_(other: vec4): vec4 {
