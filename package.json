@@ -1,0 +1,31 @@
+{
+  "name": "darblast.js",
+  "version": "0.1.0",
+  "description": "Darblast Engine",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/darblast/darblast.js.git"
+  },
+  "author": "Jim Farrell <farrelljames558@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/darblast/darblast.js/issues"
+  },
+  "homepage": "https://github.com/darblast/darblast.js#readme",
+  "devDependencies": {
+    "del": "^6.0.0",
+    "gulp": "^4.0.2",
+    "gulp-rename": "^2.0.0",
+    "gulp-typedoc": "^2.2.5",
+    "gulp-typescript": "^6.0.0-alpha.1",
+    "gulp-uglify-es": "^2.0.0",
+    "gulp-umd": "^2.0.0",
+    "merge-stream": "^2.0.0",
+    "typedoc": "^0.19.2",
+    "typescript": "^4.0.5"
+  },
+  "dependencies": {}
+}

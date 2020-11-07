@@ -1,0 +1,20 @@
+{
+  "compilerOptions": {
+    "module": "none",
+    "noImplicitAny": true,
+    "strictNullChecks": true,
+    "downlevelIteration": true,
+    "target": "es6",
+    "declaration": true,
+    "outFile": "darblast.js"
+  },
+  "typedocOptions": {
+    "excludeExternals": true,
+    "excludeNotExported": true,
+    "excludePrivate": true,
+    "excludeProtected": false,
+    "mode": "file",
+    "name": "Darblast Engine",
+    "out": "doc"
+  }
+}
