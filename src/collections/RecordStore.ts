@@ -355,15 +355,17 @@ export class RecordStore {
     this._maybeShrink();
   }
 
-  public swap(index1: number, index2: number): void {
-    this._checkIndex(index1);
-    this._checkIndex(index2);
-    // TODO
+  private _copyRecord(srcIndex: number, dstIndex: number): void {
+    const size = this._definition.byteSize;
+    const srcView = new Uint8Array(this._data, srcIndex * size, size);
+    const dstView = new Uint8Array(this._data, dstIndex * size, size);
+    dstView.set(srcView);
   }
 
   public swapAndPop(index: number): void {
     this._checkIndex(index);
-    // TODO
+    this._copyRecord(index, this._size - 1);
+    this._size--;
   }
 
   public swapPopShrink(index: number): void {
