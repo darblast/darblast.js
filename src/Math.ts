@@ -94,6 +94,22 @@ export class vec2 {
     const r = this.modulus() * other.modulus();
     return GlobalMath.acos(this.dot(other) / r);
   }
+
+  public rotate_(a: number): vec2 {
+    return mat2.rotation(a).mulv_(this);
+  }
+
+  public rotate(a: number): vec2 {
+    return mat2.rotation(a).mulv(this);
+  }
+
+  public scale_(x: number, y: number): vec2 {
+    return mat2.scaling(x, y).mulv_(this);
+  }
+
+  public scale(x: number, y: number): vec2 {
+    return mat2.scaling(x, y).mulv(this);
+  }
 }
 
 
@@ -327,6 +343,20 @@ export class mat2 {
       public m01: number,
       public m10: number,
       public m11: number) {}
+
+  public static identity(): mat2 {
+    return new mat2(1, 0, 0, 1);
+  }
+
+  public static rotation(a: number): mat2 {
+    const sin = GlobalMath.sin(a);
+    const cos = GlobalMath.cos(a);
+    return new mat2(cos, -sin, sin, cos);
+  }
+
+  public static scaling(x: number, y: number): mat2 {
+    return new mat2(x, 0, 0, y);
+  }
 
   public clone(): mat2 {
     return new mat2(this.m00, this.m01, this.m10, this.m11);
