@@ -114,6 +114,26 @@ export class vec2 implements ivec2 {
     return GlobalMath.acos(this.dot(other) / r);
   }
 
+  public translate_(x: number, y: number): vec2 {
+    this.x += x;
+    this.y += y;
+    return this;
+  }
+
+  public translate(x: number, y: number): vec2 {
+    return new vec2(this.x + x, this.y + y);
+  }
+
+  public translatev_(v: vec2): vec2 {
+    this.x += v.x;
+    this.y += v.y;
+    return this;
+  }
+
+  public translatev(v: vec2): vec2 {
+    return new vec2(this.x + v.x, this.y + v.y);
+  }
+
   public rotate_(a: number, cx: number = 0, cy: number = 0): vec2 {
     const sin = GlobalMath.sin(a);
     const cos = GlobalMath.cos(a);
@@ -133,7 +153,7 @@ export class vec2 implements ivec2 {
   }
 
   public rotatec(a: number, c: vec2): vec2 {
-    return this.rotate(a, c.x, c.y);
+    return this.clone().rotate_(a, c.x, c.y);
   }
 
   public scale_(x: number, y: number, cx: number = 0, cy: number = 0): vec2 {
@@ -151,7 +171,7 @@ export class vec2 implements ivec2 {
   }
 
   public scalec(x: number, y: number, c: vec2): vec2 {
-    return this.scale(x, y, c.x, c.y);
+    return this.clone().scale_(x, y, c.x, c.y);
   }
 }
 
@@ -282,6 +302,41 @@ export class vec3 implements ivec3, ivec2 {
     return new vec3(this.x + x * this.z, this.y + y * this.z, this.z);
   }
 
+  public translate2v_(v: vec3): vec3 {
+    this.x += v.x * this.z / v.z;
+    this.y += v.y * this.z / v.z;
+    return this;
+  }
+
+  public translate2v(v: vec3): vec3 {
+    return new vec3(
+        this.x + v.x * this.z / v.z,
+        this.y + v.y * this.z / v.z,
+        this.z);
+  }
+
+  public translate3_(x: number, y: number, z: number): vec3 {
+    this.x += x;
+    this.y += y;
+    this.z += z;
+    return this;
+  }
+
+  public translate3(x: number, y: number, z: number): vec3 {
+    return new vec3(this.x + x, this.y + y, this.z + z);
+  }
+
+  public translate3v_(v: vec3): vec3 {
+    this.x += v.x;
+    this.y += v.y;
+    this.z += v.z;
+    return this;
+  }
+
+  public translate3v(v: vec3): vec3 {
+    return new vec3(this.x + v.x, this.y + v.y, this.z + v.z);
+  }
+
   public rotate2_(a: number, cx: number = 0, cy: number = 0): vec3 {
     cx *= this.z;
     cy *= this.z;
@@ -324,6 +379,31 @@ export class vec3 implements ivec3, ivec2 {
 
   public scale2c(x: number, y: number, c: vec3): vec3 {
     return this.scale2(x, y, c.x / c.z, c.y / c.z);
+  }
+
+  public scale3_(
+      x: number, y: number, z: number,
+      cx: number, cy: number, cz: number): vec3
+  {
+    this.x = cx + (this.x - cx) * x;
+    this.y = cy + (this.y - cy) * y;
+    this.z = cz + (this.z - cz) * z;
+    return this;
+  }
+
+  public scale3(
+    x: number, y: number, z: number,
+    cx: number, cy: number, cz: number): vec3
+  {
+    return this.clone().scale3_(x, y, z, cx, cy, cz);
+  }
+
+  public scale3c_(x: number, y: number, z: number, c: vec3): vec3 {
+    return this.scale3_(x, y, z, c.x, c.y, c.z);
+  }
+
+  public scale3c(x: number, y: number, z: number, c: vec3): vec3 {
+    return this.clone().scale3_(x, y, z, c.x, c.y, c.z);
   }
 }
 
