@@ -14,12 +14,20 @@ export class vec2 {
     return new vec2(v.x, v.y);
   }
 
+  public static fromVec4(v: vec4): vec2 {
+    return new vec2(v.x, v.y);
+  }
+
   public clone(): vec2 {
     return new vec2(this.x, this.y);
   }
 
   public toVec3(z: number): vec3 {
     return new vec3(this.x, this.y, z);
+  }
+
+  public toVec4(z: number, w: number): vec4 {
+    return new vec4(this.x, this.y, z, w);
   }
 
   public add_(other: vec2): vec2 {
@@ -95,12 +103,20 @@ export class vec3 {
     return new vec3(v.x, v.y, z);
   }
 
+  public static fromVec4(v: vec4): vec3 {
+    return new vec3(v.x, v.y, v.z);
+  }
+
   public clone(): vec3 {
     return new vec3(this.x, this.y, this.z);
   }
 
   public toVec2(): vec2 {
     return new vec2(this.x, this.y);
+  }
+
+  public toVec4(w: number): vec4 {
+    return new vec4(this.x, this.y, this.z, w);
   }
 
   public add_(other: vec3): vec3 {
@@ -187,6 +203,108 @@ export class vec3 {
 }
 
 
+export class vec4 {
+  public constructor(
+      public x: number,
+      public y: number,
+      public z: number,
+      public w: number) {}
+
+  public static fromVec2(v: vec2, z: number, w: number): vec4 {
+    return new vec4(v.x, v.y, z, w);
+  }
+
+  public static fromVec3(v: vec3, w: number): vec4 {
+    return new vec4(v.x, v.y, v.z, w);
+  }
+
+  public clone(): vec4 {
+    return new vec4(this.x, this.y, this.z, this.w);
+  }
+
+  public toVec2(): vec2 {
+    return new vec2(this.x, this.y);
+  }
+
+  public toVec3(): vec3 {
+    return new vec3(this.x, this.y, this.z);
+  }
+
+  public add_(other: vec4): vec4 {
+    this.x += other.x;
+    this.y += other.y;
+    this.z += other.z;
+    this.w += other.w;
+    return this;
+  }
+
+  public add(other: vec4): vec4 {
+    return new vec4(
+        this.x + other.x,
+        this.y + other.y,
+        this.z + other.z,
+        this.w + other.w);
+  }
+
+  public sub_(other: vec4): vec4 {
+    this.x -= other.x;
+    this.y -= other.y;
+    this.z -= other.z;
+    this.w -= other.w;
+    return this;
+  }
+
+  public sub(other: vec4): vec4 {
+    return new vec4(
+        this.x - other.x,
+        this.y - other.y,
+        this.z - other.z,
+        this.w - other.w);
+  }
+
+  public mul_(r: number): vec4 {
+    this.x *= r;
+    this.y *= r;
+    this.z *= r;
+    this.w *= r;
+    return this;
+  }
+
+  public mul(r: number): vec4 {
+    return new vec4(this.x * r, this.y * r, this.z * r, this.w * r);
+  }
+
+  public div_(r: number): vec4 {
+    this.x /= r;
+    this.y /= r;
+    this.z /= r;
+    this.w /= r;
+    return this;
+  }
+
+  public div(r: number): vec4 {
+    return new vec4(this.x / r, this.y / r, this.z / r, this.w / r);
+  }
+
+  public dot(other: vec4): number {
+    return this.x * other.x + this.y * other.y + this.z * other.z +
+        this.w * other.w;
+  }
+
+  public modulus(): number {
+    return GlobalMath.hypot(this.x, this.y, this.z, this.w);
+  }
+
+  public normalize_(): vec4 {
+    return this.div_(this.modulus());
+  }
+
+  public normalize(): vec4 {
+    return this.div(this.modulus());
+  }
+}
+
+
 }  // namespace Math
 }  // namespace Darblast
 
@@ -196,3 +314,6 @@ const vec2 = Darblast.Math.vec2;
 
 type vec3 = Darblast.Math.vec3;
 const vec3 = Darblast.Math.vec3;
+
+type vec4 = Darblast.Math.vec4;
+const vec4 = Darblast.Math.vec4;
