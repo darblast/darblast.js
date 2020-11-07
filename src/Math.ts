@@ -540,6 +540,103 @@ export class vec4 implements ivec4 {
   public normalize(): vec4 {
     return this.div(this.modulus());
   }
+
+  public translate_(x: number, y: number, z: number): vec4 {
+    this.x += x * this.w;
+    this.y += y * this.w;
+    this.z += z * this.w;
+    return this;
+  }
+
+  public translate(x: number, y: number, z: number): vec4 {
+    return new vec4(
+        this.x + x * this.w,
+        this.y + y * this.w,
+        this.z + z * this.w,
+        this.w);
+  }
+
+  public translatev_(v: vec4): vec4 {
+    this.x += v.x * this.w / v.w;
+    this.y += v.y * this.w / v.w;
+    this.z += v.z * this.w / v.w;
+    return this;
+  }
+
+  public translatev(v: vec4): vec4 {
+    return new vec4(
+        this.x + v.x * this.w / v.w,
+        this.y + v.y * this.w / v.w,
+        this.z + v.z * this.w / v.w,
+        this.w);
+  }
+
+  public rotate_(
+      a: number,
+      nx: number, ny: number, nz: number,
+      cx: number = 0, cy: number = 0, cz: number = 0): vec4
+  {
+    const v = this.toStandard().rotate3_(a, nx, ny, nz, cx, cy, cz);
+    this.x = v.x;
+    this.y = v.y;
+    this.z = v.z;
+    this.w = 1;
+    return this;
+  }
+
+  public rotate(
+      a: number,
+      nx: number, ny: number, nz: number,
+      cx: number = 0, cy: number = 0, cz: number = 0): vec4
+  {
+    return this.clone().rotate_(a, nx, ny, nz, cx, cy, cz);
+  }
+
+  public rotatev_(a: number, n: vec4, c: vec4): vec4 {
+    return this.rotate_(
+        a,
+        n.x / n.w, n.y / n.w, n.z / n.w,
+        c.x / c.w, c.y / c.w, c.z / c.w);
+  }
+
+  public rotatev(a: number, n: vec4, c: vec4): vec4 {
+    return this.clone().rotate_(
+        a,
+        n.x / n.w, n.y / n.w, n.z / n.w,
+        c.x / c.w, c.y / c.w, c.z / c.w);
+  }
+
+  public scale_(
+      x: number, y: number, z: number,
+      cx: number = 0, cy: number = 0, cz: number = 0): vec4
+  {
+    cx *= this.w;
+    cy *= this.w;
+    cz *= this.w;
+    this.x = cx + (this.x - cx) * x;
+    this.y = cy + (this.y - cy) * y;
+    this.z = cz + (this.z - cz) * z;
+    return this;
+  }
+
+  public scale(
+      x: number, y: number, z: number,
+      cx: number = 0, cy: number = 0, cz: number = 0): vec4
+  {
+    return this.clone().scale_(x, y, z, cx, cy, cz);
+  }
+
+  public scalev_(v: vec4, c: vec4): vec4 {
+    return this.scale_(
+        v.x / v.w, v.y / v.w, v.z / v.w,
+        c.x / c.w, c.y / c.w, c.z / c.w);
+  }
+
+  public scalev(v: vec4, c: vec4): vec4 {
+    return this.scale(
+        v.x / v.w, v.y / v.w, v.z / v.w,
+        c.x / c.w, c.y / c.w, c.z / c.w);
+  }
 }
 
 
