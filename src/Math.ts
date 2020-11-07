@@ -95,20 +95,28 @@ export class vec2 {
     return GlobalMath.acos(this.dot(other) / r);
   }
 
-  public rotate_(a: number): vec2 {
-    return mat2.rotation(a).mulv_(this);
+  public rotate_(a: number, cx: number = 0, cy: number = 0): vec2 {
+    const sin = GlobalMath.sin(a);
+    const cos = GlobalMath.cos(a);
+    const dx = this.x - cx;
+    const dy = this.y - cy;
+    this.x = cx + dx * cos - dy * sin;
+    this.y = cy + dx * sin + dy * cos;
+    return this;
   }
 
-  public rotate(a: number): vec2 {
-    return mat2.rotation(a).mulv(this);
+  public rotate(a: number, cx: number = 0, cy: number = 0): vec2 {
+    return this.clone().rotate_(cx, cy, a);
   }
 
-  public scale_(x: number, y: number): vec2 {
-    return mat2.scaling(x, y).mulv_(this);
+  public scale_(x: number, y: number, cx: number = 0, cy: number = 0): vec2 {
+    this.x = cx + (this.x - cx) * x;
+    this.y = cy + (this.y - cy) * y;
+    return this;
   }
 
-  public scale(x: number, y: number): vec2 {
-    return mat2.scaling(x, y).mulv(this);
+  public scale(x: number, y: number, cx: number = 0, cy: number = 0): vec2 {
+    return this.clone().scale_(x, y, cx, cy);
   }
 }
 
@@ -414,6 +422,39 @@ export class mat2 {
 }
 
 
+export class mat3 {
+  public constructor(
+      public m00: number,
+      public m01: number,
+      public m02: number,
+      public m10: number,
+      public m11: number,
+      public m12: number,
+      public m20: number,
+      public m21: number,
+      public m22: number) {}
+
+  public static identity(): mat3 {
+    return new mat3(1, 0, 0, 0, 1, 0, 0, 0, 1);
+  }
+
+  public static translation(x: number, y: number): mat3 {
+    return new mat3(1, 0, x, 0, 1, y, 0, 0, 1);
+  }
+
+  public static scaling(x: number, y: number, z: number = 1): mat3 {
+    return new mat3(x, 0, 0, 0, y, 0, 0, 0, z);
+  }
+
+  public clone(): mat3 {
+    return new mat3(
+        this.m00, this.m01, this.m02,
+        this.m10, this.m11, this.m12,
+        this.m20, this.m21, this.m22);
+  }
+}
+
+
 }  // namespace Math
 }  // namespace Darblast
 
@@ -429,3 +470,6 @@ const vec4 = Darblast.Math.vec4;
 
 type mat2 = Darblast.Math.mat2;
 const mat2 = Darblast.Math.mat2;
+
+type mat3 = Darblast.Math.mat3;
+const mat3 = Darblast.Math.mat3;
