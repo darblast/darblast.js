@@ -321,6 +321,57 @@ export class vec4 {
 }
 
 
+export class mat2 {
+  public constructor(
+      public m00: number,
+      public m01: number,
+      public m10: number,
+      public m11: number) {}
+
+  public clone(): mat2 {
+    return new mat2(this.m00, this.m01, this.m10, this.m11);
+  }
+
+  public determinant(): number {
+    return this.m00 * this.m11 - this.m01 * this.m10;
+  }
+
+  public mul_(other: mat2): mat2 {
+    const m00 = this.m00 * other.m00 + this.m01 * other.m10;
+    const m01 = this.m00 * other.m01 + this.m01 * other.m11;
+    const m10 = this.m10 * other.m00 + this.m11 * other.m10;
+    const m11 = this.m10 * other.m01 + this.m11 * other.m11;
+    this.m00 = m00;
+    this.m01 = m01;
+    this.m10 = m10;
+    this.m11 = m11;
+    return this;
+  }
+
+  public mul(other: mat2): mat2 {
+    return new mat2(
+        this.m00 * other.m00 + this.m01 * other.m10,
+        this.m00 * other.m01 + this.m01 * other.m11,
+        this.m10 * other.m00 + this.m11 * other.m10,
+        this.m10 * other.m01 + this.m11 * other.m11);
+  }
+
+  public mulv_(v: vec2): vec2 {
+    const x = this.m00 * v.x + this.m01 * v.y;
+    const y = this.m10 * v.x * this.m11 * v.y;
+    v.x = x;
+    v.y = y;
+    return v;
+  }
+
+  public mulv(v: vec2): vec2 {
+    return new vec2(
+        this.m00 * v.x + this.m01 * v.y,
+        this.m10 * v.x * this.m11 * v.y);
+  }
+}
+
+
 }  // namespace Math
 }  // namespace Darblast
 
@@ -333,3 +384,6 @@ const vec3 = Darblast.Math.vec3;
 
 type vec4 = Darblast.Math.vec4;
 const vec4 = Darblast.Math.vec4;
+
+type mat2 = Darblast.Math.mat2;
+const mat2 = Darblast.Math.mat2;
