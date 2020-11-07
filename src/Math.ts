@@ -109,6 +109,14 @@ export class vec2 {
     return this.clone().rotate_(cx, cy, a);
   }
 
+  public rotatec_(a: number, c: vec2): vec2 {
+    return this.rotate_(a, c.x, c.y);
+  }
+
+  public rotatec(a: number, c: vec2): vec2 {
+    return this.rotate(a, c.x, c.y);
+  }
+
   public scale_(x: number, y: number, cx: number = 0, cy: number = 0): vec2 {
     this.x = cx + (this.x - cx) * x;
     this.y = cy + (this.y - cy) * y;
@@ -117,6 +125,14 @@ export class vec2 {
 
   public scale(x: number, y: number, cx: number = 0, cy: number = 0): vec2 {
     return this.clone().scale_(x, y, cx, cy);
+  }
+
+  public scalec_(x: number, y: number, c: vec2): vec2 {
+    return this.scale_(x, y, c.x, c.y);
+  }
+
+  public scalec(x: number, y: number, c: vec2): vec2 {
+    return this.scale(x, y, c.x, c.y);
   }
 }
 
@@ -235,6 +251,30 @@ export class vec3 {
   public angle(other: vec3): number {
     const r = this.modulus() * other.modulus();
     return GlobalMath.acos(this.dot(other) / r);
+  }
+
+  public rotate2_(a: number, cx: number = 0, cy: number = 0): vec3 {
+    cx *= this.z;
+    cy *= this.z;
+    const sin = GlobalMath.sin(a);
+    const cos = GlobalMath.cos(a);
+    const dx = this.x - cx;
+    const dy = this.y - cy;
+    this.x = (cx + dx * cos - dy * sin);
+    this.y = (cy + dx * sin + dy * cos);
+    return this;
+  }
+
+  public rotate2(a: number, cx: number = 0, cy: number = 0): vec3 {
+    return this.clone().rotate2_(a, cx, cy);
+  }
+
+  public rotate2c_(a: number, c: vec3): vec3 {
+    return this.rotate2_(a, c.x / c.z, c.y / c.z);
+  }
+
+  public rotate2c(a: number, c: vec3): vec3 {
+    return this.rotate2(a, c.x / c.z, c.y / c.z);
   }
 }
 
