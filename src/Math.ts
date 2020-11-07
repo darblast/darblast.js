@@ -386,6 +386,18 @@ export class mat2 {
         this.m10 * other.m01 + this.m11 * other.m11);
   }
 
+  public mulr_(r: number): mat2 {
+    this.m00 *= r;
+    this.m01 *= r;
+    this.m10 *= r;
+    this.m11 *= r;
+    return this;
+  }
+
+  public mulr(r: number): mat2 {
+    return new mat2(this.m00 * r, this.m01 * r, this.m10 * r, this.m11 * r);
+  }
+
   public mulv_(v: vec2): vec2 {
     const x = this.m00 * v.x + this.m01 * v.y;
     const y = this.m10 * v.x * this.m11 * v.y;
