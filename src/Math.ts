@@ -10,16 +10,11 @@ export interface ivec2 {
   y: number;
 }
 
-export interface ivec3 {
-  x: number;
-  y: number;
+export interface ivec3 extends ivec2 {
   z: number;
 }
 
-export interface ivec4 {
-  x: number;
-  y: number;
-  z: number;
+export interface ivec4 extends ivec3 {
   w: number;
 }
 
@@ -176,7 +171,7 @@ export class vec2 implements ivec2 {
 }
 
 
-export class vec3 implements ivec3, ivec2 {
+export class vec3 implements ivec3 {
   public constructor(
       public x: number,
       public y: number,
@@ -408,7 +403,7 @@ export class vec3 implements ivec3, ivec2 {
 }
 
 
-export class vec4 implements ivec4, ivec3, ivec2 {
+export class vec4 implements ivec4 {
   public constructor(
       public x: number,
       public y: number,
