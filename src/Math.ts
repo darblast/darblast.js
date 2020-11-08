@@ -287,14 +287,17 @@ export class vec3 implements ivec3 {
     return GlobalMath.acos(this.dot(other) / r);
   }
 
-  public translate2_(x: number, y: number): vec3 {
-    this.x += x * this.z;
-    this.y += y * this.z;
+  public translate2_(x: number, y: number, z: number = 1): vec3 {
+    this.x += x * this.z / z;
+    this.y += y * this.z / z;
     return this;
   }
 
-  public translate2(x: number, y: number): vec3 {
-    return new vec3(this.x + x * this.z, this.y + y * this.z, this.z);
+  public translate2(x: number, y: number, z: number = 1): vec3 {
+    return new vec3(
+        this.x + x * this.z / z,
+        this.y + y * this.z / z,
+        this.z);
   }
 
   public translate2v_(v: vec3): vec3 {
@@ -541,18 +544,18 @@ export class vec4 implements ivec4 {
     return this.div(this.modulus());
   }
 
-  public translate_(x: number, y: number, z: number): vec4 {
-    this.x += x * this.w;
-    this.y += y * this.w;
-    this.z += z * this.w;
+  public translate_(x: number, y: number, z: number, w: number = 1): vec4 {
+    this.x += x * this.w / w;
+    this.y += y * this.w / w;
+    this.z += z * this.w / w;
     return this;
   }
 
-  public translate(x: number, y: number, z: number): vec4 {
+  public translate(x: number, y: number, z: number, w: number = 1): vec4 {
     return new vec4(
-        this.x + x * this.w,
-        this.y + y * this.w,
-        this.z + z * this.w,
+        this.x + x * this.w / w,
+        this.y + y * this.w / w,
+        this.z + z * this.w / w,
         this.w);
   }
 
