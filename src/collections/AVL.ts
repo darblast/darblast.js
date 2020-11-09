@@ -361,7 +361,15 @@ export class AVL {
     return this._getField(recordIndex, this._userFieldTags[name]);
   }
 
-  // TODO: setField
+  public setField(
+      name: FieldName, index: number, value: number, ...keys: number[]): void
+  {
+    const recordIndex = this._lookup(index, this._roots[index], keys);
+    if (recordIndex < 0) {
+      throw new Error(`element not found: ${JSON.stringify(keys)}`);
+    }
+    this._setField(recordIndex, this._userFieldTags[name], value);
+  }
 
   public getRecord_(index: number, ...keys: number[]): Record {
     const recordIndex = this._lookup(index, this._roots[index], keys);
