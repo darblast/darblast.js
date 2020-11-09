@@ -40,15 +40,11 @@ export class AVL {
 
   /**
    * List of user fields of the stored records.
-   *
-   * This property is only for reporting purposes, and is not used internally.
    */
   public readonly fields: FieldDefinition[];
 
   /**
    * List of defined indices.
-   *
-   * This property is only for reporting purposes, and is not used internally.
    */
   public readonly indices: Index[];
 
@@ -165,8 +161,20 @@ export class AVL {
     return this._store.getField(recordIndex, this._leftChildFieldTags[index]);
   }
 
+  private _setLeftChild(
+      index: number, recordIndex: number, value: number): void
+  {
+    this._store.setField(recordIndex, this._leftChildFieldTags[index], value);
+  }
+
   private _getRightChild(index: number, recordIndex: number): number {
     return this._store.getField(recordIndex, this._rightChildFieldTags[index]);
+  }
+
+  private _setRightChild(
+      index: number, recordIndex: number, value: number): void
+  {
+    this._store.setField(recordIndex, this._rightChildFieldTags[index], value);
   }
 
   private _compare(index: number, recordIndex: number, keys: number[]): number {
@@ -212,6 +220,25 @@ export class AVL {
 
   private readonly _record: Record = Object.create(null);
 
+  /**
+   * Iterates over all records matching the specified keys in the given index,
+   * and for each record yields the field named with `name`.
+   *
+   * The iteration can be interrupted by passing a non-falsey value to the yield
+   * expression.
+   *
+   * @param index  Number of the index to use.
+   * @param name  Name of the field to yield for each record.
+   * @param keys  Ordered list of values for the keys of the specified index.
+   *              This list must have at least 1 value and at most K values,
+   *              with K being the cardinality of the index. If exactly K values
+   *              are specified, at most one element can be found; but if only H
+   *              are specified, with H < K, the remaining K - H keys are
+   *              unbound and multiple elements can be matched.
+   * @yields The requested field of each enumerated record.
+   * @returns `true` if all matched elements were enumerated, `false` if the
+   *          enumeration was interrupted.
+   */
   public* scanFields(
       index: number, name: FieldName,
       ...keys: number[]): Generator<number, boolean, boolean>
@@ -289,6 +316,66 @@ export class AVL {
       return this._fillRecord(Object.create(null), recordIndex);
     }
   }
+
+  private _insert(
+      index: number,
+      rootIndex: number,
+      recordIndex: number,
+      keys: number[]): number
+  {
+    if (rootIndex < 0) {
+      return recordIndex;
+    }
+    const cmp = this._compare(index, rootIndex, keys);
+    if (cmp < 0) {
+      this._setLeftChild(index, rootIndex, this._insert(
+          index, this._getLeftChild(index, rootIndex), recordIndex, keys));
+      return rootIndex;
+    } else if (cmp > 0) {
+      this._setRightChild(index, rootIndex, this._insert(
+          index, this._getRightChild(index, rootIndex), recordIndex, keys));
+      return rootIndex;
+    } else {
+      return rootIndex;
+    }
+  }
+
+  public insertOrUpdate(record: Record): void {
+    for (let index = 0; index < this._roots.length; index++) {
+      this._record[this._parentFieldTags[index]] = -1;
+      this._record[this._leftChildFieldTags[index]] = -1;
+      this._record[this._rightChildFieldTags[index]] = -1;
+      this._record[this._balanceFieldTags[index]] = 0;
+    }
+    for (const field of this.fields) {
+      this._record[this._userFieldTags[field.name]] = record[field.name];
+    }
+    const recordIndex = this._store.push(this._record);
+    for (let index = 0; index < this._roots.length; index++) {
+      const keys = this.indices[index].keys.map(name => record[name]);
+      this._insert(index, this._roots[index], recordIndex, keys);
+    }
+  }
+
+  private _remove(index: number, rootIndex: number, keys: number[]): number {
+    if (rootIndex < 0) {
+      return -1;
+    }
+    const cmp = this._compare(index, rootIndex, keys);
+    if (cmp < 0) {
+      this._setLeftChild(index, rootIndex, this._remove(
+          index, this._getLeftChild(index, rootIndex), keys));
+      return rootIndex;
+    } else if (cmp > 0) {
+      this._setRightChild(index, rootIndex, this._remove(
+          index, this._getRightChild(index, rootIndex), keys));
+      return rootIndex;
+    } else {
+      return -1;
+    }
+  }
+
+  // TODO: implement remove()
 }
 
 
