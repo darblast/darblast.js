@@ -17,7 +17,17 @@ type AnyView =
     Float64Array;
 
 
+/**
+ * Describes an index in an AVL tree.
+ *
+ * An index is defined by an ordered list of one or more fields of the user
+ * records. The fields cannot be repeated, i.e. each field may be indexed at
+ * most once.
+ */
 class Index {
+  /**
+   * @param keys  The list of field names.
+   */
   public constructor(public readonly keys: FieldName[]) {}
 }
 
@@ -27,7 +37,16 @@ class TaggedIndex {
 }
 
 
+/**
+ * Multi-index, Multi-key, TypedArray-based AVL tree implementation.
+ *
+ * This class can scale to several billion records while still maintaining
+ * maximum performance.
+ */
 export class AVL {
+  /**
+   * Used to specify indices in the AVL constructor.
+   */
   public static readonly Index = Index;
 
   private readonly _pointerType: PointerType;
@@ -89,6 +108,17 @@ export class AVL {
     }
   }
 
+  /**
+   * @param fields  The list of fields stored in each record.
+   * @param indices  A list of one or more index definitions to use to index the
+   *                 tree.
+   * @param pointerType  The type of field used to store internal node pointers.
+   *                     This must be one of `int8`, `int16`, or `int32`, and
+   *                     effectively defines the maximum level of scalability of
+   *                     the data structure: the tree will support at most 127
+   *                     nodes if it's set to `int8`, 32768 nodes for `int16`,
+   *                     and ~2B for `int32`.
+   */
   public constructor(
       fields: FieldDefinition[], indices: Index[],
       pointerType: PointerType = 'int32')
@@ -151,14 +181,27 @@ export class AVL {
     this._pointerView = new PointerView(this._data);
   }
 
+  /**
+   * @returns The "cardinality" of the data structure, which is the number of
+   *          indices.
+   */
   public get cardinality(): number {
     return this._indices.length;
   }
 
+  /**
+   * @returns The number of record slots of the underlying `ArrayBuffer`. This
+   *          may be higher than the number of records stored by the user
+   *          because the class tries to minimize reallocations by doubling the
+   *          capacity at each reallocation.
+   */
   public get capacity(): number {
     return this._capacity;
   }
 
+  /**
+   * @returns The number of records.
+   */
   public get size(): number {
     return this._size;
   }
