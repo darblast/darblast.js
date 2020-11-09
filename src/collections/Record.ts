@@ -2,6 +2,9 @@ namespace Darblast {
 export namespace Collections {
 
 
+export type PointerType = 'int8' | 'int16' | 'int32';
+
+
 export type FieldName = string | number;
 export type FieldType =
     'int8'    |
@@ -219,6 +222,8 @@ export type Record = {[name: string]: number};
 }  // namespace Collections
 }  // namespace Darblast
 
+
+type PointerType = Darblast.Collections.PointerType;
 
 type FieldDefinition = Darblast.Collections.FieldDefinition;
 const FieldDefinition = Darblast.Collections.FieldDefinition;
