@@ -2,6 +2,9 @@ namespace Darblast {
 export namespace Collections {
 
 
+/**
+ * Union type for all TypedArray views.
+ */
 export type AnyView =
     Int8Array         |
     Uint8Array        |
@@ -14,7 +17,15 @@ export type AnyView =
     Float64Array;
 
 
+/**
+ * Field names can be numbers or strings.
+ */
 export type FieldName = string | number;
+
+
+/**
+ * Available field types, corresponding to TypedArray views.
+ */
 export type FieldType =
     'int8'    |
     'uint8'   |
@@ -27,16 +38,51 @@ export type FieldType =
     'float64';
 
 
+/**
+ * TypedArray view type used to handle pointers / references to other TypedArray
+ * locations.
+ */
 export type PointerType = 'int8' | 'int16' | 'int32';
 
 
+/**
+ * Describes a field in a {@link Record}.
+ */
 export class FieldDefinition {
+  /**
+   * Name of the field.
+   */
   public readonly name: FieldName;
+
+  /**
+   * Type of the field.
+   */
   public readonly type: FieldType;
+
+  /**
+   * Size of the field, in bytes.
+   */
   public readonly byteSize: number;
+
+  /**
+   * Base 2 logarithm of the byte size, i.e. 0 for 8-bit integers, 1 for 16-bit
+   * integers, etc.
+   */
   public readonly logSize: number;
+
+  /**
+   * Reference to the TypedArray view constructor for the field's type, e.g.
+   * `Int32Array` for 32-bit signed integers.
+   */
   public readonly viewConstructor;
 
+  /**
+   * Constructs a FieldDefinition to describe a field with the specified name
+   * and type.
+   *
+   * @param name  Field name.
+   * @param type  Field type.
+   */
   public constructor(name: FieldName, type: FieldType) {
     this.name = name;
     this.type = type;
@@ -45,6 +91,15 @@ export class FieldDefinition {
     this.viewConstructor = FieldDefinition.getViewConstructor(type);
   }
 
+  /**
+   * Calculates the byte size for the given field type.
+   *
+   * This is used to calculate {@link byteSize}.
+   *
+   * @param type  A field type.
+   * @returns The size of the specified type, in bytes.
+   * @throws If an unknown type is specified.
+   */
   public static getByteSize(type: FieldType): number {
     switch (type) {
     case 'int8':
@@ -65,6 +120,15 @@ export class FieldDefinition {
     }
   }
 
+  /**
+   * Calculates the byte size for the given field type.
+   *
+   * This is used to calculate {@link logSize}.
+   *
+   * @param type  A field type.
+   * @returns The base 2 logarithmic size of the specified type.
+   * @throws If an unknown type is specified.
+   */
   public static getLogSize(type: FieldType): number {
     switch (type) {
     case 'int8':
@@ -85,6 +149,12 @@ export class FieldDefinition {
     }
   }
 
+  /**
+   * @param type  A field type.
+   * @returns The TypedArray view constructor suitable for the specified type,
+   *          e.g. `Int32Array` for 32-bit signed integers.
+   * @throws If an unknown type is specified.
+   */
   public static getViewConstructor(type: FieldType) {
     switch (type) {
     case 'int8':
@@ -170,14 +240,30 @@ class BinPacker {
 }
 
 
+/**
+ * Describes the format of a record.
+ *
+ * In the Darblast Collections framework, a record is a chunk of binary data
+ * that can be stored in typed arrays. When read back in JavaScript it results
+ * in a dictionary (an `Object` with `null` prototype) with string keys and
+ * number values.
+ */
 export class RecordDefinition {
+  /**
+   * Ordered list of fields stored in the records.
+   */
   public readonly fields: FieldDefinition[];
+
   private readonly _fieldsByName: {[name: string]: FieldDefinition} = Object.create(null);
   private readonly _sizes: {[name: string]: number} = Object.create(null);
   private readonly _logSizes: {[name: string]: number} = Object.create(null);
   private readonly _offsets: {[name: string]: number} = Object.create(null);
   private readonly _totalSize: number;
 
+  /**
+   * @param fields  Ordered list of definitions for the fields of the records.
+   * @throws If there are two or more fields with the same name.
+   */
   public constructor(fields: FieldDefinition[]) {
     this.fields = fields;
     for (const field of fields) {
@@ -210,24 +296,61 @@ export class RecordDefinition {
     return logSizes;
   }
 
+  /**
+   * @returns The total size of a record, in bytes. This is always a multiple of
+   *          8 because all fields are 64-bit aligned, and padding is added at
+   *          the end if necessary.
+   */
   public get byteSize(): number {
     return this._totalSize;
   }
 
+  /**
+   * @param name  The name of a field of the record.
+   * @returns The {@link FieldDefinition} for the specified field.
+   */
   public getField(name: FieldName): FieldDefinition {
     return this._fieldsByName[name];
   }
 
+  /**
+   * Returns the byte offset of a field from the beginning of a record.
+   *
+   * @param name  The name of the field.
+   * @returns The byte offset.
+   */
   public getFieldOffset(name: FieldName): number {
     return this._offsets[name];
   }
 
+  /**
+   * Returns an index that can be used to read the specified field in a
+   * TypedArray view. This is calculated as the byte offset (as per
+   * {@link getFieldOffset}) right-shifted by the
+   * {@link FieldDefinition.logSize} of the field, so that the resulting value
+   * is an index offset suitable for use in the TypedArray view for the type of
+   * field.
+   *
+   * For example, if a 16-bit field has a byte offset of 6 bytes
+   * {@link getFieldOffset} returns 6, but to read the field from an
+   * `Int16Array` view we actually need an index offset of `6 >>> log2(2) =
+   * 6 >>> 1 = 3`, which is returned by {@link getFieldIndex}.
+   *
+   * @param name  The field name.
+   */
   public getFieldIndex(name: FieldName): number {
     return this._offsets[name] >>> this._logSizes[name];
   }
 }
 
 
+/**
+ * A record as it is rendered in JavaScript after being deserialized from a
+ * typed array.
+ *
+ * Records are created with `Object.create(null)` so that they don't have any
+ * prototype. Names like `hasOwnProperty` can be correctly used as record keys.
+ */
 export type Record = {[name: string]: number};
 
 
