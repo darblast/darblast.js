@@ -86,7 +86,7 @@ export class RecordStore {
     const definition = this._definition;
     return this._views[name][
         index * (definition.byteSize >>> definition.getField(name).logSize) +
-        definition.getFieldOffset(name)];
+        definition.getFieldIndex(name)];
   }
 
   /**
@@ -102,7 +102,7 @@ export class RecordStore {
     const definition = this._definition;
     this._views[name][
         index * (definition.byteSize >>> definition.getField(name).logSize) +
-        definition.getFieldOffset(name)] = value;
+        definition.getFieldIndex(name)] = value;
   }
 
   private _fillRecord(output: Record, index: number): Record {
@@ -111,7 +111,7 @@ export class RecordStore {
     for (const field of definition.fields) {
       output[field.name] = this._views[field.name][
           index * (definition.byteSize >>> field.logSize) +
-          definition.getFieldOffset(field.name)];
+          definition.getFieldIndex(field.name)];
     }
     return output;
   }
@@ -162,12 +162,15 @@ export class RecordStore {
     for (const field of definition.fields) {
       this._views[field.name][
           index * (definition.byteSize >>> field.logSize) +
-          definition.getFieldOffset(field.name)] = record[field.name];
+          definition.getFieldIndex(field.name)] = record[field.name];
     }
   }
 
   /**
    * Inserts a new record at the end of the store.
+   *
+   * If the store doesn't have enough {@link capacity}, a reallocation is
+   * performed and the capacity is doubled.
    *
    * @param record  A {@link Record} object with the values to write.
    * @returns The index of the new record.
@@ -181,13 +184,16 @@ export class RecordStore {
     for (const field of definition.fields) {
       this._views[field.name][
           index * (definition.byteSize >>> field.logSize) +
-          definition.getFieldOffset(field.name)] = record[field.name];
+          definition.getFieldIndex(field.name)] = record[field.name];
     }
     return index;
   }
 
   /**
    * Inserts the specified values in a new record at the end of the store.
+   *
+   * If the store doesn't have enough {@link capacity} for a new record, a
+   * reallocation is performed and the capacity is doubled.
    *
    * @param values  The values corresponding to the fields of the record. There
    *                must be one value for each {@link FieldDefinition} object
@@ -206,7 +212,7 @@ export class RecordStore {
       const field = definition.fields[i];
       this._views[field.name][
           index * (definition.byteSize >>> field.logSize) +
-          definition.getFieldOffset(field.name)] = values[i];
+          definition.getFieldIndex(field.name)] = values[i];
     }
     return index;
   }
@@ -246,6 +252,7 @@ export class RecordStore {
    * reallocation.
    *
    * Downsizing is performed if no more than half of the capacity is being used.
+   * In that case the capacity is halved.
    *
    * @returns A boolean indicating whether downsizing happened.
    */
