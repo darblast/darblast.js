@@ -1,5 +1,3 @@
-/// <reference path="../GlobalMath.ts"/>
-/// <reference path="../Utilities.ts"/>
 /// <reference path="Record.ts"/>
 
 
@@ -7,6 +5,12 @@ namespace Darblast {
 export namespace Collections {
 
 
+/**
+ * Memory store for binary data based on TypedArrays.
+ *
+ * The store acts as a dynamic array of records, each record being defined by a
+ * set of fields as per {@link RecordDefinition}.
+ */
 export class RecordStore {
   private readonly _definition: RecordDefinition;
 
@@ -14,41 +18,41 @@ export class RecordStore {
   private _size: number;
   private _capacity: number;
 
-  private _views: {
-    int8: Int8Array,
-    uint8: Uint8Array,
-    uint8c: Uint8ClampedArray,
-    int16: Int16Array,
-    uint16: Uint16Array,
-    int32: Int32Array,
-    uint32: Uint32Array,
-    float32: Float32Array,
-    float64: Float64Array,
-  };
+  private readonly _views: {[name: string]: AnyView} = Object.create(null);
 
+  /**
+   * @param fields  List of fields in each record.
+   */
   public constructor(fields: FieldDefinition[]) {
     this._definition = new RecordDefinition(fields);
-    this.erase();
+    this._reset();
   }
 
   private _resetViews(): void {
-    this._views = {
-      int8: new Int8Array(this._data),
-      uint8: new Uint8Array(this._data),
-      uint8c: new Uint8ClampedArray(this._data),
-      int16: new Int16Array(this._data),
-      uint16: new Uint16Array(this._data),
-      int32: new Int32Array(this._data),
-      uint32: new Uint32Array(this._data),
-      float32: new Float32Array(this._data),
-      float64: new Float64Array(this._data),
-    };
+    for (const field of this._definition.fields) {
+      this._views[field.name] = new field.viewConstructor(this._data);
+    }
   }
 
+  private _reset(): void {
+    this._data = new ArrayBuffer(this._definition.byteSize);
+    this._size = 0;
+    this._capacity = 1;
+    this._resetViews();
+  }
+
+  /**
+   * @returns The number of records in the store.
+   */
   public get size(): number {
     return this._size;
   }
 
+  /**
+   * @returns The capacity of the store, which may be higher than the size
+   *          because the store tries to minimize reallocations by doubling the
+   *          capacity at every reallocation.
+   */
   public get capacity(): number {
     return this._capacity;
   }
@@ -63,131 +67,234 @@ export class RecordStore {
     this._resetViews();
   }
 
-  public reserve(capacity: number): void {
-    if (capacity > this._capacity) {
-      this._realloc(capacity);
-    }
-  }
-
-  public shrink(capacity: number): void {
-    capacity = GlobalMath.max(capacity, this._size);
-    if (capacity < this._capacity) {
-      this._realloc(capacity);
-    }
-  }
-
   private _checkIndex(index: number): void {
     if (index < 0 || index >= this._size) {
       throw new Error(`index ${index} out of range [0, ${this._size})`);
     }
   }
 
-  public getField(recordIndex: number, name: FieldName): number {
-    this._checkIndex(recordIndex);
+  /**
+   * Reads a field from a record in the store.
+   *
+   * @param index  Record index. Must be within the range [0, size).
+   * @param name  Name of the field to read.
+   * @returns The field value.
+   * @throws If `index` is out of range.
+   */
+  public getField(index: number, name: FieldName): number {
+    this._checkIndex(index);
     const definition = this._definition;
-    const fieldIndex = definition.getFieldIndex(name);
-    const field = definition.getField(name);
-    const recordOffset = recordIndex * definition.byteSize;
-    const index = recordOffset >>> field.logSize + fieldIndex;
-    return this._views[field.type][index];
+    return this._views[name][
+        index * (definition.byteSize >>> definition.getField(name).logSize) +
+        definition.getFieldOffset(name)];
   }
 
-  public setField(
-      recordIndex: number, name: FieldName, value: number): RecordStore
-  {
-    this._checkIndex(recordIndex);
+  /**
+   * Writes to a field of a record in the store.
+   *
+   * @param index  Record index. Must be within the range [0, size).
+   * @param name  Name of the field to read.
+   * @param value  The value to write.
+   * @throws If `index` is out of range.
+   */
+  public setField(index: number, name: FieldName, value: number): void {
+    this._checkIndex(index);
     const definition = this._definition;
-    const fieldIndex = definition.getFieldIndex(name);
-    const field = definition.getField(name);
-    const recordOffset = recordIndex * definition.byteSize;
-    const index = recordOffset >>> field.logSize + fieldIndex;
-    this._views[field.type][index] = value;
-    return this;
+    this._views[name][
+        index * (definition.byteSize >>> definition.getField(name).logSize) +
+        definition.getFieldOffset(name)] = value;
+  }
+
+  private _fillRecord(output: Record, index: number): Record {
+    this._checkIndex(index);
+    const definition = this._definition;
+    for (const field of definition.fields) {
+      output[field.name] = this._views[field.name][
+          index * (definition.byteSize >>> field.logSize) +
+          definition.getFieldOffset(field.name)];
+    }
+    return output;
   }
 
   private readonly _record: Record = Object.create(null);
 
+  /**
+   * Reads a record from the store.
+   *
+   * NOTE: in order to reduce strain on the garbage collector, rather than
+   * returning a new object at every call, this method reuses an internal
+   * object. **Do not reuse the returned object across calls**. If you need to
+   * generate a new, reusable object, please call {@link getRecord}.
+   *
+   * @param index  Index of the record to read. Must be within the range
+   *               [0, size).
+   * @returns A {@link Record} object with the read values.
+   * @throws If `index` is out of range.
+   */
+  public getRecord_(index: number): Record {
+    return this._fillRecord(this._record, index);
+  }
+
+  /**
+   * Reads a record from the store.
+   *
+   * @param index  Index of the record to read. Must be within the range
+   *               [0, size).
+   * @returns A {@link Record} object with the read values.
+   * @throws If `index` is out of range.
+   */
   public getRecord(index: number): Record {
-    for (const field of this._definition.fields) {
-      this._record[field.name] = this.getField(index, field.name);
-    }
-    return this._record;
-  }
-
-  public cloneRecord(index: number): Record {
     const record: Record = Object.create(null);
-    for (const field of this._definition.fields) {
-      record[field.name] = this.getField(index, field.name);
-    }
-    return record;
+    return this._fillRecord(record, index);
   }
 
+  /**
+   * Writes a record to the store.
+   *
+   * @param index  Index of the record to write. Must be within the range
+   *               [0, size).
+   * @param record  A {@link Record} object containing the values to write.
+   * @throws If `index` is out of range.
+   */
+  public setRecord(index: number, record: Record): void {
+    this._checkIndex(index);
+    const definition = this._definition;
+    for (const field of definition.fields) {
+      this._views[field.name][
+          index * (definition.byteSize >>> field.logSize) +
+          definition.getFieldOffset(field.name)] = record[field.name];
+    }
+  }
+
+  /**
+   * Inserts a new record at the end of the store.
+   *
+   * @param record  A {@link Record} object with the values to write.
+   * @returns The index of the new record.
+   */
   public push(record: Record): number {
     const index = this._size++;
     if (this._size > this._capacity) {
-      this._realloc(Utilities.npo2(this._capacity + 1));
+      this._realloc(this._capacity * 2);
     }
-    for (const field of this._definition.fields) {
-      this.setField(index, field.name, record[field.name]);
+    const definition = this._definition;
+    for (const field of definition.fields) {
+      this._views[field.name][
+          index * (definition.byteSize >>> field.logSize) +
+          definition.getFieldOffset(field.name)] = record[field.name];
     }
-    return 0;
+    return index;
   }
 
-  private _maybeShrink(): void {
-    const capacity = Utilities.npo2(this._capacity) - 1;
-    if (this._size <= capacity) {
-      this._realloc(capacity);
+  /**
+   * Inserts the specified values in a new record at the end of the store.
+   *
+   * @param values  The values corresponding to the fields of the record. There
+   *                must be one value for each {@link FieldDefinition} object
+   *                specified in the {@link RecordStore} constructor, and the
+   *                values must be specified in the same order as the field
+   *                definitions.
+   * @returns The index of the new record.
+   */
+  public emplace(...values: number[]): number {
+    const index = this._size++;
+    if (this._size > this._capacity) {
+      this._realloc(this._capacity * 2);
     }
+    const definition = this._definition;
+    for (let i = 0; i < definition.fields.length; i++) {
+      const field = definition.fields[i];
+      this._views[field.name][
+          index * (definition.byteSize >>> field.logSize) +
+          definition.getFieldOffset(field.name)] = values[i];
+    }
+    return index;
   }
 
+  /**
+   * Removes the last record from the store.
+   *
+   * This method shrinks the underlying storage if no more than half of the
+   * capacity is used after popping, and it's equivalent to a {@link quickPop}
+   * call followed by a {@link shrink}.
+   *
+   * @throws If the store is empty.
+   */
   public pop(): void {
+    this.quickPop();
+    this.shrink();
+  }
+
+  /**
+   * Removes the last record from the store.
+   *
+   * This method does not try to shrink the storage, it only decreases the
+   * {@link size}. Therefore it is potentially faster than {@link pop} because
+   * it doesn't do any reallocations.
+   *
+   * @throws If the store is empty.
+   */
+  public quickPop(): void {
     if (this._size < 1) {
-      throw new Error('cannot pop from an empty store');
+      throw new Error('cannot pop from an empty RecordStore');
     }
     this._size--;
   }
 
-  public popAndShrink(): void {
-    this.pop();
-    this._maybeShrink();
-  }
-
-  private _copyRecord(srcIndex: number, dstIndex: number): void {
-    const size = this._definition.byteSize;
-    const srcView = new Uint8Array(this._data, srcIndex * size, size);
-    const dstView = new Uint8Array(this._data, dstIndex * size, size);
-    dstView.set(srcView);
-  }
-
-  public swapAndPop(index: number): void {
-    this._checkIndex(index);
-    this._copyRecord(index, this._size - 1);
-    this._size--;
-  }
-
-  public swapPopShrink(index: number): void {
-    this.swapAndPop(index);
-    this._maybeShrink();
-  }
-
-  public truncate(size: number): void {
-    if (size < this._size) {
-      this._size = size;
+  /**
+   * Checks if the underlying storage can be downsized, and if so it performs a
+   * reallocation.
+   *
+   * Downsizing is performed if no more than half of the capacity is being used.
+   *
+   * @returns A boolean indicating whether downsizing happened.
+   */
+  public shrink(): boolean {
+    if (this._size > 0) {
+      const capacity = this._capacity >>> 1;
+      if (capacity > 0 && this._size <= capacity) {
+        this._realloc(capacity);
+        return true;
+      }
     }
+    return false;
   }
 
-  public truncateAndShrink(size: number): void {
-    if (size < this._size) {
-      this._size = size;
-      this._maybeShrink();
-    }
+  /**
+   * Copies a record over to another record slot.
+   *
+   * @param sourceIndex  Index of the record to copy.
+   * @param destinationIndex  Index of the destination slot.
+   * @throws If either index is out of the range [0, size).
+   */
+  public copy(sourceIndex: number, destinationIndex: number): void {
+    this._checkIndex(sourceIndex);
+    this._checkIndex(destinationIndex);
+    const recordSize = this._definition.byteSize;
+    const sourceView = new Uint8Array(
+        this._data, sourceIndex * recordSize, recordSize);
+    const destinationView = new Uint8Array(
+        this._data, destinationIndex * recordSize, recordSize);
+    destinationView.set(sourceView);
   }
 
-  public erase(): void {
-    this._data = new ArrayBuffer(this._definition.byteSize);
-    this._size = 0;
-    this._capacity = 1;
-    this._resetViews();
+  /**
+   * Swaps the content of two records.
+   *
+   * @param index1  Index of the first record.
+   * @param index2  Index of the second record.
+   * @throws If either index is out of the range [0, size).
+   */
+  public swap(index1: number, index2: number): void {
+    this._checkIndex(index1);
+    this._checkIndex(index2);
+    const recordSize = this._definition.byteSize;
+    const view1 = new Uint8Array(this._data, index1 * recordSize, recordSize);
+    const view2 = new Uint8Array(this._data, index2 * recordSize, recordSize);
+    const temp = new Uint8Array(new ArrayBuffer(recordSize));
+    temp.set(view1);
+    view1.set(view2);
+    view2.set(temp);
   }
 }
 
