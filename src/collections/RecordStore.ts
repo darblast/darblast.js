@@ -12,7 +12,7 @@ export namespace Collections {
  * set of fields as per {@link RecordDefinition}.
  */
 export class RecordStore {
-  private readonly _definition: RecordDefinition;
+  public readonly definition: RecordDefinition;
 
   private _data: ArrayBuffer;
   private _size: number;
@@ -24,18 +24,18 @@ export class RecordStore {
    * @param fields  List of fields in each record.
    */
   public constructor(fields: FieldDefinition[]) {
-    this._definition = new RecordDefinition(fields);
+    this.definition = new RecordDefinition(fields);
     this._reset();
   }
 
   private _resetViews(): void {
-    for (const field of this._definition.fields) {
+    for (const field of this.definition.fields) {
       this._views[field.name] = new field.viewConstructor(this._data);
     }
   }
 
   private _reset(): void {
-    this._data = new ArrayBuffer(this._definition.byteSize);
+    this._data = new ArrayBuffer(this.definition.byteSize);
     this._size = 0;
     this._capacity = 1;
     this._resetViews();
@@ -61,7 +61,7 @@ export class RecordStore {
     this._capacity = capacity;
     const sourceView = new Uint8Array(this._data);
     const destinationView = new Uint8Array(new ArrayBuffer(
-        this._capacity * this._definition.byteSize));
+        this._capacity * this.definition.byteSize));
     destinationView.set(sourceView);
     this._data = sourceView.buffer;
     this._resetViews();
@@ -83,7 +83,7 @@ export class RecordStore {
    */
   public getField(index: number, name: FieldName): number {
     this._checkIndex(index);
-    const definition = this._definition;
+    const definition = this.definition;
     return this._views[name][
         index * (definition.byteSize >>> definition.getField(name).logSize) +
         definition.getFieldIndex(name)];
@@ -99,7 +99,7 @@ export class RecordStore {
    */
   public setField(index: number, name: FieldName, value: number): void {
     this._checkIndex(index);
-    const definition = this._definition;
+    const definition = this.definition;
     this._views[name][
         index * (definition.byteSize >>> definition.getField(name).logSize) +
         definition.getFieldIndex(name)] = value;
@@ -107,7 +107,7 @@ export class RecordStore {
 
   private _fillRecord(output: Record, index: number): Record {
     this._checkIndex(index);
-    const definition = this._definition;
+    const definition = this.definition;
     for (const field of definition.fields) {
       output[field.name] = this._views[field.name][
           index * (definition.byteSize >>> field.logSize) +
@@ -158,7 +158,7 @@ export class RecordStore {
    */
   public setRecord(index: number, record: Record): void {
     this._checkIndex(index);
-    const definition = this._definition;
+    const definition = this.definition;
     for (const field of definition.fields) {
       this._views[field.name][
           index * (definition.byteSize >>> field.logSize) +
@@ -180,7 +180,7 @@ export class RecordStore {
     if (this._size > this._capacity) {
       this._realloc(this._capacity * 2);
     }
-    const definition = this._definition;
+    const definition = this.definition;
     for (const field of definition.fields) {
       this._views[field.name][
           index * (definition.byteSize >>> field.logSize) +
@@ -207,7 +207,7 @@ export class RecordStore {
     if (this._size > this._capacity) {
       this._realloc(this._capacity * 2);
     }
-    const definition = this._definition;
+    const definition = this.definition;
     for (let i = 0; i < definition.fields.length; i++) {
       const field = definition.fields[i];
       this._views[field.name][
@@ -277,7 +277,7 @@ export class RecordStore {
   public copy(sourceIndex: number, destinationIndex: number): void {
     this._checkIndex(sourceIndex);
     this._checkIndex(destinationIndex);
-    const recordSize = this._definition.byteSize;
+    const recordSize = this.definition.byteSize;
     const sourceView = new Uint8Array(
         this._data, sourceIndex * recordSize, recordSize);
     const destinationView = new Uint8Array(
@@ -295,7 +295,7 @@ export class RecordStore {
   public swap(index1: number, index2: number): void {
     this._checkIndex(index1);
     this._checkIndex(index2);
-    const recordSize = this._definition.byteSize;
+    const recordSize = this.definition.byteSize;
     const view1 = new Uint8Array(this._data, index1 * recordSize, recordSize);
     const view2 = new Uint8Array(this._data, index2 * recordSize, recordSize);
     const temp = new Uint8Array(new ArrayBuffer(recordSize));

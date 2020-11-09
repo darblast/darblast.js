@@ -1,4 +1,5 @@
 /// <reference path="Record.ts"/>
+/// <reference path="RecordStore.ts"/>
 
 
 namespace Darblast {
@@ -26,7 +27,7 @@ class TaggedIndex {
 
 
 /**
- * Multi-index, Multi-key, TypedArray-based AVL tree implementation.
+ * Multi-key, multi-index, TypedArray-based AVL tree implementation.
  *
  * This class can scale to several billion records while still maintaining
  * maximum performance.
@@ -37,30 +38,34 @@ export class AVL {
    */
   public static readonly Index = Index;
 
+  /**
+   * List of user fields of the stored records.
+   *
+   * This property is only for reporting purposes, and is not used internally.
+   */
+  public readonly fields: FieldDefinition[];
+
+  /**
+   * List of defined indices.
+   *
+   * This property is only for reporting purposes, and is not used internally.
+   */
+  public readonly indices: Index[];
+
   private readonly _pointerType: PointerType;
   private readonly _pointerTypeLogSize: number;
 
   private readonly _parentFieldTags: number[] = [];
   private readonly _leftChildFieldTags: number[] = [];
   private readonly _rightChildFieldTags: number[] = [];
-  private readonly _heightFieldTags: number[] = [];
+  private readonly _balanceFieldTags: number[] = [];
 
   private readonly _userFieldTags: {[name: string]: number} =
       Object.create(null);
 
-  private readonly _schema: FieldDefinition[];
-  private readonly _definition: RecordDefinition;
   private readonly _indices: TaggedIndex[];
-  private readonly _recordSize: number;
-  private readonly _offsets: number[];
-
+  private readonly _store: RecordStore;
   private readonly _roots: number[];
-
-  private _capacity: number;
-  private _size: number;
-  private _data: ArrayBuffer;
-  private _views: AnyView[];
-  private _pointerView: AnyView;
 
   private static _checkSchema(
       fields: FieldDefinition[], indices: Index[]): void
@@ -113,6 +118,9 @@ export class AVL {
   {
     AVL._checkSchema(fields, indices);
 
+    this.fields = fields;
+    this.indices = indices;
+
     this._pointerType = pointerType;
     switch (pointerType) {
     case 'int8':
@@ -128,139 +136,43 @@ export class AVL {
       throw new Error(`invalid pointer type ${JSON.stringify(pointerType)}`);
     }
 
+    const allFields: FieldDefinition[] = [];
     let tag = 0;
     for (let i = 0; i < indices.length; i++) {
-      this._schema.push(new FieldDefinition(tag, pointerType));
+      allFields.push(new FieldDefinition(tag, pointerType));
       this._parentFieldTags.push(tag++);
-      this._schema.push(new FieldDefinition(tag, pointerType));
+      allFields.push(new FieldDefinition(tag, pointerType));
       this._leftChildFieldTags.push(tag++);
-      this._schema.push(new FieldDefinition(tag, pointerType));
+      allFields.push(new FieldDefinition(tag, pointerType));
       this._rightChildFieldTags.push(tag++);
-      this._schema.push(new FieldDefinition(tag, pointerType));
-      this._heightFieldTags.push(tag++);
+      allFields.push(new FieldDefinition(tag, 'int8'));
+      this._balanceFieldTags.push(tag++);
     }
     for (const field of fields) {
-      this._schema.push(new FieldDefinition(tag, field.type));
+      allFields.push(new FieldDefinition(tag, field.type));
       this._userFieldTags[field.name] = tag++;
     }
-    this._definition = new RecordDefinition(this._schema);
+    this._store = new RecordStore(allFields);
 
     this._indices = indices.map(
         index => new TaggedIndex(index.keys.map(
             name => this._userFieldTags[name], this)), this);
 
-    this._recordSize = this._definition.byteSize;
-
-    this._offsets = this._schema.map(
-        field => this._definition.getFieldOffset(field.name), this);
-
     this._roots = indices.map(_ => -1);
-
-    this._reset();
-  }
-
-  private _reset(): void {
-    this._capacity = 1;
-    this._size = 0;
-    this._data = new ArrayBuffer(this._recordSize);
-    this._views = this._schema.map(
-        field => new field.viewConstructor(this._data), this);
-    const PointerView = FieldDefinition.getViewConstructor(this._pointerType);
-    this._pointerView = new PointerView(this._data);
-  }
-
-  /**
-   * @returns The "cardinality" of the data structure, which is the number of
-   *          indices.
-   */
-  public get cardinality(): number {
-    return this._indices.length;
-  }
-
-  /**
-   * @returns The number of record slots of the underlying `ArrayBuffer`. This
-   *          may be higher than the number of records stored by the user
-   *          because the class tries to minimize reallocations by doubling the
-   *          capacity at each reallocation.
-   */
-  public get capacity(): number {
-    return this._capacity;
-  }
-
-  /**
-   * @returns The number of records.
-   */
-  public get size(): number {
-    return this._size;
-  }
-
-  private _getField(recordIndex: number, tag: number): number {
-    return this._views[tag][
-        recordIndex * (this._recordSize >>> this._schema[tag].logSize) +
-        this._offsets[tag]];
-  }
-
-  private _setField(recordIndex: number, tag: number, value: number): void {
-    this._views[tag][
-        recordIndex * (this._recordSize >>> this._schema[tag].logSize) +
-        this._offsets[tag]] = value;
-  }
-
-  private _getParent(index: number, recordIndex: number): number {
-    return this._pointerView[
-        recordIndex * (this._recordSize >>> this._pointerTypeLogSize) +
-        this._offsets[this._parentFieldTags[index]]];
-  }
-
-  private _setParent(index: number, recordIndex: number, value: number): void {
-    this._pointerView[
-        recordIndex * (this._recordSize >>> this._pointerTypeLogSize) +
-        this._offsets[this._parentFieldTags[index]]] = value;
   }
 
   private _getLeftChild(index: number, recordIndex: number): number {
-    return this._pointerView[
-        recordIndex * (this._recordSize >>> this._pointerTypeLogSize) +
-        this._offsets[this._leftChildFieldTags[index]]];
-  }
-
-  private _setLeftChild(
-      index: number, recordIndex: number, value: number): void
-  {
-    this._pointerView[
-        recordIndex * (this._recordSize >>> this._pointerTypeLogSize) +
-        this._offsets[this._leftChildFieldTags[index]]] = value;
+    return this._store.getField(recordIndex, this._leftChildFieldTags[index]);
   }
 
   private _getRightChild(index: number, recordIndex: number): number {
-    return this._pointerView[
-        recordIndex * (this._recordSize >>> this._pointerTypeLogSize) +
-        this._offsets[this._rightChildFieldTags[index]]];
-  }
-
-  private _setRightChild(
-      index: number, recordIndex: number, value: number): void
-  {
-    this._pointerView[
-        recordIndex * (this._recordSize >>> this._pointerTypeLogSize) +
-        this._offsets[this._rightChildFieldTags[index]]] = value;
-  }
-
-  private _getHeight(index: number, recordIndex: number): number {
-    return this._pointerView[
-        recordIndex * (this._recordSize >>> this._pointerTypeLogSize) +
-        this._offsets[this._heightFieldTags[index]]];
-  }
-
-  private _setHeight(index: number, recordIndex: number, value: number): void {
-    this._pointerView[
-        recordIndex * (this._recordSize >>> this._pointerTypeLogSize) +
-        this._offsets[this._heightFieldTags[index]]] = value;
+    return this._store.getField(recordIndex, this._rightChildFieldTags[index]);
   }
 
   private _compare(index: number, recordIndex: number, keys: number[]): number {
     for (let i = 0; i < keys.length; i++) {
-      const value = this._getField(recordIndex, this._indices[index].keys[i]);
+      const value = this._store.getField(
+          recordIndex, this._indices[index].keys[i]);
       if (keys[i] < value) {
         return -1;
       }
@@ -271,20 +183,7 @@ export class AVL {
     return 0;
   }
 
-  private _checkKeys(index: number, keys: number[]): number[] {
-    const cardinality = this._indices.length;
-    if (index < 0 || index >= cardinality) {
-      throw new Error(
-          `invalid index ${index}, must be within [0, ${cardinality})`);
-    }
-    if (keys.length > cardinality) {
-      throw new Error(`invalid key ${JSON.stringify(keys)} for index ${
-          JSON.stringify(this._indices[index].keys)}`);
-    }
-    return keys;
-  }
-
-  private* _scanSubTree(
+  private* _scan(
       index: number, recordIndex: number,
       keys: number[]): Generator<number, void>
   {
@@ -293,75 +192,59 @@ export class AVL {
     }
     const cmp = this._compare(index, recordIndex, keys);
     if (cmp < 0) {
-      yield* this._scanSubTree(
-          index, this._getLeftChild(index, recordIndex), keys);
+      yield* this._scan(index, this._getLeftChild(index, recordIndex), keys);
     } else if (cmp > 0) {
-      yield* this._scanSubTree(
-          index, this._getRightChild(index, recordIndex), keys);
+      yield* this._scan(index, this._getRightChild(index, recordIndex), keys);
     } else {
-      yield* this._scanSubTree(
-          index, this._getLeftChild(index, recordIndex), keys);
+      yield* this._scan(index, this._getLeftChild(index, recordIndex), keys);
       yield recordIndex;
-      yield* this._scanSubTree(
-          index, this._getRightChild(index, recordIndex), keys);
+      yield* this._scan(index, this._getRightChild(index, recordIndex), keys);
     }
   }
 
-  private _scan(index: number, keys: number[]): Generator<number, void> {
-    return this._scanSubTree(
-        index, this._roots[index], this._checkKeys(index, keys));
+  private _fillRecord(output: Record, recordIndex: number): Record {
+    const data = this._store.getRecord_(recordIndex);
+    for (const field of this.fields) {
+      output[field.name] = data[this._userFieldTags[field.name]];
+    }
+    return output;
   }
 
   private readonly _record: Record = Object.create(null);
 
-  private _fillRecord(record: Record, recordIndex: number): Record {
-    for (const name in this._userFieldTags) {
-      const tag = this._userFieldTags[name];
-      const view = this._views[tag];
-      const recordOffset = recordIndex * (
-          this._recordSize >>> this._schema[tag].logSize);
-      record[name] = view[recordOffset + this._offsets[tag]];
-    }
-    return record;
-  }
-
-  public* scanField(
-      name: FieldName, index: number,
+  public* scanFields(
+      index: number, name: FieldName,
       ...keys: number[]): Generator<number, boolean, boolean>
   {
     const tag = this._userFieldTags[name];
-    const recordSize = this._recordSize >>> this._schema[tag].logSize;
-    const offset = this._offsets[tag];
-    for (const recordIndex of this._scan(index, this._checkKeys(index, keys))) {
-      if (yield this._views[tag][recordIndex * recordSize + offset]) {
+    for (const recordIndex of this._scan(index, this._roots[index], keys)) {
+      if (yield this._store.getField(recordIndex, tag)) {
         return false;
       }
     }
     return true;
   }
 
-  private* _scanRecords(
-      output: Record, index: number,
-      keys: number[]): Generator<Record, boolean, boolean>
+  public* scanRecords_(
+      index: number, ...keys: number[]): Generator<Record, boolean, boolean>
   {
-    for (const recordIndex of this._scan(index, keys)) {
-      if (yield this._fillRecord(output, recordIndex)) {
+    for (const recordIndex of this._scan(index, this._roots[index], keys)) {
+      if (yield this._fillRecord(this._record, recordIndex)) {
         return false;
       }
     }
     return true;
   }
 
-  public scan_(
+  public* scanRecords(
       index: number, ...keys: number[]): Generator<Record, boolean, boolean>
   {
-    return this._scanRecords(this._record, index, keys);
-  }
-
-  public scan(
-      index: number, ...keys: number[]): Generator<Record, boolean, boolean>
-  {
-    return this._scanRecords(Object.create(null), index, keys);
+    for (const recordIndex of this._scan(index, this._roots[index], keys)) {
+      if (yield this._fillRecord(Object.create(null), recordIndex)) {
+        return false;
+      }
+    }
+    return true;
   }
 
   private _lookup(index: number, recordIndex: number, keys: number[]): number {
@@ -370,52 +253,41 @@ export class AVL {
     }
     const cmp = this._compare(index, recordIndex, keys);
     if (cmp < 0) {
-      return this._lookup(
-          index, this._getLeftChild(index, recordIndex), keys);
+      return this._lookup(index, this._getLeftChild(index, recordIndex), keys);
     } else if (cmp > 0) {
-      return this._lookup(
-          index, this._getRightChild(index, recordIndex), keys);
+      return this._lookup(index, this._getRightChild(index, recordIndex), keys);
     } else {
       return recordIndex;
     }
   }
 
-  public contains(index: number, ...keys: number[]): boolean {
-    return this._lookup(index, this._roots[index], keys) >= 0;
-  }
-
-  public getField(name: FieldName, index: number, ...keys: number[]): number {
-    const recordIndex = this._lookup(index, this._roots[index], keys);
-    if (recordIndex < 0) {
-      throw new Error(`element not found: ${JSON.stringify(keys)}`);
-    }
-    return this._getField(recordIndex, this._userFieldTags[name]);
-  }
-
-  public setField(
-      name: FieldName, index: number, value: number, ...keys: number[]): void
+  public lookupField(
+      index: number, name: FieldName, ...keys: number[]): number
   {
     const recordIndex = this._lookup(index, this._roots[index], keys);
     if (recordIndex < 0) {
-      throw new Error(`element not found: ${JSON.stringify(keys)}`);
+      throw new Error(`keys ${JSON.stringify(keys)} not found`);
+    } else {
+      return this._store.getField(recordIndex, this._userFieldTags[name]);
     }
-    this._setField(recordIndex, this._userFieldTags[name], value);
   }
 
-  public getRecord_(index: number, ...keys: number[]): Record {
+  public lookupRecord_(index: number, ...keys: number[]): Record {
     const recordIndex = this._lookup(index, this._roots[index], keys);
     if (recordIndex < 0) {
-      throw new Error(`element not found: ${JSON.stringify(keys)}`);
+      throw new Error(`keys ${JSON.stringify(keys)} not found`);
+    } else {
+      return this._fillRecord(this._record, recordIndex);
     }
-    return this._fillRecord(this._record, recordIndex);
   }
 
-  public getRecord(index: number, ...keys: number[]): Record {
+  public lookupRecord(index: number, ...keys: number[]): Record {
     const recordIndex = this._lookup(index, this._roots[index], keys);
     if (recordIndex < 0) {
-      throw new Error(`element not found: ${JSON.stringify(keys)}`);
+      throw new Error(`keys ${JSON.stringify(keys)} not found`);
+    } else {
+      return this._fillRecord(Object.create(null), recordIndex);
     }
-    return this._fillRecord(Object.create(null), recordIndex);
   }
 }
 
