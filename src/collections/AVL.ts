@@ -27,12 +27,6 @@ class TaggedIndex {
 }
 
 
-interface ScannerInterface {
-  scan(keys: number[]): Generator<number, void>;
-  lookup(keys: number[]): number;
-}
-
-
 export class AVL {
   public static readonly Index = Index;
 
@@ -60,90 +54,6 @@ export class AVL {
   private _data: ArrayBuffer;
   private _views: AnyView[];
   private _pointerView: AnyView;
-
-  private static readonly Scanner = class Scanner implements ScannerInterface {
-    public constructor(
-        protected readonly _tree: AVL,
-        protected readonly _index: number)
-    {
-      const cardinality = this._tree._indices.length;
-      if (this._index < 0 || this._index >= cardinality) {
-        throw new Error(
-            `invalid index ${this._index}, must be within [0, ${cardinality})`);
-      }
-    }
-
-    private _checkKeys(keys: number[]): number[] {
-      if (keys.length > this._tree._indices.length) {
-        throw new Error(`invalid key ${JSON.stringify(keys)} for index ${
-            JSON.stringify(this._tree._indices[this._index].keys)}`);
-      }
-      return keys;
-    }
-
-    private _compare(recordIndex: number, keys: number[]): number {
-      const index = this._tree._indices[this._index];
-      for (let i = 0; i < keys.length; i++) {
-        const value = this._tree._getField(recordIndex, index.keys[i]);
-        if (keys[i] < value) {
-          return -1;
-        }
-        if (keys[i] > value) {
-          return 1;
-        }
-      }
-      return 0;
-    }
-
-    private* _scan(
-        recordIndex: number, keys: number[]): Generator<number, void>
-    {
-      if (recordIndex >= 0) {
-        const cmp = this._compare(recordIndex, keys);
-        if (cmp < 0) {
-          yield* this._scan(
-              this._tree._getLeftChild(this._index, recordIndex), keys);
-        } else if (cmp > 0) {
-          yield* this._scan(
-              this._tree._getRightChild(this._index, recordIndex), keys);
-        } else {
-          yield* this._scan(
-              this._tree._getLeftChild(this._index, recordIndex), keys);
-          yield recordIndex;
-          yield* this._scan(
-              this._tree._getRightChild(this._index, recordIndex), keys);
-        }
-      }
-    }
-
-    public scan(keys: number[]): Generator<number, void> {
-      return this._scan(this._tree._roots[this._index], this._checkKeys(keys));
-    }
-
-    private _lookup(recordIndex: number, keys: number[]): number {
-      if (recordIndex < 0) {
-        return -1;
-      } else {
-        const cmp = this._compare(recordIndex, keys);
-        if (cmp < 0) {
-          return this._lookup(
-              this._tree._getLeftChild(this._index, recordIndex), keys);
-        } else if (cmp > 0) {
-          return this._lookup(
-              this._tree._getRightChild(this._index, recordIndex), keys);
-        } else {
-          return recordIndex;
-        }
-      }
-    }
-
-    public lookup(keys: number[]): number {
-      return this._lookup(
-          this._tree._roots[this._index], this._checkKeys(keys));
-    }
-  };
-
-  private readonly _lookupScanners: ScannerInterface[];
 
   private static _checkSchema(
       fields: FieldDefinition[], indices: Index[]): void
@@ -227,8 +137,6 @@ export class AVL {
         field => this._definition.getFieldOffset(field.name), this);
 
     this._roots = indices.map(_ => -1);
-    this._lookupScanners = indices.map(
-        (_, index) => new AVL.Scanner(this, index), this);
 
     this._reset();
   }
@@ -319,13 +227,58 @@ export class AVL {
         this._offsets[this._heightFieldTags[index]]] = value;
   }
 
-  private* _scan(index: number, keys: number[]): Generator<number, void> {
-    const scanner = new AVL.Scanner(this, index);
-    for (const recordIndex of scanner.scan(keys)) {
-      if (yield recordIndex) {
-        break;
+  private _compare(index: number, recordIndex: number, keys: number[]): number {
+    for (let i = 0; i < keys.length; i++) {
+      const value = this._getField(recordIndex, this._indices[index].keys[i]);
+      if (keys[i] < value) {
+        return -1;
+      }
+      if (keys[i] > value) {
+        return 1;
       }
     }
+    return 0;
+  }
+
+  private _checkKeys(index: number, keys: number[]): number[] {
+    const cardinality = this._indices.length;
+    if (index < 0 || index >= cardinality) {
+      throw new Error(
+          `invalid index ${index}, must be within [0, ${cardinality})`);
+    }
+    if (keys.length > cardinality) {
+      throw new Error(`invalid key ${JSON.stringify(keys)} for index ${
+          JSON.stringify(this._indices[index].keys)}`);
+    }
+    return keys;
+  }
+
+  private* _scanSubTree(
+      index: number, recordIndex: number,
+      keys: number[]): Generator<number, void>
+  {
+    if (recordIndex < 0) {
+      return;
+    }
+    const cmp = this._compare(index, recordIndex, keys);
+    if (cmp < 0) {
+      yield* this._scanSubTree(
+          index, this._getLeftChild(index, recordIndex), keys);
+    } else if (cmp > 0) {
+      yield* this._scanSubTree(
+          index, this._getRightChild(index, recordIndex), keys);
+    } else {
+      yield* this._scanSubTree(
+          index, this._getLeftChild(index, recordIndex), keys);
+      yield recordIndex;
+      yield* this._scanSubTree(
+          index, this._getRightChild(index, recordIndex), keys);
+    }
+  }
+
+  private _scan(index: number, keys: number[]): Generator<number, void> {
+    return this._scanSubTree(
+        index, this._roots[index], this._checkKeys(index, keys));
   }
 
   private readonly _record: Record = Object.create(null);
@@ -348,7 +301,7 @@ export class AVL {
     const tag = this._userFieldTags[name];
     const recordSize = this._recordSize >>> this._schema[tag].logSize;
     const offset = this._offsets[tag];
-    for (const recordIndex of this._scan(index, keys)) {
+    for (const recordIndex of this._scan(index, this._checkKeys(index, keys))) {
       if (yield this._views[tag][recordIndex * recordSize + offset]) {
         return false;
       }
@@ -380,12 +333,28 @@ export class AVL {
     return this._scanRecords(Object.create(null), index, keys);
   }
 
+  private _lookup(index: number, recordIndex: number, keys: number[]): number {
+    if (recordIndex < 0) {
+      return -1;
+    }
+    const cmp = this._compare(index, recordIndex, keys);
+    if (cmp < 0) {
+      return this._lookup(
+          index, this._getLeftChild(index, recordIndex), keys);
+    } else if (cmp > 0) {
+      return this._lookup(
+          index, this._getRightChild(index, recordIndex), keys);
+    } else {
+      return recordIndex;
+    }
+  }
+
   public contains(index: number, ...keys: number[]): boolean {
-    return this._lookupScanners[index].lookup(keys) >= 0;
+    return this._lookup(index, this._roots[index], keys) >= 0;
   }
 
   public getField(name: FieldName, index: number, ...keys: number[]): number {
-    const recordIndex = this._lookupScanners[index].lookup(keys);
+    const recordIndex = this._lookup(index, this._roots[index], keys);
     if (recordIndex < 0) {
       throw new Error(`element not found: ${JSON.stringify(keys)}`);
     }
@@ -395,7 +364,7 @@ export class AVL {
   // TODO: setField
 
   public getRecord_(index: number, ...keys: number[]): Record {
-    const recordIndex = this._lookupScanners[index].lookup(keys);
+    const recordIndex = this._lookup(index, this._roots[index], keys);
     if (recordIndex < 0) {
       throw new Error(`element not found: ${JSON.stringify(keys)}`);
     }
@@ -403,7 +372,7 @@ export class AVL {
   }
 
   public getRecord(index: number, ...keys: number[]): Record {
-    const recordIndex = this._lookupScanners[index].lookup(keys);
+    const recordIndex = this._lookup(index, this._roots[index], keys);
     if (recordIndex < 0) {
       throw new Error(`element not found: ${JSON.stringify(keys)}`);
     }
