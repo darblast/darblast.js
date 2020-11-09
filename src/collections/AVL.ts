@@ -27,70 +27,6 @@ class TaggedIndex {
 }
 
 
-class Scanner {
-  public constructor(
-      private readonly _tree: AVL,
-      private readonly _index: number,
-      private readonly _keys: number[])
-  {
-    const cardinality = this._tree._indices.length;
-    if (this._index < 0 || this._index >= cardinality) {
-      throw new Error(
-          `invalid index ${this._index}, must be within [0, ${cardinality})`);
-    }
-    if (this._keys.length > cardinality) {
-      throw new Error(`invalid key ${JSON.stringify(this._keys)} for index ${
-          JSON.stringify(this._tree._indices[this._index].keys)}`);
-    }
-  }
-
-  private _compare(recordIndex: number): number {
-    const index = this._tree._indices[this._index];
-    for (let i = 0; i < this._keys.length; i++) {
-      const key = this._keys[i];
-      const value = this._tree._getField(recordIndex, index.keys[i]);
-      if (key < value) {
-        return -1;
-      }
-      if (key > value) {
-        return 1;
-      }
-    }
-    return 0;
-  }
-
-  public* scan(recordIndex: number): Generator<number, void> {
-    if (recordIndex >= 0) {
-      const cmp = this._compare(recordIndex);
-      if (cmp < 0) {
-        yield* this.scan(this._tree._getLeftChild(this._index, recordIndex));
-      } else if (cmp > 0) {
-        yield* this.scan(this._tree._getRightChild(this._index, recordIndex));
-      } else {
-        yield* this.scan(this._tree._getLeftChild(this._index, recordIndex));
-        yield recordIndex;
-        yield* this.scan(this._tree._getRightChild(this._index, recordIndex));
-      }
-    }
-  }
-
-  public lookup(recordIndex: number): number {
-    if (recordIndex < 0) {
-      return -1;
-    } else {
-      const cmp = this._compare(recordIndex);
-      if (cmp < 0) {
-        return this.lookup(this._tree._getLeftChild(this._index, recordIndex));
-      } else if (cmp > 0) {
-        return this.lookup(this._tree._getRightChild(this._index, recordIndex));
-      } else {
-        return recordIndex;
-      }
-    }
-  }
-};
-
-
 export class AVL {
   public static readonly Index = Index;
 
@@ -118,6 +54,68 @@ export class AVL {
   private _data: ArrayBuffer;
   private _views: AnyView[];
   private _pointerView: AnyView;
+
+  private readonly Scanner = (tree => class Scanner {
+    public constructor(
+        private readonly _index: number,
+        private readonly _keys: number[])
+    {
+      const cardinality = tree._indices.length;
+      if (this._index < 0 || this._index >= cardinality) {
+        throw new Error(
+            `invalid index ${this._index}, must be within [0, ${cardinality})`);
+      }
+      if (this._keys.length > cardinality) {
+        throw new Error(`invalid key ${JSON.stringify(this._keys)} for index ${
+            JSON.stringify(tree._indices[this._index].keys)}`);
+      }
+    }
+
+    private _compare(recordIndex: number): number {
+      const index = tree._indices[this._index];
+      for (let i = 0; i < this._keys.length; i++) {
+        const key = this._keys[i];
+        const value = tree._getField(recordIndex, index.keys[i]);
+        if (key < value) {
+          return -1;
+        }
+        if (key > value) {
+          return 1;
+        }
+      }
+      return 0;
+    }
+
+    public* scan(recordIndex: number): Generator<number, void> {
+      if (recordIndex >= 0) {
+        const cmp = this._compare(recordIndex);
+        if (cmp < 0) {
+          yield* this.scan(tree._getLeftChild(this._index, recordIndex));
+        } else if (cmp > 0) {
+          yield* this.scan(tree._getRightChild(this._index, recordIndex));
+        } else {
+          yield* this.scan(tree._getLeftChild(this._index, recordIndex));
+          yield recordIndex;
+          yield* this.scan(tree._getRightChild(this._index, recordIndex));
+        }
+      }
+    }
+
+    public lookup(recordIndex: number): number {
+      if (recordIndex < 0) {
+        return -1;
+      } else {
+        const cmp = this._compare(recordIndex);
+        if (cmp < 0) {
+          return this.lookup(tree._getLeftChild(this._index, recordIndex));
+        } else if (cmp > 0) {
+          return this.lookup(tree._getRightChild(this._index, recordIndex));
+        } else {
+          return recordIndex;
+        }
+      }
+    }
+  })(this);
 
   private static _checkSchema(
       fields: FieldDefinition[], indices: Index[]): void
@@ -295,7 +293,7 @@ export class AVL {
       index: number, recordIndex: number,
       keys: number[]): Generator<number, void>
   {
-    const scanner = new Scanner(this, index, keys);
+    const scanner = new this.Scanner(index, keys);
     for (const recordIndex of scanner.scan(this._roots[index])) {
       if (yield recordIndex) {
         break;
