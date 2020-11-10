@@ -33,10 +33,13 @@ export type FieldType =
 
 
 /**
- * TypedArray view type used to handle pointers / references to other TypedArray
- * locations.
+ * Used to express record schemas concisely.
+ *
+ * Keys are field names, values are field types. Readers of these values must
+ * ignore properties of the `Object` prototype such as `hasOwnProperty`. This
+ * allows users to specify schemas in object literal notation.
  */
-export type PointerType = 'int8' | 'int16' | 'int32';
+export type Schema = {[fieldName: string]: FieldType};
 
 
 /**
@@ -354,7 +357,7 @@ export type Record = {[name: string]: number};
 
 type AnyView = Darblast.Collections.AnyView;
 type FieldType = Darblast.Collections.FieldType;
-type PointerType = Darblast.Collections.PointerType;
+type Schema = Darblast.Collections.Schema;
 
 type FieldDefinition = Darblast.Collections.FieldDefinition;
 const FieldDefinition = Darblast.Collections.FieldDefinition;
