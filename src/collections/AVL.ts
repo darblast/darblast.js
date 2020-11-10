@@ -42,7 +42,7 @@ function validateSchema(fields: FieldDefinition[], indices: Index[]): void {
 }
 
 
-export const AVL = TemplateClass(
+export const compileAVL = TemplateClass(
     (fields: FieldDefinition[], indices: Index[]) =>
 {
   validateSchema(fields, indices);
@@ -67,6 +67,9 @@ export const AVL = TemplateClass(
       node * ${definition.byteSize >>> fieldMap[name].logSize} +
       ${definition.getFieldIndex(name)}]`;
 
+  const setField = (name: string, value: string) =>
+      `${getField(name)} = ${value};`;
+
   return `
     class AVL {
       static Index = Darblast.Collections.Index;
@@ -87,7 +90,7 @@ export const AVL = TemplateClass(
         float64: new Float64Array(this._data),
       };
 
-      _roots = ${JSON.stringify(Array.from(indices, _ => 0))};
+      _roots = ${JSON.stringify(indices.map(_ => 0))};
 
       _realloc(capacity) {
         const sourceView = new Uint8Array(this._data);
@@ -226,6 +229,38 @@ export const AVL = TemplateClass(
 
       scan_ = this.scan0_;
       scan = this.scan0;
+
+      ${indices.map((_, index) => {
+        return `
+          _insert${index}(root, node, data) {
+            if (!root) {
+              return node;
+            }
+            const cmp = this._compare${index}(
+                node, ${indices[index].keys.map(
+                    key => `data.${key}`).join(', ')});
+            if (cmp < 0) {
+              ${setField('$left', `this._insert${index}(
+                  root, ${getField('$left')}, data)`)}
+              return root;
+            } else if (cmp > 0) {
+              ${setField('$right', `this._insert${index}(
+                  root, ${getField('$right')}, data)`)}
+              return root;
+            } else {
+              return node;
+            }
+          }
+        `;
+      }).join('\n')}
+
+      insertOrUpdate(record) {
+        // TODO: store record and get node
+        ${indices.map((_, index) => `
+          this._roots[${index}] = this._insert${index}(
+              this._roots[${index}], node, record);
+        `).join('')}
+      }
     }
   `;
 });
@@ -235,4 +270,4 @@ export const AVL = TemplateClass(
 }  // namespace Darblast
 
 
-const AVL = Darblast.Collections.AVL;
+const compileAVL = Darblast.Collections.compileAVL;
