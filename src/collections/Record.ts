@@ -18,12 +18,6 @@ export type AnyView =
 
 
 /**
- * Field names can be numbers or strings.
- */
-export type FieldName = string | number;
-
-
-/**
  * Available field types, corresponding to TypedArray views.
  */
 export type FieldType =
@@ -52,7 +46,7 @@ export class FieldDefinition {
   /**
    * Name of the field.
    */
-  public readonly name: FieldName;
+  public readonly name: string;
 
   /**
    * Type of the field.
@@ -83,7 +77,7 @@ export class FieldDefinition {
    * @param name  Field name.
    * @param type  Field type.
    */
-  public constructor(name: FieldName, type: FieldType) {
+  public constructor(name: string, type: FieldType) {
     this.name = name;
     this.type = type;
     this.byteSize = FieldDefinition.getByteSize(type);
@@ -309,7 +303,7 @@ export class RecordDefinition {
    * @param name  The name of a field of the record.
    * @returns The {@link FieldDefinition} for the specified field.
    */
-  public getField(name: FieldName): FieldDefinition {
+  public getField(name: string): FieldDefinition {
     return this._fieldsByName[name];
   }
 
@@ -319,7 +313,7 @@ export class RecordDefinition {
    * @param name  The name of the field.
    * @returns The byte offset.
    */
-  public getFieldOffset(name: FieldName): number {
+  public getFieldOffset(name: string): number {
     return this._offsets[name];
   }
 
@@ -338,7 +332,7 @@ export class RecordDefinition {
    *
    * @param name  The field name.
    */
-  public getFieldIndex(name: FieldName): number {
+  public getFieldIndex(name: string): number {
     return this._offsets[name] >>> this._logSizes[name];
   }
 }
@@ -359,7 +353,6 @@ export type Record = {[name: string]: number};
 
 
 type AnyView = Darblast.Collections.AnyView;
-type FieldName = Darblast.Collections.FieldName;
 type FieldType = Darblast.Collections.FieldType;
 type PointerType = Darblast.Collections.PointerType;
 

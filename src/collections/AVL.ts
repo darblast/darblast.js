@@ -1,387 +1,238 @@
+/// <reference path="../Utilities.ts"/>
 /// <reference path="Record.ts"/>
-/// <reference path="RecordStore.ts"/>
 
 
 namespace Darblast {
 export namespace Collections {
 
 
-/**
- * Describes an index in an AVL tree.
- *
- * An index is defined by an ordered list of one or more fields of the user
- * records. The fields cannot be repeated, i.e. each field may be indexed at
- * most once.
- */
-class Index {
-  /**
-   * @param keys  The list of field names.
-   */
-  public constructor(public readonly keys: FieldName[]) {}
+export class Index {
+  public constructor(public readonly keys: string[]) {}
 }
 
 
-class TaggedIndex {
-  public constructor(public readonly keys: number[]) {}
+function validateSchema(fields: FieldDefinition[], indices: Index[]): void {
+  if (!fields.length) {
+    throw new Error('at least one field must be specified');
+  }
+  const names = new Set<string>();
+  for (const field of fields) {
+    if (!/^[a-zA-Z_][a-zA-Z0-9_]*$/.test(field.name)) {
+      throw new Error(`invalid field name ${JSON.stringify(field.name)}`);
+    }
+    if (field.name in names) {
+      throw new Error(`duplicate name ${JSON.stringify(field.name)}`);
+    } else {
+      names.add(field.name);
+    }
+  }
+  if (!indices.length) {
+    throw new Error('at least one index must be defined');
+  }
+  for (const index of indices) {
+    if (!index.keys.length) {
+      throw new Error('indices must have at least one key');
+    }
+    index.keys.forEach(key => {
+      if (!(key in names)) {
+        throw new Error(`unknown field ${JSON.stringify(key)}`);
+      }
+    });
+  }
 }
 
 
-/**
- * Multi-key, multi-index, TypedArray-based AVL tree implementation.
- *
- * This class can scale to several billion records while still maintaining
- * maximum performance.
- */
-export class AVL {
-  /**
-   * Used to specify indices in the AVL constructor.
-   */
-  public static readonly Index = Index;
+export const AVL = TemplateClass(
+    (fields: FieldDefinition[], indices: Index[]) =>
+{
+  validateSchema(fields, indices);
 
-  /**
-   * List of user fields of the stored records.
-   */
-  public readonly fields: FieldDefinition[];
+  const allFields: FieldDefinition[] = [];
+  indices.forEach((_, index) => {
+    allFields.push(new FieldDefinition('$parent', 'uint32'));
+    allFields.push(new FieldDefinition('$left', 'uint32'));
+    allFields.push(new FieldDefinition('$right', 'uint32'));
+    allFields.push(new FieldDefinition('$balance', 'int8'));
+  });
+  allFields.push.apply(allFields, fields);
 
-  /**
-   * List of defined indices.
-   */
-  public readonly indices: Index[];
+  const definition = new RecordDefinition(allFields);
 
-  private readonly _pointerType: PointerType;
-  private readonly _pointerTypeLogSize: number;
+  const fieldMap: {[name: string]: FieldDefinition} = Object.create(null);
+  for (const field of allFields) {
+    fieldMap[field.name] = field;
+  }
 
-  private readonly _parentFieldTags: number[] = [];
-  private readonly _leftChildFieldTags: number[] = [];
-  private readonly _rightChildFieldTags: number[] = [];
-  private readonly _balanceFieldTags: number[] = [];
+  const getField = (name: string) => `this._views${fieldMap[name].type}[
+      node * ${definition.byteSize >>> fieldMap[name].logSize} +
+      ${definition.getFieldIndex(name)}]`;
 
-  private readonly _userFieldTags: {[name: string]: number} =
-      Object.create(null);
+  return `
+    class AVL {
+      static Index = Darblast.Collections.Index;
 
-  private readonly _indices: TaggedIndex[];
-  private readonly _store: RecordStore;
-  private readonly _roots: number[];
+      _data = new ArrayBuffer(${definition.byteSize});
+      _capacity = 1;
+      _size = 0;
 
-  private static _checkSchema(
-      fields: FieldDefinition[], indices: Index[]): void
-  {
-    if (!fields.length) {
-      throw new Error('no fields defined');
-    }
-    const names = new Set<string>();
-    for (const field of fields) {
-      const name = '' + field.name;
-      if (name in names) {
-        throw new Error(`duplicate field ${JSON.stringify(field.name)}`);
-      } else {
-        names.add(name);
+      _view = {
+        int8: new Int8Array(this._data),
+        uint8: new Uint8Array(this._data),
+        uint8c: new Uint8ClampedArray(this._data),
+        int16: new Int16Array(this._data),
+        uint16: new Uint16Array(this._data),
+        int32: new Int32Array(this._data),
+        uint32: new Uint32Array(this._data),
+        float32: new Float32Array(this._data),
+        float64: new Float64Array(this._data),
+      };
+
+      _roots = ${JSON.stringify(Array.from(indices, _ => 0))};
+
+      _realloc(capacity) {
+        const sourceView = new Uint8Array(this._data);
+        const destinationView = new Uint8Array(new ArrayBuffer(
+            capacity * ${definition.byteSize}));
+        destinationView.set(sourceView);
+        this._data = destinationView.buffer;
+        this._capacity = capacity;
+        this._views = {
+          int8: new Int8Array(this._data),
+          uint8: new Uint8Array(this._data),
+          uint8c: new Uint8ClampedArray(this._data),
+          int16: new Int16Array(this._data),
+          uint16: new Uint16Array(this._data),
+          int32: new Int32Array(this._data),
+          uint32: new Uint32Array(this._data),
+          float32: new Float32Array(this._data),
+          float64: new Float64Array(this._data),
+        };
       }
-    }
-    if (!indices.length) {
-      throw new Error('no indices defined');
-    }
-    for (const index of indices) {
-      const keys = new Set<string>();
-      for (const key of index.keys) {
-        const name = '' + key;
-        if (name in keys) {
-          throw new Error(`duplicate key ${JSON.stringify(key)} in index ${
-              JSON.stringify(index.keys)}`);
-        } else if (!fields.some(field => field.name == key)) {
-          throw new Error(`unknown key ${JSON.stringify(key)}`);
-        } else {
-          keys.add(name);
-        }
+
+      get size() {
+        return this._size;
       }
-    }
-  }
 
-  /**
-   * @param fields  The list of fields stored in each record.
-   * @param indices  A list of one or more index definitions to use to index the
-   *                 tree.
-   * @param pointerType  The type of field used to store internal node pointers.
-   *                     This must be one of `int8`, `int16`, or `int32`, and
-   *                     effectively defines the maximum level of scalability of
-   *                     the data structure: the tree will support at most 127
-   *                     nodes if it's set to `int8`, 32768 nodes for `int16`,
-   *                     and ~2B for `int32`.
-   */
-  public constructor(
-      fields: FieldDefinition[], indices: Index[],
-      pointerType: PointerType = 'int32')
-  {
-    AVL._checkSchema(fields, indices);
-
-    this.fields = fields;
-    this.indices = indices;
-
-    this._pointerType = pointerType;
-    switch (pointerType) {
-    case 'int8':
-      this._pointerTypeLogSize = 0;
-      break;
-    case 'int16':
-      this._pointerTypeLogSize = 1;
-      break;
-    case 'int32':
-      this._pointerTypeLogSize = 2;
-      break;
-    default:
-      throw new Error(`invalid pointer type ${JSON.stringify(pointerType)}`);
-    }
-
-    const allFields: FieldDefinition[] = [];
-    let tag = 0;
-    for (let i = 0; i < indices.length; i++) {
-      allFields.push(new FieldDefinition(tag, pointerType));
-      this._parentFieldTags.push(tag++);
-      allFields.push(new FieldDefinition(tag, pointerType));
-      this._leftChildFieldTags.push(tag++);
-      allFields.push(new FieldDefinition(tag, pointerType));
-      this._rightChildFieldTags.push(tag++);
-      allFields.push(new FieldDefinition(tag, 'int8'));
-      this._balanceFieldTags.push(tag++);
-    }
-    for (const field of fields) {
-      allFields.push(new FieldDefinition(tag, field.type));
-      this._userFieldTags[field.name] = tag++;
-    }
-    this._store = new RecordStore(allFields);
-
-    this._indices = indices.map(
-        index => new TaggedIndex(index.keys.map(
-            name => this._userFieldTags[name], this)), this);
-
-    this._roots = indices.map(_ => -1);
-  }
-
-  private _getLeftChild(index: number, recordIndex: number): number {
-    return this._store.getField(recordIndex, this._leftChildFieldTags[index]);
-  }
-
-  private _setLeftChild(
-      index: number, recordIndex: number, value: number): void
-  {
-    this._store.setField(recordIndex, this._leftChildFieldTags[index], value);
-  }
-
-  private _getRightChild(index: number, recordIndex: number): number {
-    return this._store.getField(recordIndex, this._rightChildFieldTags[index]);
-  }
-
-  private _setRightChild(
-      index: number, recordIndex: number, value: number): void
-  {
-    this._store.setField(recordIndex, this._rightChildFieldTags[index], value);
-  }
-
-  private _compare(index: number, recordIndex: number, keys: number[]): number {
-    for (let i = 0; i < keys.length; i++) {
-      const value = this._store.getField(
-          recordIndex, this._indices[index].keys[i]);
-      if (keys[i] < value) {
-        return -1;
+      get capacity() {
+        return this._capacity;
       }
-      if (keys[i] > value) {
-        return 1;
+
+      _fillRecord(node, output) {
+        ${fields.map(field => `
+          output.${field} = ${getField(field.name)};
+        `).join('')}
+        return output;
       }
-    }
-    return 0;
-  }
 
-  private* _scan(
-      index: number, recordIndex: number,
-      keys: number[]): Generator<number, void>
-  {
-    if (recordIndex < 0) {
-      return;
-    }
-    const cmp = this._compare(index, recordIndex, keys);
-    if (cmp < 0) {
-      yield* this._scan(index, this._getLeftChild(index, recordIndex), keys);
-    } else if (cmp > 0) {
-      yield* this._scan(index, this._getRightChild(index, recordIndex), keys);
-    } else {
-      yield* this._scan(index, this._getLeftChild(index, recordIndex), keys);
-      yield recordIndex;
-      yield* this._scan(index, this._getRightChild(index, recordIndex), keys);
-    }
-  }
+      _record = Object.create(null);
 
-  private _fillRecord(output: Record, recordIndex: number): Record {
-    const data = this._store.getRecord_(recordIndex);
-    for (const field of this.fields) {
-      output[field.name] = data[this._userFieldTags[field.name]];
-    }
-    return output;
-  }
+      ${indices.map((_, index) => {
+        let code = '';
+        indices[index].keys.forEach(key => {
+          code += `if (${key} < ${getField(key)}) { return -1; } else `;
+          code += `if (${key} < ${getField(key)}) { return -1; } else `;
+        });
+        return `
+          _compare${index}(node, ${indices[index].keys.join(', ')}) {
+            ${code} { return 0; }
+          }
+        `;
+      }).join('\n')}
 
-  private readonly _record: Record = Object.create(null);
+      ${indices.map((_, index) => {
+        const keys = indices[index].keys.join(', ');
+        return `
+          _lookup${index}(node, ${keys}) {
+            if (!node) {
+              return 0;
+            }
+            const cmp = this._compare${index}(node, ${keys});
+            if (cmp < 0) {
+              return this._lookup${index}(${getField('$left')}, ${keys});
+            } else if (cmp > 0) {
+              return this._lookup${index}(${getField('$right')}, ${keys});
+            } else {
+              return node;
+            }
+          }
 
-  /**
-   * Iterates over all records matching the specified keys in the given index,
-   * and for each record yields the field named with `name`.
-   *
-   * The iteration can be interrupted by passing a non-falsey value to the yield
-   * expression.
-   *
-   * @param index  Number of the index to use.
-   * @param name  Name of the field to yield for each record.
-   * @param keys  Ordered list of values for the keys of the specified index.
-   *              This list must have at least 1 value and at most K values,
-   *              with K being the cardinality of the index. If exactly K values
-   *              are specified, at most one element can be found; but if only H
-   *              are specified, with H < K, the remaining K - H keys are
-   *              unbound and multiple elements can be matched.
-   * @yields The requested field of each enumerated record.
-   * @returns `true` if all matched elements were enumerated, `false` if the
-   *          enumeration was interrupted.
-   */
-  public* scanFields(
-      index: number, name: FieldName,
-      ...keys: number[]): Generator<number, boolean, boolean>
-  {
-    const tag = this._userFieldTags[name];
-    for (const recordIndex of this._scan(index, this._roots[index], keys)) {
-      if (yield this._store.getField(recordIndex, tag)) {
-        return false;
-      }
-    }
-    return true;
-  }
+          lookup${index}_(node, ${keys}) {
+            const node = this._lookup${index}(this._roots[${index}], ${keys});
+            if (node > 0) {
+              return this._fillRecord(node, this._record);
+            } else {
+              throw new Error(
+                  \`element with key ${JSON.stringify([keys])} not found\`);
+            }
+          }
 
-  public* scanRecords_(
-      index: number, ...keys: number[]): Generator<Record, boolean, boolean>
-  {
-    for (const recordIndex of this._scan(index, this._roots[index], keys)) {
-      if (yield this._fillRecord(this._record, recordIndex)) {
-        return false;
-      }
-    }
-    return true;
-  }
+          lookup${index}(node, ${keys}) {
+            const node = this._lookup${index}(this._roots[${index}], ${keys});
+            if (node > 0) {
+              return this._fillRecord(node, Object.create(null));
+            } else {
+              throw new Error(
+                  \`element with key ${JSON.stringify([keys])} not found\`);
+            }
+          }
+        `;
+      }).join('\n')}
 
-  public* scanRecords(
-      index: number, ...keys: number[]): Generator<Record, boolean, boolean>
-  {
-    for (const recordIndex of this._scan(index, this._roots[index], keys)) {
-      if (yield this._fillRecord(Object.create(null), recordIndex)) {
-        return false;
-      }
-    }
-    return true;
-  }
+      lookup_ = this.lookup0_;
+      lookup = this.lookup0;
 
-  private _lookup(index: number, recordIndex: number, keys: number[]): number {
-    if (recordIndex < 0) {
-      return -1;
-    }
-    const cmp = this._compare(index, recordIndex, keys);
-    if (cmp < 0) {
-      return this._lookup(index, this._getLeftChild(index, recordIndex), keys);
-    } else if (cmp > 0) {
-      return this._lookup(index, this._getRightChild(index, recordIndex), keys);
-    } else {
-      return recordIndex;
-    }
-  }
+      ${indices.map((_, index) => {
+        const keys = indices[index].keys.join(', ');
+        return `
+          *_scan${index}(node, ${keys}) {
+            if (!node) {
+              return 0;
+            }
+            const cmp = this._compare${index}(node, ${keys});
+            if (cmp < 0) {
+              yield* this._scan${index}(${getField('$left')}, ${keys});
+            } else if (cmp > 0) {
+              yield* this._scan${index}(${getField('$right')}, ${keys});
+            } else {
+              yield* this._scan${index}(${getField('$left')}, ${keys});
+              yield node;
+              yield* this._scan${index}(${getField('$right')}, ${keys});
+            }
+          }
 
-  public lookupField(
-      index: number, name: FieldName, ...keys: number[]): number
-  {
-    const recordIndex = this._lookup(index, this._roots[index], keys);
-    if (recordIndex < 0) {
-      throw new Error(`keys ${JSON.stringify(keys)} not found`);
-    } else {
-      return this._store.getField(recordIndex, this._userFieldTags[name]);
-    }
-  }
+          scan${index}_(${keys}) {
+            for (const node of this._scan${index}(
+                this._roots[${index}], ${keys}))
+            {
+              if (yield this._fillRecord(node, this._record)) {
+                return false;
+              }
+            }
+            return true;
+          }
 
-  public lookupRecord_(index: number, ...keys: number[]): Record {
-    const recordIndex = this._lookup(index, this._roots[index], keys);
-    if (recordIndex < 0) {
-      throw new Error(`keys ${JSON.stringify(keys)} not found`);
-    } else {
-      return this._fillRecord(this._record, recordIndex);
-    }
-  }
+          scan${index}(${keys}) {
+            for (const node of this._scan${index}(
+                this._roots[${index}], ${keys}))
+            {
+              if (yield this._fillRecord(node, Object.create(null))) {
+                return false;
+              }
+            }
+            return true;
+          }
+        `;
+      }).join('\n')}
 
-  public lookupRecord(index: number, ...keys: number[]): Record {
-    const recordIndex = this._lookup(index, this._roots[index], keys);
-    if (recordIndex < 0) {
-      throw new Error(`keys ${JSON.stringify(keys)} not found`);
-    } else {
-      return this._fillRecord(Object.create(null), recordIndex);
+      scan_ = this.scan0_;
+      scan = this.scan0;
     }
-  }
-
-  private _insert(
-      index: number,
-      rootIndex: number,
-      recordIndex: number,
-      keys: number[]): number
-  {
-    if (rootIndex < 0) {
-      return recordIndex;
-    }
-    const cmp = this._compare(index, rootIndex, keys);
-    if (cmp < 0) {
-      this._setLeftChild(index, rootIndex, this._insert(
-          index, this._getLeftChild(index, rootIndex), recordIndex, keys));
-      return rootIndex;
-    } else if (cmp > 0) {
-      this._setRightChild(index, rootIndex, this._insert(
-          index, this._getRightChild(index, rootIndex), recordIndex, keys));
-      return rootIndex;
-    } else {
-      return rootIndex;
-    }
-  }
-
-  public insertOrUpdate(record: Record): void {
-    for (let index = 0; index < this._roots.length; index++) {
-      this._record[this._parentFieldTags[index]] = -1;
-      this._record[this._leftChildFieldTags[index]] = -1;
-      this._record[this._rightChildFieldTags[index]] = -1;
-      this._record[this._balanceFieldTags[index]] = 0;
-    }
-    for (const field of this.fields) {
-      this._record[this._userFieldTags[field.name]] = record[field.name];
-    }
-    const recordIndex = this._store.push(this._record);
-    for (let index = 0; index < this._roots.length; index++) {
-      const keys = this.indices[index].keys.map(name => record[name]);
-      this._insert(index, this._roots[index], recordIndex, keys);
-    }
-  }
-
-  private _remove(index: number, rootIndex: number, keys: number[]): number {
-    if (rootIndex < 0) {
-      return -1;
-    }
-    const cmp = this._compare(index, rootIndex, keys);
-    if (cmp < 0) {
-      this._setLeftChild(index, rootIndex, this._remove(
-          index, this._getLeftChild(index, rootIndex), keys));
-      return rootIndex;
-    } else if (cmp > 0) {
-      this._setRightChild(index, rootIndex, this._remove(
-          index, this._getRightChild(index, rootIndex), keys));
-      return rootIndex;
-    } else {
-      return -1;
-    }
-  }
-
-  // TODO: implement remove()
-}
+  `;
+});
 
 
 }  // namespace Collections
 }  // namespace Darblast
 
 
-type AVL = Darblast.Collections.AVL;
 const AVL = Darblast.Collections.AVL;
