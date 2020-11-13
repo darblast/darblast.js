@@ -336,6 +336,33 @@ export const compileAVL = TemplateClass(
         }
       }
 
+      _removeLast(quick, node) {
+        const right = ${getField('$right')};
+        if (right) {
+          return this._removeLast(quick, right);
+        } else {
+          const left = ${getField('$left')};
+          if (left) {
+            return this._removePredecessor(quick, left);
+          } else {
+            this._swap(node);
+            if (!quick) {
+              this.shrink();
+            }
+            return 0;
+          }
+        }
+      }
+
+      _removePredecessor(quick, node) {
+        const left = ${getField('$left')};
+        if (left) {
+          return this._removeLast(quick, left);
+        } else {
+          return ${getField('$right')};
+        }
+      }
+
       _remove(quick, node, ${keyArgs}) {
         if (!node) {
           return 0;
@@ -350,11 +377,7 @@ export const compileAVL = TemplateClass(
               quick, ${getField('$right')}, ${keyArgs})`)}
           return node;
         } else {
-          this._swap(node);
-          if (!quick) {
-            this.shrink();
-          }
-          return 0;
+          return this._removePredecessor(node);
         }
       }
 
