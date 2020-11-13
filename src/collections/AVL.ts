@@ -257,6 +257,11 @@ export const compileAVL = TemplateClass(
         }
       }
 
+      contains(${keyArgs}) {
+        const node = this._lookup(this._root, ${keyArgs});
+        return node > 0;
+      }
+
       _insert(parent, record) {
         const node = this._size++;
         if (this._size > this._capacity) {
