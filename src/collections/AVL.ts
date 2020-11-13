@@ -69,11 +69,6 @@ export const compileAVL = TemplateClass(
   const setField = (name: string, value: string) =>
       setNodeField('node', name, value);
 
-  const swapFields = (name: string) => `
-      temp = ${getNodeField('node', name)};
-      ${getNodeField('node', name)} = ${getNodeField('last', name)};
-      ${getNodeField('last', name)} = temp;`;
-
   const keyArgs = keys.join(', ');
 
   return `
@@ -314,12 +309,10 @@ export const compileAVL = TemplateClass(
         const last = this._size--;
         if (node < last) {
           const parent = ${getNodeField('last', '$parent')}
-          let temp;
-          ${swapFields('$parent')}
-          ${swapFields('$left')}
-          ${swapFields('$right')}
-          ${swapFields('$balance')}
-          ${fields.map(field => swapFields(field.name)).join('')}
+          this._views.uint8.copyWithin(
+              node * ${definition.byteSize},
+              last * ${definition.byteSize},
+              (last + 1) * ${definition.byteSize});
           switch (last) {
           case ${getNodeField('parent', '$left')}:
             ${setNodeField('parent', '$left', 'node')}
