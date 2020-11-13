@@ -136,6 +136,30 @@ export const compileAVL = TemplateClass(
         }
       }
 
+      *_lowerBound(node, ${keyArgs}) {
+        if (!node) {
+          return;
+        }
+        const cmp = this._compare(node, ${keyArgs});
+        if (cmp >= 0) {
+          yield* this._scan(${getField('$left')}, ${keyArgs});
+          yield node;
+          yield* this._scan(${getField('$right')}, ${keyArgs});
+        }
+      }
+
+      *_upperBound(node, ${keyArgs}) {
+        if (!node) {
+          return;
+        }
+        const cmp = this._compare(node, ${keyArgs});
+        if (cmp < 0) {
+          yield* this._scan(${getField('$left')}, ${keyArgs});
+          yield node;
+          yield* this._scan(${getField('$right')}, ${keyArgs});
+        }
+      }
+
       _lookup(node, ${keyArgs}) {
         if (!node) {
           return 0;
@@ -170,6 +194,42 @@ export const compileAVL = TemplateClass(
 
       *scan(${keyArgs}) {
         for (const node of this._scan(this._root, ${keyArgs})) {
+          if (yield this._fillRecord(node, Object.create(null))) {
+            return false;
+          }
+        }
+        return true;
+      }
+
+      *lowerBound_(${keyArgs}) {
+        for (const node of this._lowerBound(this._root, ${keyArgs})) {
+          if (yield this._fillRecord(node, this._record)) {
+            return false;
+          }
+        }
+        return true;
+      }
+
+      *lowerBound(${keyArgs}) {
+        for (const node of this._lowerBound(this._root, ${keyArgs})) {
+          if (yield this._fillRecord(node, Object.create(null))) {
+            return false;
+          }
+        }
+        return true;
+      }
+
+      *upperBound_(${keyArgs}) {
+        for (const node of this._upperBound(this._root, ${keyArgs})) {
+          if (yield this._fillRecord(node, this._record)) {
+            return false;
+          }
+        }
+        return true;
+      }
+
+      *upperBound(${keyArgs}) {
+        for (const node of this._upperBound(this._root, ${keyArgs})) {
           if (yield this._fillRecord(node, Object.create(null))) {
             return false;
           }
@@ -234,6 +294,34 @@ export const compileAVL = TemplateClass(
 
       insertOrUpdate(record) {
         this._root = this._insertOrUpdate(0, this._root, record);
+      }
+
+      _remove(node, ${keyArgs}) {
+        if (!node) {
+          return 0;
+        }
+        const cmp = this._compare(node, ${keyArgs});
+        if (cmp < 0) {
+          ${setField('$left', `this._remove(
+              ${getField('$left')}, ${keyArgs})`)}
+          return node;
+        } else if (cmp > 0) {
+          ${setField('$right', `this._remove(
+              ${getField('$right')}, ${keyArgs})`)}
+          return node;
+        } else {
+          // TODO
+          return node;
+        }
+      }
+
+      remove(${keyArgs}) {
+        this._root = this._remove(this._root, ${keyArgs});
+      }
+
+      removeRecord(record) {
+        this._root = this._remove(
+            this._root, ${keys.map(key => `record.${key}`).join(', ')});
       }
     }
   `;
