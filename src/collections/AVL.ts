@@ -56,12 +56,23 @@ export const compileAVL = TemplateClass(
     fieldMap[field.name] = field;
   }
 
-  const getField = (name: string) => `this._views${fieldMap[name].type}[
-      node * ${definition.byteSize >>> fieldMap[name].logSize} +
-      ${definition.getFieldIndex(name)}]`;
+  const getNodeField = (node: string, name: string) =>
+      `this._views${fieldMap[name].type}[
+          ${node} * ${definition.byteSize >>> fieldMap[name].logSize} +
+          ${definition.getFieldIndex(name)}]`;
+
+  const setNodeField = (node: string, name: string, value: string) =>
+      `${getNodeField(node, name)} = ${value};`;
+
+  const getField = (name: string) => getNodeField('node', name);
 
   const setField = (name: string, value: string) =>
-      `${getField(name)} = ${value};`;
+      setNodeField('node', name, value);
+
+  const swapFields = (name: string) => `
+      temp = ${getNodeField('node', name)};
+      ${getNodeField('node', name)} = ${getNodeField('last', name)};
+      ${getNodeField('last', name)} = temp;`;
 
   const keyArgs = keys.join(', ');
 
@@ -263,17 +274,16 @@ export const compileAVL = TemplateClass(
       }
 
       _insert(parent, record) {
-        const node = this._size++;
-        if (this._size > this._capacity) {
+        const node = ++this._size;
+        if (this._size + 1 > this._capacity) {
           this._realloc(this._capacity * 2);
         }
         ${setField('$parent', 'parent')}
         ${setField('$left', '0')}
         ${setField('$right', '0')}
         ${setField('$balance', '0')}
-        ${fields.map(field => `
-          ${setField(field.name, `record.${field.name}`)}
-        `).join('')}
+        ${fields.map(field => setField(
+            field.name, `record.${field.name}`)).join('')}
         return node;
       }
 
@@ -290,9 +300,8 @@ export const compileAVL = TemplateClass(
           ${setField('$right', `this._insertOrUpdate(
               node, ${getField('$right')}, record)`)}
         } else {
-          ${fields.map(field => `
-            ${setField(field.name, `record.${field.name}`)}
-          `).join('')}
+          ${fields.map(field => setField(
+              field.name, `record.${field.name}`)).join('')}
           return node;
         }
       }
@@ -301,32 +310,65 @@ export const compileAVL = TemplateClass(
         this._root = this._insertOrUpdate(0, this._root, record);
       }
 
-      _remove(node, ${keyArgs}) {
+      _swap(node) {
+        const last = this._size--;
+        if (node < last) {
+          let temp;
+          ${swapFields('$parent')}
+          ${swapFields('$left')}
+          ${swapFields('$right')}
+          ${swapFields('$balance')}
+          ${fields.map(field => swapFields(field.name)).join('')}
+        }
+      }
+
+      _swapAndPop(node) {
+        this._swap(node);
+        const capacity = this._capacity >>> 1;
+        if (this._size < capacity) {
+          this._realloc(capacity);
+        }
+      }
+
+      _remove(quick, node, ${keyArgs}) {
         if (!node) {
           return 0;
         }
         const cmp = this._compare(node, ${keyArgs});
         if (cmp < 0) {
           ${setField('$left', `this._remove(
-              ${getField('$left')}, ${keyArgs})`)}
+              quick, ${getField('$left')}, ${keyArgs})`)}
           return node;
         } else if (cmp > 0) {
           ${setField('$right', `this._remove(
-              ${getField('$right')}, ${keyArgs})`)}
+              quick, ${getField('$right')}, ${keyArgs})`)}
           return node;
         } else {
+          if (quick) {
+            this._swap(node);
+          } else {
+            this._swapAndPop(node);
+          }
           // TODO
-          return node;
         }
       }
 
       remove(${keyArgs}) {
-        this._root = this._remove(this._root, ${keyArgs});
+        this._root = this._remove(false, this._root, ${keyArgs});
       }
 
       removeRecord(record) {
         this._root = this._remove(
-            this._root, ${keys.map(key => `record.${key}`).join(', ')});
+            false, this._root, ${keys.map(key => `record.${key}`).join(', ')});
+      }
+
+      quickRemove(${keyArgs}) {
+        this._root = this._remove(true, this._root, ${keyArgs});
+      }
+
+      quickRemoveRecord(record) {
+        this._root = this._remove(
+            true, this._root, ${keys.map(key => `record.${key}`).join(', ')});
       }
     }
   `;
