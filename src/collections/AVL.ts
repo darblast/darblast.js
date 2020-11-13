@@ -313,20 +313,33 @@ export const compileAVL = TemplateClass(
       _swap(node) {
         const last = this._size--;
         if (node < last) {
+          const parent = ${getNodeField('last', '$parent')}
           let temp;
           ${swapFields('$parent')}
           ${swapFields('$left')}
           ${swapFields('$right')}
           ${swapFields('$balance')}
           ${fields.map(field => swapFields(field.name)).join('')}
+          switch (last) {
+          case ${getNodeField('parent', '$left')}:
+            ${setNodeField('parent', '$left', 'node')}
+            break;
+          case ${getNodeField('parent', '$right')}:
+            ${setNodeField('parent', '$right', 'node')}
+            break;
+          default:
+            throw new Error('internal error');
+          }
         }
       }
 
-      _swapAndPop(node) {
-        this._swap(node);
+      shrink() {
         const capacity = this._capacity >>> 1;
         if (this._size < capacity) {
           this._realloc(capacity);
+          return true;
+        } else {
+          return false;
         }
       }
 
@@ -344,12 +357,11 @@ export const compileAVL = TemplateClass(
               quick, ${getField('$right')}, ${keyArgs})`)}
           return node;
         } else {
-          if (quick) {
-            this._swap(node);
-          } else {
-            this._swapAndPop(node);
+          this._swap(node);
+          if (!quick) {
+            this.shrink();
           }
-          // TODO
+          return 0;
         }
       }
 
