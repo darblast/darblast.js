@@ -336,15 +336,19 @@ export const compileAVL = TemplateClass(
         }
       }
 
-      _removeLast(quick, node) {
+      _removeLast(quick, root, node) {
         const right = ${getField('$right')};
         if (right) {
-          return this._removeLast(quick, right);
+          ${setField('$right', 'this._removeLast(quick, root, right)')}
+          return node;
         } else {
           const left = ${getField('$left')};
           if (left) {
-            return this._removePredecessor(quick, left);
+            ${setField('$left', 'this._removePredecessor(quick, root, left)')}
+            return node;
           } else {
+            ${fields.map(field => setNodeField(
+                'root', field.name, getField(field.name))).join('')}
             this._swap(node);
             if (!quick) {
               this.shrink();
@@ -354,10 +358,11 @@ export const compileAVL = TemplateClass(
         }
       }
 
-      _removePredecessor(quick, node) {
+      _removePredecessor(quick, root, node) {
         const left = ${getField('$left')};
         if (left) {
-          return this._removeLast(quick, left);
+          ${setField('$left', 'this._removeLast(quick, root, left)')}
+          return node;
         } else {
           return ${getField('$right')};
         }
@@ -377,7 +382,7 @@ export const compileAVL = TemplateClass(
               quick, ${getField('$right')}, ${keyArgs})`)}
           return node;
         } else {
-          return this._removePredecessor(node);
+          return this._removePredecessor(quick, node, node);
         }
       }
 
