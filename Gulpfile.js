@@ -1,4 +1,5 @@
 const gulp = require('gulp');
+const sourcemaps = require('gulp-sourcemaps');
 const typescript = require('gulp-typescript');
 const merge = require('merge-stream');
 const umd = require('gulp-umd');
@@ -10,8 +11,10 @@ const typedoc = require('gulp-typedoc');
 gulp.task('compile', function () {
   const project = typescript.createProject('tsconfig.json');
   const tsResult = gulp.src(['src/**/*.ts'])
+      .pipe(sourcemaps.init())
       .pipe(project());
   return merge(tsResult, tsResult.js.pipe(umd()))
+      .pipe(sourcemaps.write('.'))
       .pipe(gulp.dest('dist'));
 });
 
