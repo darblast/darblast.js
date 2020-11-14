@@ -2,10 +2,7 @@ namespace Darblast {
 export namespace Collections {
 
 
-/**
- * Union type for all TypedArray views.
- */
-export type AnyView =
+type AnyView =
     Int8Array         |
     Uint8Array        |
     Uint8ClampedArray |
@@ -355,12 +352,5 @@ export type Record = {[name: string]: number};
 }  // namespace Darblast
 
 
-type AnyView = Darblast.Collections.AnyView;
-type FieldType = Darblast.Collections.FieldType;
-type Schema = Darblast.Collections.Schema;
-
-type FieldDefinition = Darblast.Collections.FieldDefinition;
 const FieldDefinition = Darblast.Collections.FieldDefinition;
-
-type RecordDefinition = Darblast.Collections.RecordDefinition;
 const RecordDefinition = Darblast.Collections.RecordDefinition;

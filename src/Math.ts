@@ -757,20 +757,8 @@ export class mat3 {
 }  // namespace Darblast
 
 
-type ivec2 = Darblast.Math.ivec2;
-type vec2 = Darblast.Math.vec2;
 const vec2 = Darblast.Math.vec2;
-
-type ivec3 = Darblast.Math.ivec3;
-type vec3 = Darblast.Math.vec3;
 const vec3 = Darblast.Math.vec3;
-
-type ivec4 = Darblast.Math.ivec4;
-type vec4 = Darblast.Math.vec4;
 const vec4 = Darblast.Math.vec4;
-
-type mat2 = Darblast.Math.mat2;
 const mat2 = Darblast.Math.mat2;
-
-type mat3 = Darblast.Math.mat3;
 const mat3 = Darblast.Math.mat3;
