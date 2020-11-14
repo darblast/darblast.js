@@ -6,7 +6,12 @@ namespace Darblast {
 export namespace Collections {
 
 
-function validateSchema(fields: FieldDefinition[], keys: string[]): void {
+export class Index {
+  public constructor(public readonly keys: string[]) {}
+}
+
+
+function validateSchema(fields: FieldDefinition[], indices: Index[]): void {
   if (!fields.length) {
     throw new Error('at least one field must be specified');
   }
@@ -21,12 +26,17 @@ function validateSchema(fields: FieldDefinition[], keys: string[]): void {
       names.add(field.name);
     }
   }
-  if (!keys.length) {
-    throw new Error('there must be at least one key');
+  if (!indices.length) {
+    throw new Error('at least one index must be defined');
   }
-  for (const key of keys) {
-    if (!(key in names)) {
-      throw new Error(`unknown field ${JSON.stringify(key)}`);
+  for (const index of indices) {
+    if (!index.keys.length) {
+      throw new Error('an index cannot be empty');
+    }
+    for (const key of index.keys) {
+      if (!(key in names)) {
+        throw new Error(`unknown field ${key}`);
+      }
     }
   }
 }
@@ -38,16 +48,18 @@ function validateSchema(fields: FieldDefinition[], keys: string[]): void {
  * TODO(jim): provide more details.
  */
 export const compileAVL = TemplateClass(
-    (fields: FieldDefinition[], keys: string[]): string =>
+    (fields: FieldDefinition[], indices: Index[]): string =>
 {
-  validateSchema(fields, keys);
+  validateSchema(fields, indices);
 
-  const allFields: FieldDefinition[] = [
-    new FieldDefinition('$parent', 'uint32'),
-    new FieldDefinition('$left', 'uint32'),
-    new FieldDefinition('$right', 'uint32'),
-    new FieldDefinition('$balance', 'int8'),
-  ].concat(fields);
+  const allFields = fields.slice();
+  indices.forEach((_, index) => {
+    allFields.push(
+        new FieldDefinition(`$parent${index}`, 'uint32'),
+        new FieldDefinition(`$left${index}`, 'uint32'),
+        new FieldDefinition(`$right${index}`, 'uint32'),
+        new FieldDefinition(`$balance${index}`, 'int8'));
+  });
 
   const definition = new RecordDefinition(allFields);
 
@@ -69,15 +81,13 @@ export const compileAVL = TemplateClass(
   const setField = (name: string, value: string) =>
       setNodeField('node', name, value);
 
-  const keyArgs = keys.join(', ');
-
   return `
     class AVL {
       _data = new ArrayBuffer(${definition.byteSize});
       _capacity = 1;
       _size = 0;
 
-      _view = {
+      _views = {
         int8: new Int8Array(this._data),
         uint8: new Uint8Array(this._data),
         uint8c: new Uint8ClampedArray(this._data),
@@ -89,26 +99,23 @@ export const compileAVL = TemplateClass(
         float64: new Float64Array(this._data),
       };
 
-      _root = 0;
+      ${indices.map((_, index) => `
+          _root${index} = 0;`).join('')}
 
       _realloc(capacity) {
-        const sourceView = new Uint8Array(this._data);
-        const destinationView = new Uint8Array(new ArrayBuffer(
-            capacity * ${definition.byteSize}));
-        destinationView.set(sourceView);
-        this._data = destinationView.buffer;
+        const target = new Uint8Array(capacity * ${definition.byteSize});
+        target.set(this._views.uint8);
+        this._data = target.buffer;
         this._capacity = capacity;
-        this._views = {
-          int8: new Int8Array(this._data),
-          uint8: new Uint8Array(this._data),
-          uint8c: new Uint8ClampedArray(this._data),
-          int16: new Int16Array(this._data),
-          uint16: new Uint16Array(this._data),
-          int32: new Int32Array(this._data),
-          uint32: new Uint32Array(this._data),
-          float32: new Float32Array(this._data),
-          float64: new Float64Array(this._data),
-        };
+        this._views.int8 = new Int8Array(this._data);
+        this._views.uint8 = new Uint8Array(this._data);
+        this._views.uint8c = new Uint8ClampedArray(this._data);
+        this._views.int16 = new Int16Array(this._data);
+        this._views.uint16 = new Uint16Array(this._data);
+        this._views.int32 = new Int32Array(this._data);
+        this._views.uint32 = new Uint32Array(this._data);
+        this._views.float32 = new Float32Array(this._data);
+        this._views.float64 = new Float64Array(this._data);
       }
 
       get size() {
@@ -117,67 +124,6 @@ export const compileAVL = TemplateClass(
 
       get capacity() {
         return this._capacity;
-      }
-
-      _compare(node, ${keyArgs}) {
-        ${keys.map(key => `
-          if (${key} < ${getField(key)}) { return -1; } else
-          if (${key} > ${getField(key)}) { return 1; } else
-        `).join('')} { return 0; }
-      }
-
-      *_scan(node, ${keyArgs}) {
-        if (!node) {
-          return;
-        }
-        const cmp = this._compare(node, ${keyArgs});
-        if (cmp < 0) {
-          yield* this._scan(${getField('$left')}, ${keyArgs});
-        } else if (cmp > 0) {
-          yield* this._scan(${getField('$right')}, ${keyArgs});
-        } else {
-          yield* this._scan(${getField('$left')}, ${keyArgs});
-          yield node;
-          yield* this._scan(${getField('$right')}, ${keyArgs});
-        }
-      }
-
-      *_lowerBound(node, ${keyArgs}) {
-        if (!node) {
-          return;
-        }
-        const cmp = this._compare(node, ${keyArgs});
-        if (cmp >= 0) {
-          yield* this._scan(${getField('$left')}, ${keyArgs});
-          yield node;
-          yield* this._scan(${getField('$right')}, ${keyArgs});
-        }
-      }
-
-      *_upperBound(node, ${keyArgs}) {
-        if (!node) {
-          return;
-        }
-        const cmp = this._compare(node, ${keyArgs});
-        if (cmp < 0) {
-          yield* this._scan(${getField('$left')}, ${keyArgs});
-          yield node;
-          yield* this._scan(${getField('$right')}, ${keyArgs});
-        }
-      }
-
-      _lookup(node, ${keyArgs}) {
-        if (!node) {
-          return 0;
-        }
-        const cmp = this._compare(node, ${keyArgs});
-        if (cmp < 0) {
-          return this._lookup(${getField('$left')}, ${keyArgs});
-        } else if (cmp > 0) {
-          return this._lookup(${getField('$right')}, ${keyArgs});
-        } else {
-          return 0;
-        }
       }
 
       _fillRecord(node, output) {
@@ -189,220 +135,101 @@ export const compileAVL = TemplateClass(
 
       _record = Object.create(null);
 
-      *scan_(${keyArgs}) {
-        for (const node of this._scan(this._root, ${keyArgs})) {
-          if (yield this._fillRecord(node, this._record)) {
-            return false;
-          }
-        }
-        return true;
-      }
-
-      *scan(${keyArgs}) {
-        for (const node of this._scan(this._root, ${keyArgs})) {
-          if (yield this._fillRecord(node, Object.create(null))) {
-            return false;
-          }
-        }
-        return true;
-      }
-
-      *lowerBound_(${keyArgs}) {
-        for (const node of this._lowerBound(this._root, ${keyArgs})) {
-          if (yield this._fillRecord(node, this._record)) {
-            return false;
-          }
-        }
-        return true;
-      }
-
-      *lowerBound(${keyArgs}) {
-        for (const node of this._lowerBound(this._root, ${keyArgs})) {
-          if (yield this._fillRecord(node, Object.create(null))) {
-            return false;
-          }
-        }
-        return true;
-      }
-
-      *upperBound_(${keyArgs}) {
-        for (const node of this._upperBound(this._root, ${keyArgs})) {
-          if (yield this._fillRecord(node, this._record)) {
-            return false;
-          }
-        }
-        return true;
-      }
-
-      *upperBound(${keyArgs}) {
-        for (const node of this._upperBound(this._root, ${keyArgs})) {
-          if (yield this._fillRecord(node, Object.create(null))) {
-            return false;
-          }
-        }
-        return true;
-      }
-
-      lookup_(${keyArgs}) {
-        const node = this._lookup(this._root, ${keyArgs});
-        if (node > 0) {
-          return this._fillRecord(node, this._record);
-        } else {
-          const key = JSON.stringify([${keyArgs}]);
-          throw new Error('element with key ' + key + ' not found');
-        }
-      }
-
-      lookup(${keyArgs}) {
-        const node = this._lookup(this._root, ${keyArgs});
-        if (node > 0) {
-          return this._fillRecord(node, Object.create(null));
-        } else {
-          const key = JSON.stringify([${keyArgs}]);
-          throw new Error('element with key ' + key + ' not found');
-        }
-      }
-
-      contains(${keyArgs}) {
-        const node = this._lookup(this._root, ${keyArgs});
-        return node > 0;
-      }
-
-      _insert(parent, record) {
-        const node = ++this._size;
-        if (this._size + 1 > this._capacity) {
-          this._realloc(this._capacity * 2);
-        }
-        ${setField('$parent', 'parent')}
-        ${setField('$left', '0')}
-        ${setField('$right', '0')}
-        ${setField('$balance', '0')}
-        ${fields.map(field => setField(
-            field.name, `record.${field.name}`)).join('')}
-        return node;
-      }
-
-      _insertOrUpdate(parent, node, record) {
-        if (!node) {
-          return this._insert(parent, record);
-        }
-        const cmp = this._compare(node, ${keys.map(
-            key => `record.${key}`).join(', ')});
-        if (cmp < 0) {
-          ${setField('$left', `this._insertOrUpdate(
-              node, ${getField('$left')}, record)`)}
-        } else if (cmp > 0) {
-          ${setField('$right', `this._insertOrUpdate(
-              node, ${getField('$right')}, record)`)}
-        } else {
-          ${fields.map(field => setField(
-              field.name, `record.${field.name}`)).join('')}
-          return node;
-        }
-      }
-
-      insertOrUpdate(record) {
-        this._root = this._insertOrUpdate(0, this._root, record);
-      }
-
-      _swap(node) {
-        const last = this._size--;
-        if (node < last) {
-          const parent = ${getNodeField('last', '$parent')}
-          this._views.uint8.copyWithin(
-              node * ${definition.byteSize},
-              last * ${definition.byteSize},
-              (last + 1) * ${definition.byteSize});
-          switch (last) {
-          case ${getNodeField('parent', '$left')}:
-            ${setNodeField('parent', '$left', 'node')}
-            break;
-          case ${getNodeField('parent', '$right')}:
-            ${setNodeField('parent', '$right', 'node')}
-            break;
-          default:
-            throw new Error('internal error');
-          }
-        }
-      }
-
-      shrink() {
-        const capacity = this._capacity >>> 1;
-        if (this._size < capacity) {
-          this._realloc(capacity);
-          return true;
-        } else {
-          return false;
-        }
-      }
-
-      _removeLast(quick, root, node) {
-        const right = ${getField('$right')};
-        if (right) {
-          ${setField('$right', 'this._removeLast(quick, root, right)')}
-          return node;
-        } else {
-          const left = ${getField('$left')};
-          if (left) {
-            ${setField('$left', 'this._removePredecessor(quick, root, left)')}
-            return node;
-          } else {
-            ${fields.map(field => setNodeField(
-                'root', field.name, getField(field.name))).join('')}
-            this._swap(node);
-            if (!quick) {
-              this.shrink();
-            }
+      ${indices.map((_, index) => {
+        const keys = indices[index].keys;
+        const keyArgs = keys.join(', ');
+        return `
+          _comparePartial${index}(keys) {
+            ${keys.map((key, i) => `
+              if (keys.length > ${i}) {
+                const value = ${getField(key)};
+                if (keys[${i}] !== value) {
+                  return value - keys[${i}];
+                }
+              }
+            `).join('')}
             return 0;
           }
-        }
-      }
 
-      _removePredecessor(quick, root, node) {
-        const left = ${getField('$left')};
-        if (left) {
-          ${setField('$left', 'this._removeLast(quick, root, left)')}
-          return node;
-        } else {
-          return ${getField('$right')};
-        }
-      }
+          *_scan${index}(node, keys) {
+            if (!node) {
+              return;
+            }
+            const cmp = this._compare(node, keys);
+            if (cmp < 0) {
+              yield* this._scan(${getField(`$left${index}`)}, keys);
+            } else if (cmp > 0) {
+              yield* this._scan(${getField(`$right${index}`)}, keys);
+            } else {
+              yield* this._scan(${getField(`$left${index}`)}, keys);
+              yield node;
+              yield* this._scan(${getField(`$right${index}`)}, keys);
+            }
+          }
 
-      _remove(quick, node, ${keyArgs}) {
-        if (!node) {
-          return 0;
-        }
-        const cmp = this._compare(node, ${keyArgs});
-        if (cmp < 0) {
-          ${setField('$left', `this._remove(
-              quick, ${getField('$left')}, ${keyArgs})`)}
-          return node;
-        } else if (cmp > 0) {
-          ${setField('$right', `this._remove(
-              quick, ${getField('$right')}, ${keyArgs})`)}
-          return node;
-        } else {
-          return this._removePredecessor(quick, node, node);
-        }
-      }
+          *scan${index}_(keys) {
+            for (const node of this._scan(this._root${index}, keys)) {
+              if (yield this._fillRecord(node, this._record)) {
+                return false;
+              }
+            }
+            return true;
+          }
 
-      remove(${keyArgs}) {
-        this._root = this._remove(false, this._root, ${keyArgs});
-      }
+          *scan${index}(keys) {
+            for (const node of this._scan(this._root${index}, keys)) {
+              if (yield this._fillRecord(node, Object.create(null))) {
+                return false;
+              }
+            }
+            return true;
+          }
 
-      removeRecord(record) {
-        this._root = this._remove(
-            false, this._root, ${keys.map(key => `record.${key}`).join(', ')});
-      }
+          _compare${index}(node, ${keyArgs}) {
+            ${keys.map(key => `
+              {
+                const value = ${getField(key)};
+                if (${key} !== value) {
+                  return value - ${key};
+                }
+              }
+            `).join('')}
+            return 0;
+          }
 
-      quickRemove(${keyArgs}) {
-        this._root = this._remove(true, this._root, ${keyArgs});
-      }
+          _lookup${index}(node, ${keyArgs}) {
+            if (!node) {
+              return 0;
+            }
+            const cmp = this._compare(node, ${keyArgs});
+            if (cmp < 0) {
+              return this._lookup(${getField(`$left${index}`)}, ${keyArgs});
+            } else if (cmp > 0) {
+              return this._lookup(${getField(`$right${index}`)}, ${keyArgs});
+            } else {
+              return 0;
+            }
+          }
 
-      quickRemoveRecord(record) {
-        this._root = this._remove(
-            true, this._root, ${keys.map(key => `record.${key}`).join(', ')});
-      }
+          lookup${index}_(${keyArgs}) {
+            const node = this._lookup${index}(${keyArgs});
+            if (node) {
+              return this._fillRecord(node, this._record);
+            } else {
+              throw new Error('element not found');
+            }
+          }
+
+          lookup${index}(${keyArgs}) {
+            const node = this._lookup${index}(${keyArgs});
+            if (node) {
+              return this._fillRecord(node, Object.create(null));
+            } else {
+              throw new Error('element not found');
+            }
+          }
+        `;
+      }).join('')}
     }
   `;
 });
