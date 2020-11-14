@@ -155,7 +155,7 @@ export const compileAVL = TemplateClass(
             if (!node) {
               return;
             }
-            const cmp = this._compare(node, keys);
+            const cmp = this._comparePartial${index}(node, keys);
             if (cmp < 0) {
               yield* this._scan(${getField(`$left${index}`)}, keys);
             } else if (cmp > 0) {
@@ -167,8 +167,8 @@ export const compileAVL = TemplateClass(
             }
           }
 
-          *scan${index}_(keys) {
-            for (const node of this._scan(this._root${index}, keys)) {
+          *scan${index}_(...keys) {
+            for (const node of this._scan${index}(this._root${index}, keys)) {
               if (yield this._fillRecord(node, this._record)) {
                 return false;
               }
@@ -176,8 +176,76 @@ export const compileAVL = TemplateClass(
             return true;
           }
 
-          *scan${index}(keys) {
-            for (const node of this._scan(this._root${index}, keys)) {
+          *scan${index}(...keys) {
+            for (const node of this._scan${index}(this._root${index}, keys)) {
+              if (yield this._fillRecord(node, Object.create(null))) {
+                return false;
+              }
+            }
+            return true;
+          }
+
+          *_lowerBound${index}(node, keys) {
+            if (!node) {
+              return;
+            }
+            const cmp = this._comparePartial${index}(node, keys);
+            if (cmp >= 0) {
+              yield* this._scan(${getField(`$left${index}`)}, keys);
+              yield node;
+              yield* this._scan(${getField(`$right${index}`)}, keys);
+            }
+          }
+
+          *lowerBound${index}_(...keys) {
+            for (const node of this._lowerBound${index}(
+                this._root${index}, keys))
+            {
+              if (yield this._fillRecord(node, this._record)) {
+                return false;
+              }
+            }
+            return true;
+          }
+
+          *lowerBound${index}(...keys) {
+            for (const node of this._lowerBound${index}(
+                this._root${index}, keys))
+            {
+              if (yield this._fillRecord(node, Object.create(null))) {
+                return false;
+              }
+            }
+            return true;
+          }
+
+          *_upperBound${index}(node, keys) {
+            if (!node) {
+              return;
+            }
+            const cmp = this._comparePartial${index}(node, keys);
+            if (cmp < 0) {
+              yield* this._scan(${getField(`$left${index}`)}, keys);
+              yield node;
+              yield* this._scan(${getField(`$right${index}`)}, keys);
+            }
+          }
+
+          *upperBound${index}_(...keys) {
+            for (const node of this._upperBound${index}(
+                this._root${index}, keys))
+            {
+              if (yield this._fillRecord(node, this._record)) {
+                return false;
+              }
+            }
+            return true;
+          }
+
+          *upperBound${index}(...keys) {
+            for (const node of this._upperBound${index}(
+                this._root${index}, keys))
+            {
               if (yield this._fillRecord(node, Object.create(null))) {
                 return false;
               }
@@ -255,14 +323,14 @@ export class AVL {
    * @param keys  List of fields to use as keys. This has the same meaning as in
    *              the {@link compileAVL} function.
    */
-  public static fromSchema(schema: Schema, keys: string[]) {
+  public static fromSchema(schema: Schema, indices: string[][]) {
     const fields: FieldDefinition[] = [];
     for (const name in schema) {
       if (schema.hasOwnProperty(name)) {
         fields.push(new FieldDefinition(name, schema[name]));
       }
     }
-    return compileAVL(fields, keys);
+    return compileAVL(fields, indices.map(keys => new Index(keys)));
   }
 };
 
