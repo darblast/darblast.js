@@ -149,7 +149,7 @@ export const compileAVL = TemplateClass(
               if (keys.length > ${i}) {
                 const value = ${getField(key)};
                 if (keys[${i}] !== value) {
-                  return value - keys[${i}];
+                  return keys[${i}] - value;
                 }
               }
             `).join('')}
@@ -263,7 +263,7 @@ export const compileAVL = TemplateClass(
               {
                 const value = ${getField(key)};
                 if (${key} !== value) {
-                  return value - ${key};
+                  return ${key} - value;
                 }
               }
             `).join('')}
