@@ -317,6 +317,22 @@ export const compileAVL = TemplateClass(
       lookup_ = lookup0_;
       lookup = lookup0;
       contains = contains0;
+
+      _push(record) {
+        const node = ++this._size;
+        if (this._size > this._capacity) {
+          this._realloc(this._capacity * 2);
+        }
+        ${indices.map((_, index) => `
+          ${setField(`$parent${index}`, '0')}
+          ${setField(`$left${index}`, '0')}
+          ${setField(`$right${index}`, '0')}
+          ${setField(`$balance${index}`, '0')}
+        `).join('')}
+        ${fields.map(field => setField(
+            field.name, `record.${field.name}`)).join('')}
+        return node;
+      }
     }
   `;
 });
