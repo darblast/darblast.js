@@ -280,7 +280,7 @@ export const compileAVL = TemplateClass(
           }
 
           lookup${index}_(${keyArgs}) {
-            const node = this._lookup${index}(${keyArgs});
+            const node = this._lookup${index}(this._root${index}, ${keyArgs});
             if (node) {
               return this._fillRecord(node, this._record);
             } else {
@@ -289,12 +289,16 @@ export const compileAVL = TemplateClass(
           }
 
           lookup${index}(${keyArgs}) {
-            const node = this._lookup${index}(${keyArgs});
+            const node = this._lookup${index}(this._root${index}, ${keyArgs});
             if (node) {
               return this._fillRecord(node, Object.create(null));
             } else {
               throw new Error('element not found');
             }
+          }
+
+          contains${index}(${keyArgs}) {
+            return !!this._lookup${index}(this._root${index}, ${keyArgs});
           }
         `;
       }).join('')}
@@ -307,6 +311,7 @@ export const compileAVL = TemplateClass(
       upperBound = upperBound0;
       lookup_ = lookup0_;
       lookup = lookup0;
+      contains = contains0;
     }
   `;
 });
