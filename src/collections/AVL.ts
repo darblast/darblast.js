@@ -29,14 +29,19 @@ function validateSchema(fields: FieldDefinition[], indices: Index[]): void {
   if (!indices.length) {
     throw new Error('at least one index must be defined');
   }
-  for (const index of indices) {
-    if (!index.keys.length) {
-      throw new Error('an index cannot be empty');
+  const reference = indices[0].keys.slice().sort();
+  for (const key of reference) {
+    if (!(key in names)) {
+      throw new Error(`unknown field ${key}`);
     }
-    for (const key of index.keys) {
-      if (!(key in names)) {
-        throw new Error(`unknown field ${key}`);
-      }
+  }
+  for (let i = 1; i < indices.length; i++) {
+    const sorted = indices[i].keys.slice().sort();
+    if (sorted.length !== reference.length) {
+      throw new Error(`index ${JSON.stringify(indices[0].keys)} has different keys than ${JSON.stringify(indices[i].keys)}`);
+    }
+    if (sorted.some((key, j) => key !== reference[j])) {
+      throw new Error(`index ${JSON.stringify(indices[0].keys)} has different keys than ${JSON.stringify(indices[i].keys)}`);
     }
   }
 }
