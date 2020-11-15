@@ -266,17 +266,17 @@ export const compileAVL = TemplateClass(
           }
 
           _lookup${index}(node, ${keyArgs}) {
-            if (!node) {
-              return 0;
+            while (node) {
+              const cmp = this._compare(node, ${keyArgs});
+              if (cmp < 0) {
+                node = ${getField(`$left${index}`)};
+              } else if (cmp > 0) {
+                node = ${getField(`$right${index}`)};
+              } else {
+                return node;
+              }
             }
-            const cmp = this._compare(node, ${keyArgs});
-            if (cmp < 0) {
-              return this._lookup(${getField(`$left${index}`)}, ${keyArgs});
-            } else if (cmp > 0) {
-              return this._lookup(${getField(`$right${index}`)}, ${keyArgs});
-            } else {
-              return node;
-            }
+            return 0;
           }
 
           lookup${index}_(${keyArgs}) {
