@@ -15,7 +15,7 @@ function validateSchema(fields: FieldDefinition[], indices: Index[]): void {
   if (!fields.length) {
     throw new Error('at least one field must be specified');
   }
-  const names = new Set<string>();
+  const names: {[name: string]: boolean} = Object.create(null);
   for (const field of fields) {
     if (!/^[a-zA-Z_][a-zA-Z0-9_]*$/.test(field.name)) {
       throw new Error(`invalid field name ${JSON.stringify(field.name)}`);
@@ -23,7 +23,7 @@ function validateSchema(fields: FieldDefinition[], indices: Index[]): void {
     if (field.name in names) {
       throw new Error(`duplicate name ${JSON.stringify(field.name)}`);
     } else {
-      names.add(field.name);
+      names[field.name] = true;
     }
   }
   if (!indices.length) {
@@ -74,7 +74,7 @@ export const compileAVL = TemplateClass(
   }
 
   const getNodeField = (node: string, name: string) =>
-      `this._views${fieldMap[name].type}[
+      `this._views.${fieldMap[name].type}[
           ${node} * ${definition.byteSize >>> fieldMap[name].logSize} +
           ${definition.getFieldIndex(name)}]`;
 
@@ -133,7 +133,7 @@ export const compileAVL = TemplateClass(
 
       _fillRecord(node, output) {
         ${fields.map(field => `
-          output.${field} = ${getField(field.name)};
+          output.${field.name} = ${getField(field.name)};
         `).join('')}
         return output;
       }
