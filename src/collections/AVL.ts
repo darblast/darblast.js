@@ -302,6 +302,17 @@ export const compileAVL = TemplateClass(
             }
           }
 
+          ${fields.map(field => `
+            lookup${index}_${field.name}(${keyArgs}) {
+              const node = this._lookup${index}(this._root${index}, ${keyArgs});
+              if (node) {
+                return ${getField(field.name)};
+              } else {
+                throw new Error('element not found');
+              }
+            }
+          `).join('')}
+
           contains${index}(${keyArgs}) {
             return !!this._lookup${index}(this._root${index}, ${keyArgs});
           }
@@ -317,6 +328,9 @@ export const compileAVL = TemplateClass(
       lookup_ = lookup0_;
       lookup = lookup0;
       contains = contains0;
+
+      ${fields.map(field => `
+          lookup_${field.name} = lookup0_${field.name};`).join('')}
 
       _push(record) {
         const node = ++this._size;
