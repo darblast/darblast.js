@@ -275,7 +275,7 @@ export const compileAVL = TemplateClass(
             } else if (cmp > 0) {
               return this._lookup(${getField(`$right${index}`)}, ${keyArgs});
             } else {
-              return 0;
+              return node;
             }
           }
 
