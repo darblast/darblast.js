@@ -298,6 +298,15 @@ export const compileAVL = TemplateClass(
           }
         `;
       }).join('')}
+
+      scan_ = scan0_;
+      scan = scan0;
+      lowerBound_ = lowerBound0_;
+      lowerBound = lowerBound0;
+      upperBound_ = upperBound0_;
+      upperBound = upperBound0;
+      lookup_ = lookup0_;
+      lookup = lookup0;
     }
   `;
 });
