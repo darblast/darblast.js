@@ -74,9 +74,9 @@ export const compileAVL = TemplateClass(
   }
 
   const getNodeField = (node: string, name: string) =>
-      `this._views.${fieldMap[name].type}[
-          ${node} * ${definition.byteSize >>> fieldMap[name].logSize} +
-          ${definition.getFieldIndex(name)}]`;
+      `this._views.${fieldMap[name].type}[${node} * ${
+          definition.byteSize >>> fieldMap[name].logSize} + ${
+          definition.getFieldIndex(name)}]`;
 
   const setNodeField = (node: string, name: string, value: string) =>
       `${getNodeField(node, name)} = ${value};`;
@@ -162,13 +162,13 @@ export const compileAVL = TemplateClass(
             }
             const cmp = this._comparePartial${index}(node, keys);
             if (cmp < 0) {
-              yield* this._scan(${getField(`$left${index}`)}, keys);
+              yield* this._scan${index}(${getField(`$left${index}`)}, keys);
             } else if (cmp > 0) {
-              yield* this._scan(${getField(`$right${index}`)}, keys);
+              yield* this._scan${index}(${getField(`$right${index}`)}, keys);
             } else {
-              yield* this._scan(${getField(`$left${index}`)}, keys);
+              yield* this._scan${index}(${getField(`$left${index}`)}, keys);
               yield node;
-              yield* this._scan(${getField(`$right${index}`)}, keys);
+              yield* this._scan${index}(${getField(`$right${index}`)}, keys);
             }
           }
 
@@ -196,9 +196,9 @@ export const compileAVL = TemplateClass(
             }
             const cmp = this._comparePartial${index}(node, keys);
             if (cmp >= 0) {
-              yield* this._scan(${getField(`$left${index}`)}, keys);
+              yield* this._scan${index}(${getField(`$left${index}`)}, keys);
               yield node;
-              yield* this._scan(${getField(`$right${index}`)}, keys);
+              yield* this._scan${index}(${getField(`$right${index}`)}, keys);
             }
           }
 
@@ -230,9 +230,9 @@ export const compileAVL = TemplateClass(
             }
             const cmp = this._comparePartial${index}(node, keys);
             if (cmp < 0) {
-              yield* this._scan(${getField(`$left${index}`)}, keys);
+              yield* this._scan${index}(${getField(`$left${index}`)}, keys);
               yield node;
-              yield* this._scan(${getField(`$right${index}`)}, keys);
+              yield* this._scan${index}(${getField(`$right${index}`)}, keys);
             }
           }
 
@@ -272,7 +272,7 @@ export const compileAVL = TemplateClass(
 
           _lookup${index}(node, ${keyArgs}) {
             while (node) {
-              const cmp = this._compare(node, ${keyArgs});
+              const cmp = this._compare${index}(node, ${keyArgs});
               if (cmp < 0) {
                 node = ${getField(`$left${index}`)};
               } else if (cmp > 0) {
@@ -319,18 +319,64 @@ export const compileAVL = TemplateClass(
         `;
       }).join('')}
 
-      scan_ = scan0_;
-      scan = scan0;
-      lowerBound_ = lowerBound0_;
-      lowerBound = lowerBound0;
-      upperBound_ = upperBound0_;
-      upperBound = upperBound0;
-      lookup_ = lookup0_;
-      lookup = lookup0;
-      contains = contains0;
+      scan_(...keys) {
+        return this.scan0_(keys...);
+      }
 
-      ${fields.map(field => `
-          lookup_${field.name} = lookup0_${field.name};`).join('')}
+      scan(...keys) {
+        return this.scan0(keys...);
+      }
+
+      lowerBound_(...keys) {
+        return this.lowerBound0_(keys...);
+      }
+
+      lowerBound(...keys) {
+        return this.lowerBound0(keys...);
+      }
+
+      upperBound_(...keys) {
+        return this.upperBound0_(keys...);
+      }
+
+      upperBound(...keys) {
+        return this.upperBound0(keys...);
+      }
+
+      ${((keyArgs) => `
+        lookup_(${keyArgs}) {
+          const node = this._lookup0(this._root0, ${keyArgs});
+          if (node) {
+            return this._fillRecord(node, this._record);
+          } else {
+            return null;
+          }
+        }
+
+        lookup(${keyArgs}) {
+          const node = this._lookup0(this._root0, ${keyArgs});
+          if (node) {
+            return this._fillRecord(node, Object.create(null));
+          } else {
+            return null;
+          }
+        }
+
+        ${fields.map(field => `
+          lookup_${field.name}(${keyArgs}) {
+            const node = this._lookup0(this._root0, ${keyArgs});
+            if (node) {
+              return ${getField(field.name)};
+            } else {
+              return null;
+            }
+          }
+        `).join('')}
+
+        contains(${keyArgs}) {
+          return !!this._lookup0(this._root0, ${keyArgs});
+        }
+      `)(indices[0].keys.join(', '))}
 
       _push(record) {
         const node = ++this._size;
