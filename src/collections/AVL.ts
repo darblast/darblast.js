@@ -437,6 +437,64 @@ export const compileAVL = TemplateClass(
         return node;
       }
 
+      _insertOrUpdate0(node, keys, record) {
+        if (node) {
+          const cmp = this._compare0(node, ...keys);
+          if (cmp < 0) {
+            ${setField('$left0', `this._insertOrUpdate0(${
+                getField('$left0')}, keys, record)`)}
+          } else if (cmp > 0) {
+            ${setField('$right0', `this._insertOrUpdate0(${
+                getField('$right0')}, keys, record)`)}
+          } else {
+            ${fields.map(field => setField(
+                field.name, `record.${field.name}`)).join('')}
+          }
+          return node;
+        } else {
+          return this._push(record);
+        }
+      }
+
+      ${indices.slice(1).map((_, index) => `
+        _insert${index}(node, keys) {
+          if (node) {
+            const cmp = this._compare${index}(node, ...keys);
+            if (cmp < 0) {
+              ${setField(`$left${index}`, `this._insert${index}(${
+                  getField(`$left${index}`)}, keys, record)`)}
+            } else if (cmp > 0) {
+              ${setField(`$right${index}`, `this._insert${index}(${
+                  getField(`$right${index}`)}, keys, record)`)}
+            } else {
+              ${fields.map(field => setField(
+                  field.name, `record.${field.name}`)).join('')}
+            }
+          } else {
+            throw new Error('internal error');
+          }
+        }
+      `).join('')}
+
+      _keys = [];
+
+      ${indices.map((_, index) => `
+        _getKeys${index}_(record) {
+          this._keys.length = ${indices[index].keys.length};
+          ${indices[index].keys.map((key, i) => `
+            this._keys[${i}] = record.${key};`).join('')}
+          return this._keys;
+        }
+      `).join('')}
+
+      insertOrUpdate(record) {
+        this._insertOrUpdate0(this._root0, this._getKeys0(record), record);
+        ${indices.slice(1).map((_, index) => `
+          this._insert${index}(
+              this._root${index}, this._getKeys${index}_(record));
+        `).join('')}
+      }
+
       ${fields.map(field => `
         ${indices.map((_, index) => {
           const keyArgs = indices[index].keys.join(', ');
