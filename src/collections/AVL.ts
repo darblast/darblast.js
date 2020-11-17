@@ -304,7 +304,8 @@ export const compileAVL = TemplateClass(
             return 0;
           }
 
-          _lookup${index}(node, ${keyArgs}) {
+          _lookup${index}(${keyArgs}) {
+            let node = this._root${index};
             while (node) {
               const cmp = this._compare${index}(node, ${keyArgs});
               if (cmp < 0) {
@@ -319,7 +320,7 @@ export const compileAVL = TemplateClass(
           }
 
           lookup${index}_(${keyArgs}) {
-            const node = this._lookup${index}(this._root${index}, ${keyArgs});
+            const node = this._lookup${index}(${keyArgs});
             if (node) {
               return this._fillRecord(node, this._record);
             } else {
@@ -328,7 +329,7 @@ export const compileAVL = TemplateClass(
           }
 
           lookup${index}(${keyArgs}) {
-            const node = this._lookup${index}(this._root${index}, ${keyArgs});
+            const node = this._lookup${index}(${keyArgs});
             if (node) {
               return this._fillRecord(node, Object.create(null));
             } else {
@@ -338,7 +339,7 @@ export const compileAVL = TemplateClass(
 
           ${fields.map(field => `
             lookup${index}_${field.name}(${keyArgs}) {
-              const node = this._lookup${index}(this._root${index}, ${keyArgs});
+              const node = this._lookup${index}(${keyArgs});
               if (node) {
                 return ${getField(field.name)};
               } else {
@@ -348,7 +349,7 @@ export const compileAVL = TemplateClass(
           `).join('')}
 
           contains${index}(${keyArgs}) {
-            return !!this._lookup${index}(this._root${index}, ${keyArgs});
+            return !!this._lookup${index}(${keyArgs});
           }
         `;
       }).join('')}
@@ -385,9 +386,9 @@ export const compileAVL = TemplateClass(
         return this.range0(lowerBound, upperBound);
       }
 
-      ${((keyArgs) => `
+      ${(keyArgs => `
         lookup_(${keyArgs}) {
-          const node = this._lookup0(this._root0, ${keyArgs});
+          const node = this._lookup0(${keyArgs});
           if (node) {
             return this._fillRecord(node, this._record);
           } else {
@@ -396,7 +397,7 @@ export const compileAVL = TemplateClass(
         }
 
         lookup(${keyArgs}) {
-          const node = this._lookup0(this._root0, ${keyArgs});
+          const node = this._lookup0(${keyArgs});
           if (node) {
             return this._fillRecord(node, Object.create(null));
           } else {
@@ -406,7 +407,7 @@ export const compileAVL = TemplateClass(
 
         ${fields.map(field => `
           lookup_${field.name}(${keyArgs}) {
-            const node = this._lookup0(this._root0, ${keyArgs});
+            const node = this._lookup0(${keyArgs});
             if (node) {
               return ${getField(field.name)};
             } else {
@@ -416,7 +417,7 @@ export const compileAVL = TemplateClass(
         `).join('')}
 
         contains(${keyArgs}) {
-          return !!this._lookup0(this._root0, ${keyArgs});
+          return !!this._lookup0(${keyArgs});
         }
       `)(indices[0].keys.join(', '))}
 
@@ -435,6 +436,35 @@ export const compileAVL = TemplateClass(
             field.name, `record.${field.name}`)).join('')}
         return node;
       }
+
+      ${fields.map(field => `
+        ${indices.map((_, index) => {
+          const keyArgs = indices[index].keys.join(', ');
+          return `
+            update${index}_${field.name}(value, ${keyArgs}) {
+              const node = this._lookup${index}(${keyArgs});
+              if (node) {
+                ${setField(field.name, 'value')}
+                return true;
+              } else {
+                return false;
+              }
+            }
+          `;
+        }).join('')}
+
+        ${(keyArgs => `
+          update_${field.name}(value, ${keyArgs}) {
+            const node = this._lookup0(${keyArgs});
+            if (node) {
+              ${setField(field.name, 'value')}
+              return true;
+            } else {
+              return false;
+            }
+          }
+        `)(indices[0].keys.join(', '))}
+      `).join('')}
     }
   `;
 });
