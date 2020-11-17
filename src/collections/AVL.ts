@@ -289,7 +289,7 @@ export const compileAVL = TemplateClass(
             if (node) {
               return this._fillRecord(node, this._record);
             } else {
-              throw new Error('element not found');
+              return null;
             }
           }
 
@@ -298,7 +298,7 @@ export const compileAVL = TemplateClass(
             if (node) {
               return this._fillRecord(node, Object.create(null));
             } else {
-              throw new Error('element not found');
+              return null;
             }
           }
 
@@ -308,7 +308,7 @@ export const compileAVL = TemplateClass(
               if (node) {
                 return ${getField(field.name)};
               } else {
-                throw new Error('element not found');
+                return null;
               }
             }
           `).join('')}
