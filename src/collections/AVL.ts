@@ -320,27 +320,27 @@ export const compileAVL = TemplateClass(
       }).join('')}
 
       scan_(...keys) {
-        return this.scan0_(keys...);
+        return this.scan0_(...keys);
       }
 
       scan(...keys) {
-        return this.scan0(keys...);
+        return this.scan0(...keys);
       }
 
       lowerBound_(...keys) {
-        return this.lowerBound0_(keys...);
+        return this.lowerBound0_(...keys);
       }
 
       lowerBound(...keys) {
-        return this.lowerBound0(keys...);
+        return this.lowerBound0(...keys);
       }
 
       upperBound_(...keys) {
-        return this.upperBound0_(keys...);
+        return this.upperBound0_(...keys);
       }
 
       upperBound(...keys) {
-        return this.upperBound0(keys...);
+        return this.upperBound0(...keys);
       }
 
       ${((keyArgs) => `
