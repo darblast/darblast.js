@@ -104,8 +104,7 @@ export const compileAVL = TemplateClass(
         float64: new Float64Array(this._data),
       };
 
-      ${indices.map((_, index) => `
-          _root${index} = 0;`).join('')}
+      ${indices.map((_, index) => `_root${index} = 0;`).join('')}
 
       _realloc(capacity) {
         const target = new Uint8Array(capacity * ${definition.byteSize});
@@ -194,8 +193,7 @@ export const compileAVL = TemplateClass(
             if (!node) {
               return;
             }
-            const cmp = this._comparePartial${index}(node, keys);
-            if (cmp >= 0) {
+            if (this._comparePartial${index}(node, keys) >= 0) {
               yield* this._scan${index}(${getField(`$left${index}`)}, keys);
               yield node;
               yield* this._scan${index}(${getField(`$right${index}`)}, keys);
@@ -228,8 +226,7 @@ export const compileAVL = TemplateClass(
             if (!node) {
               return;
             }
-            const cmp = this._comparePartial${index}(node, keys);
-            if (cmp < 0) {
+            if (this._comparePartial${index}(node, keys) < 0) {
               yield* this._scan${index}(${getField(`$left${index}`)}, keys);
               yield node;
               yield* this._scan${index}(${getField(`$right${index}`)}, keys);
@@ -250,6 +247,43 @@ export const compileAVL = TemplateClass(
           *upperBound${index}(...keys) {
             for (const node of this._upperBound${index}(
                 this._root${index}, keys))
+            {
+              if (yield this._fillRecord(node, Object.create(null))) {
+                return false;
+              }
+            }
+            return true;
+          }
+
+          *_range${index}(node, lowerBound, upperBound) {
+            if (!node) {
+              return;
+            }
+            if (this._comparePartial${index}(node, lowerBound) >= 0 &&
+                this._comparePartial${index}(node, upperBound) < 0)
+            {
+              yield* this._range${index}(
+                  ${getField(`$left${index}`)}, lowerBound, upperBound);
+              yield node;
+              yield* this._range${index}(
+                  ${getField(`$right${index}`)}, lowerBound, upperBound);
+            }
+          }
+
+          *range${index}_(lowerBound, upperBound) {
+            for (const node of this._range${index}(
+                this._root${index}, lowerBound, upperBound))
+            {
+              if (yield this._fillRecord(node, this._record)) {
+                return false;
+              }
+            }
+            return true;
+          }
+
+          *range${index}(lowerBound, upperBound) {
+            for (const node of this._range${index}(
+                this._root${index}, lowerBound, upperBound))
             {
               if (yield this._fillRecord(node, Object.create(null))) {
                 return false;
@@ -341,6 +375,14 @@ export const compileAVL = TemplateClass(
 
       upperBound(...keys) {
         return this.upperBound0(...keys);
+      }
+
+      range_(lowerBound, upperBound) {
+        return this.range0_(lowerBound, upperBound);
+      }
+
+      range(lowerBound, upperBound) {
+        return this.range0(lowerBound, upperBound);
       }
 
       ${((keyArgs) => `
