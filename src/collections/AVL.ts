@@ -440,6 +440,7 @@ export const compileAVL = TemplateClass(
       _insertContext = {
         keys: [],
         record: null,
+        node: 0,
       };
 
       _insertOrUpdate0(node) {
@@ -458,7 +459,8 @@ export const compileAVL = TemplateClass(
           }
           return node;
         } else {
-          return this._push(this._insertContext.record);
+          return this._insertContext.node = this._push(
+              this._insertContext.record);
         }
       }
 
@@ -473,12 +475,10 @@ export const compileAVL = TemplateClass(
               ${setField(`$right${index}`, `this._insert${index}(${
                   getField(`$right${index}`)})`)}
             } else {
-              ${fields.map(field => setField(
-                  field.name, `this._insertContext.record.${
-                      field.name}`)).join('')}
+              throw new Error('internal error');
             }
           } else {
-            throw new Error('internal error');
+            return this._insertContext.node;
           }
         }
       `).join('')}
@@ -496,10 +496,10 @@ export const compileAVL = TemplateClass(
       insertOrUpdate(record) {
         this._insertContext.record = record;
         this._getKeys0_();
-        this._insertOrUpdate0(this._root0);
+        this._root0 = this._insertOrUpdate0(this._root0);
         ${indices.slice(1).map((_, index) => `
           this._getKeys${index}_();
-          this._insert${index}(this._root${index});
+          this._root${index} = this._insert${index}(this._root${index});
         `).join('')}
       }
 
