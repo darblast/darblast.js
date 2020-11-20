@@ -441,6 +441,7 @@ export const compileAVL = TemplateClass(
         keys: [],
         record: null,
         node: 0,
+        inserted: false,
       };
 
       _insertOrUpdate0(node) {
@@ -456,9 +457,12 @@ export const compileAVL = TemplateClass(
             ${fields.map(field => setField(
                 field.name, `this._insertContext.record.${
                     field.name}`)).join('')}
+            this._insertContext.inserted = true;
+            this._insertContext.node = node;
           }
           return node;
         } else {
+          this._insertContext.inserted = true;
           return this._insertContext.node = this._push(
               this._insertContext.record);
         }
@@ -498,10 +502,13 @@ export const compileAVL = TemplateClass(
         this._insertContext.record = record;
         this._getKeys0_();
         this._root0 = this._insertOrUpdate0(this._root0);
-        ${indices.map((_, index) => index > 0 ? `
-          this._getKeys${index}_();
-          this._root${index} = this._insert${index}(this._root${index});
-        ` : '').join('')}
+        if (this._insertContext.inserted) {
+          ${indices.map((_, index) => index > 0 ? `
+            this._getKeys${index}_();
+            this._root${index} = this._insert${index}(this._root${index});
+          ` : '').join('')}
+        }
+        return this._insertContext.inserted;
       }
 
       ${fields.map(field => `
