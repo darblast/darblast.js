@@ -437,15 +437,17 @@ export const compileAVL = TemplateClass(
         return node;
       }
 
-      _insertOrUpdate0(node, keys, record) {
+      _keys = [];
+
+      _insertOrUpdate0(node, record) {
         if (node) {
-          const cmp = this._compare0(node, ...keys);
+          const cmp = this._compare0(node, ...this._keys);
           if (cmp < 0) {
             ${setField('$left0', `this._insertOrUpdate0(${
-                getField('$left0')}, keys, record)`)}
+                getField('$left0')}, record)`)}
           } else if (cmp > 0) {
             ${setField('$right0', `this._insertOrUpdate0(${
-                getField('$right0')}, keys, record)`)}
+                getField('$right0')}, record)`)}
           } else {
             ${fields.map(field => setField(
                 field.name, `record.${field.name}`)).join('')}
@@ -457,15 +459,15 @@ export const compileAVL = TemplateClass(
       }
 
       ${indices.slice(1).map((_, index) => `
-        _insert${index}(node, keys) {
+        _insert${index}(node, record) {
           if (node) {
-            const cmp = this._compare${index}(node, ...keys);
+            const cmp = this._compare${index}(node, ...this._keys);
             if (cmp < 0) {
               ${setField(`$left${index}`, `this._insert${index}(${
-                  getField(`$left${index}`)}, keys, record)`)}
+                  getField(`$left${index}`)}, record)`)}
             } else if (cmp > 0) {
               ${setField(`$right${index}`, `this._insert${index}(${
-                  getField(`$right${index}`)}, keys, record)`)}
+                  getField(`$right${index}`)}, record)`)}
             } else {
               ${fields.map(field => setField(
                   field.name, `record.${field.name}`)).join('')}
@@ -475,8 +477,6 @@ export const compileAVL = TemplateClass(
           }
         }
       `).join('')}
-
-      _keys = [];
 
       ${indices.map((_, index) => `
         _getKeys${index}_(record) {
@@ -488,10 +488,11 @@ export const compileAVL = TemplateClass(
       `).join('')}
 
       insertOrUpdate(record) {
-        this._insertOrUpdate0(this._root0, this._getKeys0(record), record);
+        this._getKeys0_(record);
+        this._insertOrUpdate0(this._root0, record);
         ${indices.slice(1).map((_, index) => `
-          this._insert${index}(
-              this._root${index}, this._getKeys${index}_(record));
+          this._getKeys${index}_(record);
+          this._insert${index}(this._root${index}, record);
         `).join('')}
       }
 
