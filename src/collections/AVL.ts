@@ -437,40 +437,45 @@ export const compileAVL = TemplateClass(
         return node;
       }
 
-      _keys = [];
+      _insertContext = {
+        keys: [],
+        record: null,
+      };
 
-      _insertOrUpdate0(node, record) {
+      _insertOrUpdate0(node) {
         if (node) {
-          const cmp = this._compare0(node, ...this._keys);
+          const cmp = this._compare0(node, ...this._insertContext.keys);
           if (cmp < 0) {
             ${setField('$left0', `this._insertOrUpdate0(${
-                getField('$left0')}, record)`)}
+                getField('$left0')})`)}
           } else if (cmp > 0) {
             ${setField('$right0', `this._insertOrUpdate0(${
-                getField('$right0')}, record)`)}
+                getField('$right0')})`)}
           } else {
             ${fields.map(field => setField(
-                field.name, `record.${field.name}`)).join('')}
+                field.name, `this._insertContext.record.${
+                    field.name}`)).join('')}
           }
           return node;
         } else {
-          return this._push(record);
+          return this._push(this._insertContext.record);
         }
       }
 
       ${indices.slice(1).map((_, index) => `
-        _insert${index}(node, record) {
+        _insert${index}(node) {
           if (node) {
             const cmp = this._compare${index}(node, ...this._keys);
             if (cmp < 0) {
               ${setField(`$left${index}`, `this._insert${index}(${
-                  getField(`$left${index}`)}, record)`)}
+                  getField(`$left${index}`)})`)}
             } else if (cmp > 0) {
               ${setField(`$right${index}`, `this._insert${index}(${
-                  getField(`$right${index}`)}, record)`)}
+                  getField(`$right${index}`)})`)}
             } else {
               ${fields.map(field => setField(
-                  field.name, `record.${field.name}`)).join('')}
+                  field.name, `this._insertContext.record.${
+                      field.name}`)).join('')}
             }
           } else {
             throw new Error('internal error');
@@ -479,20 +484,22 @@ export const compileAVL = TemplateClass(
       `).join('')}
 
       ${indices.map((_, index) => `
-        _getKeys${index}_(record) {
-          this._keys.length = ${indices[index].keys.length};
+        _getKeys${index}_() {
+          this._insertContext.keys.length = ${indices[index].keys.length};
           ${indices[index].keys.map((key, i) => `
-            this._keys[${i}] = record.${key};`).join('')}
-          return this._keys;
+            this._insertContext.keys[${i}] = this._insertContext.record.${
+                key};`).join('')}
+          return this._insertContext.keys;
         }
       `).join('')}
 
       insertOrUpdate(record) {
-        this._getKeys0_(record);
-        this._insertOrUpdate0(this._root0, record);
+        this._insertContext.record = record;
+        this._getKeys0_();
+        this._insertOrUpdate0(this._root0);
         ${indices.slice(1).map((_, index) => `
-          this._getKeys${index}_(record);
-          this._insert${index}(this._root${index}, record);
+          this._getKeys${index}_();
+          this._insert${index}(this._root${index});
         `).join('')}
       }
 
