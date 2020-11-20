@@ -511,7 +511,7 @@ export const compileAVL = TemplateClass(
         return this._insertContext.inserted;
       }
 
-      insertOrUpdateAll(...records) {
+      insertOrUpdateAll(records) {
         let result = true;
         for (const record of records) {
           result = result && this.insertOrUpdate(record);
