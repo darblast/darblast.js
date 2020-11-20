@@ -6,6 +6,7 @@ const umd = require('gulp-umd');
 const rename = require('gulp-rename');
 const uglify = require('gulp-uglify-es').default;
 const del = require('del');
+const mocha = require('gulp-mocha');
 const typedoc = require('gulp-typedoc');
 
 gulp.task('compile', function () {
@@ -30,6 +31,10 @@ gulp.task('default', gulp.series(['compile', 'uglify']));
 gulp.task('watch', function () {
   return gulp.watch('src/**/*.ts', gulp.series(['compile']));
 });
+
+gulp.task('test', gulp.series(['default', function () {
+  return gulp.src('test/**/*.js', {read: false}).pipe(mocha());
+}]));
 
 gulp.task('doc', function () {
   return gulp.src('src/**/*.ts')

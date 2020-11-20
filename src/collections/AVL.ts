@@ -127,7 +127,7 @@ export const compileAVL = TemplateClass(
       }
 
       get capacity() {
-        return this._capacity;
+        return this._capacity - 1;
       }
 
       _fillRecord(node, output) {
