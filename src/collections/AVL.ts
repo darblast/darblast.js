@@ -423,7 +423,7 @@ export const compileAVL = TemplateClass(
 
       _push(record) {
         const node = ++this._size;
-        if (this._size > this._capacity) {
+        if (this._size >= this._capacity) {
           this._realloc(this._capacity * 2);
         }
         ${indices.map((_, index) => `
@@ -464,10 +464,11 @@ export const compileAVL = TemplateClass(
         }
       }
 
-      ${indices.slice(1).map((_, index) => `
+      ${indices.map((_, index) => index > 0 ? `
         _insert${index}(node) {
           if (node) {
-            const cmp = this._compare${index}(node, ...this._keys);
+            const cmp = this._compare${index}(
+                node, ...this._insertContext.keys);
             if (cmp < 0) {
               ${setField(`$left${index}`, `this._insert${index}(${
                   getField(`$left${index}`)})`)}
@@ -481,7 +482,7 @@ export const compileAVL = TemplateClass(
             return this._insertContext.node;
           }
         }
-      `).join('')}
+      ` : '').join('')}
 
       ${indices.map((_, index) => `
         _getKeys${index}_() {
@@ -497,10 +498,10 @@ export const compileAVL = TemplateClass(
         this._insertContext.record = record;
         this._getKeys0_();
         this._root0 = this._insertOrUpdate0(this._root0);
-        ${indices.slice(1).map((_, index) => `
+        ${indices.map((_, index) => index > 0 ? `
           this._getKeys${index}_();
           this._root${index} = this._insert${index}(this._root${index});
-        `).join('')}
+        ` : '').join('')}
       }
 
       ${fields.map(field => `
