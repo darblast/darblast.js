@@ -511,6 +511,14 @@ export const compileAVL = TemplateClass(
         return this._insertContext.inserted;
       }
 
+      insertOrUpdateAll(...records) {
+        let result = true;
+        for (const record of records) {
+          result = result && this.insertOrUpdate(record);
+        }
+        return result;
+      }
+
       ${fields.map(field => `
         ${indices.map((_, index) => {
           const keyArgs = indices[index].keys.join(', ');
