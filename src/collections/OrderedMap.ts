@@ -226,18 +226,46 @@ export class OrderedMap<Key, Value> {
   }
 
   private _insertOrUpdate(node: MaybeNode<Key, Value>, key: Key, value: Value):
-      MaybeNode<Key, Value>
+      Node<Key, Value>
   {
     if (node) {
       const cmp = this._compare(key, node.key);
       if (cmp < 0) {
-        node.leftChild = this._insertOrUpdate(node.leftChild, key, value);
+        const child = this._insertOrUpdate(node.leftChild, key, value);
+        node.leftChild = child;
+        if (node.balance < 0) {
+          if (child.balance > 0) {
+            return this._rotateLeftRight(node, child);
+          } else {
+            return this._rotateRight(node, child);
+          }
+        } else if (node.balance > 0) {
+          node.balance = 0;
+          return node;
+        } else {
+          node.balance = -1;
+          return node;
+        }
       } else if (cmp > 0) {
-        node.rightChild = this._insertOrUpdate(node.rightChild, key, value);
+        const child = this._insertOrUpdate(node.rightChild, key, value);
+        node.rightChild = child;
+        if (node.balance > 0) {
+          if (child.balance < 0) {
+            return this._rotateRightLeft(node, child);
+          } else {
+            return this._rotateLeft(node, child);
+          }
+        } else if (node.balance < 0) {
+          node.balance = 0;
+          return node;
+        } else {
+          node.balance = 1;
+          return node;
+        }
       } else {
         node.value = value;
+        return node;
       }
-      return node;
     } else {
       this._size++;
       return new Node<Key, Value>(key, value);
