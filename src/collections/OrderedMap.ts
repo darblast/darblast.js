@@ -153,6 +153,78 @@ export class OrderedMap<Key, Value> {
     return this.scan();
   }
 
+  private _rotateLeft(parent: Node<Key, Value>, node: Node<Key, Value>):
+      Node<Key, Value>
+  {
+    parent.rightChild = node;
+    node.leftChild = parent;
+    if (node.balance) {
+      node.balance = 0;
+      parent.balance = 0;
+    } else {
+      node.balance = -1;
+      parent.balance = 1;
+    }
+    return node;
+  }
+
+  private _rotateRight(parent: Node<Key, Value>, node: Node<Key, Value>):
+      Node<Key, Value>
+  {
+    parent.leftChild = node;
+    node.rightChild = parent;
+    if (node.balance) {
+      node.balance = 0;
+      parent.balance = 0;
+    } else {
+      node.balance = 1;
+      parent.balance = -1;
+    }
+    return node;
+  }
+
+  private _rotateRightLeft(parent: Node<Key, Value>, node: Node<Key, Value>):
+      Node<Key, Value>
+  {
+    const child = node.leftChild!;
+    node.leftChild = child.rightChild;
+    parent.rightChild = child.leftChild;
+    child.leftChild = parent;
+    child.rightChild = node;
+    if (child.balance > 0) {
+      parent.balance = -1;
+      node.balance = 0;
+    } else if (child.balance < 0) {
+      parent.balance = 0;
+      node.balance = 1;
+    } else {
+      parent.balance = 0;
+      node.balance = 0;
+    }
+    return child;
+  }
+
+  private _rotateLeftRight(parent: Node<Key, Value>, node: Node<Key, Value>):
+      Node<Key, Value>
+  {
+    const child = node.rightChild!;
+    node.rightChild = child.leftChild;
+    parent.leftChild = child.rightChild;
+    child.rightChild = parent;
+    child.leftChild = node;
+    if (child.balance > 0) {
+      parent.balance = 1;
+      node.balance = 0;
+    } else if (child.balance < 0) {
+      parent.balance = 0;
+      node.balance = -1;
+    } else {
+      parent.balance = 0;
+      node.balance = 0;
+    }
+    return child;
+  }
+
   private _insertOrUpdate(node: MaybeNode<Key, Value>, key: Key, value: Value):
       MaybeNode<Key, Value>
   {
