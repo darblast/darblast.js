@@ -18,6 +18,11 @@ const TestAVL = AVL.fromSchema({
 const tree = new TestAVL();
 
 
+after(() => {
+  tree._checkConsistency();
+});
+
+
 describe('AVL', () => {
   describe('size and capacity', () => {
     it('should be initially empty', () => {

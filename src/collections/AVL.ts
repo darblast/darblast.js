@@ -130,6 +130,45 @@ export const compileAVL = TemplateClass(
         return this._capacity - 1;
       }
 
+      ${indices.map((_, index) => `
+        _checkConsistency${index}(node) {
+          if (node) {
+            const left = ${getField(`$left${index}`)};
+            const right = ${getField(`$right${index}`)};
+            if (${getNodeField('left', `$parent${index}`)} !== node) {
+              throw new Error('tree #${index} has incorrect left link')
+            }
+            if (${getNodeField('right', `$parent${index}`)} !== node) {
+              throw new Error('tree #${index} has incorrect right link')
+            }
+            const leftResult = this._checkConsistency${index}(left);
+            const rightResult = this._checkConsistency${index}(right);
+            const balance = ${getField(`$balance${index}`)};
+            if (balance !== rightResult.height - leftResult.height) {
+              throw new Error('tree #${index} has wrong balance factor');
+            }
+            if (balance < -1 || balance > 1) {
+              throw new Error('tree #${index} is unbalanced');
+            }
+            return {
+              size: 1 + leftResult.size + rightResult.size,
+              height: 1 + Math.max(leftResult.height, rightResult.height),
+            }
+          } else {
+            return {
+              size: 0,
+              height: 0,
+            };
+          }
+        }
+      `).join('')}
+
+      _checkConsistency() {
+        ${indices.map((_, index) => `
+          this._checkConsistency${index}(this._root${index});
+        `).join('')}
+      }
+
       _fillRecord(node, output) {
         ${fields.map(field => `
           output.${field.name} = ${getField(field.name)};
