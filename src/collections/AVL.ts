@@ -433,9 +433,107 @@ export const compileAVL = TemplateClass(
           ${setField(`$balance${index}`, '0')}
         `).join('')}
         ${fields.map(field => setField(
-            field.name, `record.${field.name}`)).join('')}
+            field.name, `record.${field.name}`)).join('\n')}
         return node;
       }
+
+      ${indices.map((_, index) => `
+        _rotateLeft${index}(parent, node) {
+          const child = ${getNodeField('node', `$left${index}`)};
+          ${setNodeField('parent', `$right${index}`, 'child')}
+          if (child) {
+            ${setNodeField('child', `$parent${index}`, 'parent')}
+          }
+          ${setNodeField('node', `$left${index}`, 'parent')}
+          ${setNodeField('parent', `$parent${index}`, 'node')}
+          if (${getNodeField('node', `$balance${index}`)}) {
+            ${setNodeField('parent', `$balance${index}`, '1')}
+            ${setNodeField('node', `$balance${index}`, '-1')}
+          } else {
+            ${setNodeField('parent', `$balance${index}`, '0')}
+            ${setNodeField('node', `$balance${index}`, '0')}
+          }
+          return node;
+        }
+
+        _rotateRight${index}(parent, node) {
+          const child = ${getNodeField('node', `$right${index}`)};
+          ${setNodeField('parent', `$left${index}`, 'child')}
+          if (child) {
+            ${setNodeField('child', `$parent${index}`, 'parent')}
+          }
+          ${setNodeField('node', `$right${index}`, 'parent')}
+          ${setNodeField('parent', `$parent${index}`, 'node')}
+          if (${getNodeField('node', `$balance${index}`)}) {
+            ${setNodeField('parent', `$balance${index}`, '-1')}
+            ${setNodeField('node', `$balance${index}`, '1')}
+          } else {
+            ${setNodeField('parent', `$balance${index}`, '0')}
+            ${setNodeField('node', `$balance${index}`, '0')}
+          }
+          return node;
+        }
+
+        _rotateRightLeft${index}(parent, node) {
+          const child = ${getNodeField('node', `$left${index}`)};
+          let inner = ${getNodeField('child', `$right${index}`)};
+          ${setNodeField('node', `$left${index}`, 'inner')}
+          if (inner) {
+            ${setNodeField('inner', `$parent${index}`, 'node')}
+          }
+          ${setNodeField('child', `$right${index}`, 'node')}
+          ${setNodeField('node', `$parent${index}`, 'child')}
+          inner = ${getNodeField('child', `$left${index}`)};
+          ${setNodeField('parent', `$right${index}`, 'inner')}
+          if (inner) {
+            ${setNodeField('inner', `$parent${index}`, 'parent')}
+          }
+          ${setNodeField('child', `$left${index}`, 'parent')}
+          ${setNodeField('parent', `$parent${index}`, 'child')}
+          const balance = ${getNodeField('child', `$balance${index}`)};
+          if (balance > 0) {
+            ${setNodeField('parent', `$balance${index}`, '-1')}
+            ${setNodeField('node', `$balance${index}`, '0')}
+          } else if (balance < 0) {
+            ${setNodeField('parent', `$balance${index}`, '0')}
+            ${setNodeField('node', `$balance${index}`, '1')}
+          } else {
+            ${setNodeField('parent', `$balance${index}`, '0')}
+            ${setNodeField('node', `$balance${index}`, '0')}
+          }
+          return child;
+        }
+
+        _rotateLeftRight${index}(parent, node) {
+          const child = ${getNodeField('node', `$right${index}`)};
+          let inner = ${getNodeField('child', `$left${index}`)};
+          ${setNodeField('node', `$right${index}`, 'inner')}
+          if (inner) {
+            ${setNodeField('inner', `$parent${index}`, 'node')}
+          }
+          ${setNodeField('child', `$left${index}`, 'node')}
+          ${setNodeField('node', `$parent${index}`, 'child')}
+          inner = ${getNodeField('child', `$right${index}`)};
+          ${setNodeField('parent', `$left${index}`, 'inner')}
+          if (inner) {
+            ${setNodeField('inner', `$parent${index}`, 'parent')}
+          }
+          ${setNodeField('child', `$right${index}`, 'parent')}
+          ${setNodeField('parent', `$parent${index}`, 'child')}
+          const balance = ${getNodeField('child', `$balance${index}`)};
+          if (balance > 0) {
+            ${setNodeField('parent', `$balance${index}`, '1')}
+            ${setNodeField('node', `$balance${index}`, '0')}
+          } else if (balance < 0) {
+            ${setNodeField('parent', `$balance${index}`, '0')}
+            ${setNodeField('node', `$balance${index}`, '-1')}
+          } else {
+            ${setNodeField('parent', `$balance${index}`, '0')}
+            ${setNodeField('node', `$balance${index}`, '0')}
+          }
+          return child;
+        }
+      `).join('')}
 
       _insertContext = {
         keys: [],
@@ -456,7 +554,7 @@ export const compileAVL = TemplateClass(
           } else {
             ${fields.map(field => setField(
                 field.name, `this._insertContext.record.${
-                    field.name}`)).join('')}
+                    field.name}`)).join('\n')}
             this._insertContext.inserted = false;
             this._insertContext.node = node;
           }
@@ -493,7 +591,7 @@ export const compileAVL = TemplateClass(
           this._insertContext.keys.length = ${indices[index].keys.length};
           ${indices[index].keys.map((key, i) => `
             this._insertContext.keys[${i}] = this._insertContext.record.${
-                key};`).join('')}
+                key};`).join('\n')}
           return this._insertContext.keys;
         }
       `).join('')}
