@@ -542,49 +542,65 @@ export const compileAVL = TemplateClass(
         inserted: false,
       };
 
-      _insertOrUpdate0(node) {
-        if (node) {
-          const cmp = this._compare0(node, ...this._insertContext.keys);
-          if (cmp < 0) {
-            ${setField('$left0', `this._insertOrUpdate0(${
-                getField('$left0')})`)}
-          } else if (cmp > 0) {
-            ${setField('$right0', `this._insertOrUpdate0(${
-                getField('$right0')})`)}
-          } else {
-            ${fields.map(field => setField(
-                field.name, `this._insertContext.record.${
-                    field.name}`)).join('\n')}
-            this._insertContext.inserted = false;
-            this._insertContext.node = node;
-          }
-          return node;
-        } else {
-          this._insertContext.inserted = true;
-          return this._insertContext.node = this._push(
-              this._insertContext.record);
-        }
-      }
-
-      ${indices.map((_, index) => index > 0 ? `
+      ${indices.map((_, index) => `
         _insert${index}(node) {
           if (node) {
             const cmp = this._compare${index}(
                 node, ...this._insertContext.keys);
             if (cmp < 0) {
-              ${setField(`$left${index}`, `this._insert${index}(${
-                  getField(`$left${index}`)})`)}
+              const child = this._insert${index}(${getField(`$left${index}`)});
+              ${setField(`$left${index}`, 'child')}
+              if (${getNodeField('node', `$balance${index}`)} < 0) {
+                if (${getNodeField('child', `$balance${index}`)} > 0) {
+                  return this._rotateLeftRight${index}(node, child);
+                } else {
+                  return this._rotateRight${index}(node, child);
+                }
+              } else if (${getNodeField('node', `$balance${index}`)} > 0) {
+                ${setNodeField('node', `$balance${index}`, '0')}
+                return node;
+              } else {
+                ${setNodeField('node', `$balance${index}`, '-1')}
+                return node;
+              }
             } else if (cmp > 0) {
-              ${setField(`$right${index}`, `this._insert${index}(${
-                  getField(`$right${index}`)})`)}
+              const child = this._insert${index}(${getField(`$right${index}`)});
+              ${setField(`$right${index}`, 'child')}
+              if (${getNodeField('node', `$balance${index}`)} > 0) {
+                if (${getNodeField('child', `$balance${index}`)} < 0) {
+                  return this._rotateRightLeft${index}(node, child);
+                } else {
+                  return this._rotateLeft${index}(node, child);
+                }
+              } else if (${getNodeField('node', `$balance${index}`)} < 0) {
+                ${setNodeField('node', `$balance${index}`, '0')}
+                return node;
+              } else {
+                ${setNodeField('node', `$balance${index}`, '1')}
+                return node;
+              }
             } else {
-              throw new Error('internal error');
+              ${index > 0 ? `
+                throw new Error('internal error');
+              ` : `
+                ${fields.map(field => setField(
+                    field.name, `this._insertContext.record.${
+                        field.name}`)).join('\n')}
+                this._insertContext.inserted = false;
+                return this._insertContext.node = node;
+              `}
             }
           } else {
-            return this._insertContext.node;
+            ${index > 0 ? `
+              return this._insertContext.node;
+            ` : `
+              this._insertContext.inserted = true;
+              return this._insertContext.node = this._push(
+                  this._insertContext.record);
+            `}
           }
         }
-      ` : '').join('')}
+      `).join('')}
 
       ${indices.map((_, index) => `
         _getKeys${index}_() {
@@ -599,7 +615,7 @@ export const compileAVL = TemplateClass(
       insertOrUpdate(record) {
         this._insertContext.record = record;
         this._getKeys0_();
-        this._root0 = this._insertOrUpdate0(this._root0);
+        this._root0 = this._insert0(this._root0);
         if (this._insertContext.inserted) {
           ${indices.map((_, index) => index > 0 ? `
             this._getKeys${index}_();
