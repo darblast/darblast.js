@@ -457,7 +457,7 @@ export const compileAVL = TemplateClass(
             ${fields.map(field => setField(
                 field.name, `this._insertContext.record.${
                     field.name}`)).join('')}
-            this._insertContext.inserted = true;
+            this._insertContext.inserted = false;
             this._insertContext.node = node;
           }
           return node;
