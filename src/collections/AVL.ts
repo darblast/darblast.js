@@ -597,7 +597,8 @@ export const compileAVL = TemplateClass(
                 node, ...this._insertContext.keys);
             if (cmp < 0) {
               const child = this._insert${index}(${getField(`$left${index}`)});
-              ${setField(`$left${index}`, 'child')}
+              ${setNodeField('node', `$left${index}`, 'child')}
+              ${setNodeField('child', `$parent${index}`, 'node')}
               if (${getNodeField('node', `$balance${index}`)} < 0) {
                 if (${getNodeField('child', `$balance${index}`)} > 0) {
                   return this._rotateLeftRight${index}(node, child);
@@ -613,7 +614,8 @@ export const compileAVL = TemplateClass(
               }
             } else if (cmp > 0) {
               const child = this._insert${index}(${getField(`$right${index}`)});
-              ${setField(`$right${index}`, 'child')}
+              ${setNodeField('node', `$right${index}`, 'child')}
+              ${setNodeField('child', `$parent${index}`, 'node')}
               if (${getNodeField('node', `$balance${index}`)} > 0) {
                 if (${getNodeField('child', `$balance${index}`)} < 0) {
                   return this._rotateRightLeft${index}(node, child);
