@@ -19,6 +19,15 @@ const TestAVL = AVL.fromSchema({
 describe('AVL', () => {
   let tree;
 
+  const value = domain => Math.floor(Math.random() * domain);
+  const element = () => ({
+    x: value(1e9),
+    y: value(1e9),
+    z: value(1e9),
+    id: value(256),
+    status: value(256),
+  });
+
   beforeEach(() => {
     tree = new TestAVL();
   });
@@ -33,36 +42,42 @@ describe('AVL', () => {
   });
 
   it('grows upon insertion', () => {
-    tree.insertOrUpdate({x: 0, y: 0, z: 0, id: 0, status: 0});
+    tree.insertOrUpdate(element());
     expect(tree.size).to.equal(1);
     expect(tree.capacity).to.equal(1);
   });
 
   it('grows more', () => {
-    tree.insertOrUpdate({x: 0, y: 0, z: 0, id: 0, status: 0});
-    tree.insertOrUpdate({x: 1, y: 0, z: 0, id: 0, status: 0});
+    tree.insertOrUpdate(element());
+    tree.insertOrUpdate(element());
     expect(tree.size).to.equal(2);
     expect(tree.capacity).to.equal(3);
   });
 
   it('grows exponentially', () => {
-    tree.insertOrUpdate({x: 0, y: 0, z: 0, id: 0, status: 0});
-    tree.insertOrUpdate({x: 1, y: 0, z: 0, id: 0, status: 0});
-    tree.insertOrUpdate({x: 2, y: 0, z: 0, id: 0, status: 0});
-    tree.insertOrUpdate({x: 3, y: 0, z: 0, id: 0, status: 0});
+    tree.insertOrUpdate(element());
+    tree.insertOrUpdate(element());
+    tree.insertOrUpdate(element());
+    tree.insertOrUpdate(element());
     expect(tree.size).to.equal(4);
     expect(tree.capacity).to.equal(7);
   });
 
   it('inserts an element', () => {
-    const result = tree.insertOrUpdate({x: 1, y: 2, z: 3, id: 42, status: 123});
+    const result = tree.insertOrUpdate(element());
     expect(result).to.equal(true);
   });
 
   it('updates an element at the second insertion', () => {
-    const element = {x: 3, y: 2, z: 1, id: 42, status: 123};
-    tree.insertOrUpdate(element);
-    const result = tree.insertOrUpdate(element);
+    const e = element();
+    tree.insertOrUpdate(e);
+    const result = tree.insertOrUpdate(e);
     expect(result).to.equal(false);
+  });
+
+  it('retrieves an inserted element', () => {
+    const e = element();
+    tree.insertOrUpdate(e);
+    expect(tree.lookup(e.x, e.y, e.z)).to.eql(e);
   });
 });
