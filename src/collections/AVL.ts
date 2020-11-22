@@ -134,12 +134,16 @@ export const compileAVL = TemplateClass(
         _checkConsistency${index}(node) {
           if (node) {
             const left = ${getField(`$left${index}`)};
-            const right = ${getField(`$right${index}`)};
-            if (${getNodeField('left', `$parent${index}`)} !== node) {
-              throw new Error('tree #${index} has incorrect left link')
+            if (left) {
+              if (${getNodeField('left', `$parent${index}`)} !== node) {
+                throw new Error('tree #${index} has incorrect left link')
+              }
             }
-            if (${getNodeField('right', `$parent${index}`)} !== node) {
-              throw new Error('tree #${index} has incorrect right link')
+            const right = ${getField(`$right${index}`)};
+            if (right) {
+              if (${getNodeField('right', `$parent${index}`)} !== node) {
+                throw new Error('tree #${index} has incorrect right link')
+              }
             }
             const leftResult = this._checkConsistency${index}(left);
             const rightResult = this._checkConsistency${index}(right);
@@ -165,7 +169,12 @@ export const compileAVL = TemplateClass(
 
       _checkConsistency() {
         ${indices.map((_, index) => `
-          this._checkConsistency${index}(this._root${index});
+          if (this._root${index}) {
+            if (${getNodeField(`this._root${index}`, `$parent${index}`)}) {
+              throw new Error('tree #${index} has dangling parent link');
+            }
+            this._checkConsistency${index}(this._root${index});
+          }
         `).join('')}
       }
 
