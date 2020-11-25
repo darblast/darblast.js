@@ -541,7 +541,9 @@ export const compileAVL = TemplateClass(
             ${setNodeField('inner', `$parent${index}`, 'parent')}
           }
           ${setNodeField('child', `$left${index}`, 'parent')}
+          const root = ${getNodeField('parent', `$parent${index}`)};
           ${setNodeField('parent', `$parent${index}`, 'child')}
+          ${setNodeField('child', `$parent${index}`, 'root')}
           const balance = ${getNodeField('child', `$balance${index}`)};
           if (balance > 0) {
             ${setNodeField('parent', `$balance${index}`, '-1')}
@@ -571,7 +573,9 @@ export const compileAVL = TemplateClass(
             ${setNodeField('inner', `$parent${index}`, 'parent')}
           }
           ${setNodeField('child', `$right${index}`, 'parent')}
+          const root = ${getNodeField('parent', `$parent${index}`)};
           ${setNodeField('parent', `$parent${index}`, 'child')}
+          ${setNodeField('child', `$parent${index}`, 'root')}
           const balance = ${getNodeField('child', `$balance${index}`)};
           if (balance > 0) {
             ${setNodeField('parent', `$balance${index}`, '1')}
