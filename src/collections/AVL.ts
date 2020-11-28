@@ -73,10 +73,16 @@ export const compileAVL = TemplateClass(
     fieldMap[field.name] = field;
   }
 
-  const getNodeField = (node: string, name: string) =>
-      `this._views.${fieldMap[name].type}[${node} * ${
+  const getNodeField = (node: string, name: string) => {
+    if (name in fieldMap) {
+      return `this._views.${fieldMap[name].type}[${node} * ${
           definition.byteSize >>> fieldMap[name].logSize} + ${
           definition.getFieldIndex(name)}]`;
+    } else {
+      throw new Error(
+          `internal error: field ${JSON.stringify(name)} is not defined`);
+    }
+  };
 
   const setNodeField = (node: string, name: string, value: string) =>
       `${getNodeField(node, name)} = ${value};`;
