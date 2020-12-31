@@ -602,47 +602,54 @@ export const compileAVL = TemplateClass(
         record: null,
         node: 0,
         inserted: false,
+        balanced: true,
       };
 
       ${indices.map((_, index) => `
-        _insert${index}(node) {
+        _insert${index}(parent, node) {
           if (node) {
             const cmp = this._compare${index}(
                 node, ...this._insertContext.keys);
             if (cmp < 0) {
-              const child = this._insert${index}(${getField(`$left${index}`)});
+              const child = this._insert${index}(
+                  node, ${getField(`$left${index}`)});
               ${setNodeField('node', `$left${index}`, 'child')}
-              ${setNodeField('child', `$parent${index}`, 'node')}
-              if (${getNodeField('node', `$balance${index}`)} < 0) {
-                if (${getNodeField('child', `$balance${index}`)} > 0) {
-                  return this._rotateLeftRight${index}(node, child);
+              if (!this._insertContext.balanced) {
+                if (${getNodeField('node', `$balance${index}`)} < 0) {
+                  if (${getNodeField('child', `$balance${index}`)} > 0) {
+                    node = this._rotateLeftRight${index}(node, child);
+                  } else {
+                    node = this._rotateRight${index}(node, child);
+                  }
+                  this._insertContext.balanced = true;
+                } else if (${getNodeField('node', `$balance${index}`)} > 0) {
+                  ${setNodeField('node', `$balance${index}`, '0')}
+                  this._insertContext.balanced = true;
                 } else {
-                  return this._rotateRight${index}(node, child);
+                  ${setNodeField('node', `$balance${index}`, '-1')}
                 }
-              } else if (${getNodeField('node', `$balance${index}`)} > 0) {
-                ${setNodeField('node', `$balance${index}`, '0')}
-                return node;
-              } else {
-                ${setNodeField('node', `$balance${index}`, '-1')}
-                return node;
               }
+              return node;
             } else if (cmp > 0) {
-              const child = this._insert${index}(${getField(`$right${index}`)});
+              const child = this._insert${index}(
+                  node, ${getField(`$right${index}`)});
               ${setNodeField('node', `$right${index}`, 'child')}
-              ${setNodeField('child', `$parent${index}`, 'node')}
-              if (${getNodeField('node', `$balance${index}`)} > 0) {
-                if (${getNodeField('child', `$balance${index}`)} < 0) {
-                  return this._rotateRightLeft${index}(node, child);
+              if (!this._insertContext.balanced) {
+                if (${getNodeField('node', `$balance${index}`)} > 0) {
+                  if (${getNodeField('child', `$balance${index}`)} < 0) {
+                    node = this._rotateRightLeft${index}(node, child);
+                  } else {
+                    node = this._rotateLeft${index}(node, child);
+                  }
+                  this._insertContext.balanced = true;
+                } else if (${getNodeField('node', `$balance${index}`)} < 0) {
+                  ${setNodeField('node', `$balance${index}`, '0')}
+                  this._insertContext.balanced = true;
                 } else {
-                  return this._rotateLeft${index}(node, child);
+                  ${setNodeField('node', `$balance${index}`, '1')}
                 }
-              } else if (${getNodeField('node', `$balance${index}`)} < 0) {
-                ${setNodeField('node', `$balance${index}`, '0')}
-                return node;
-              } else {
-                ${setNodeField('node', `$balance${index}`, '1')}
-                return node;
               }
+              return node;
             } else {
               ${index > 0 ? `
                 throw new Error('internal error');
@@ -651,16 +658,20 @@ export const compileAVL = TemplateClass(
                     field.name, `this._insertContext.record.${
                         field.name}`)).join('\n')}
                 this._insertContext.inserted = false;
+                this._insertContext.balanced = true;
                 return this._insertContext.node = node;
               `}
             }
           } else {
             ${index > 0 ? `
+              this._insertContext.balanced = true;
               return this._insertContext.node;
             ` : `
               this._insertContext.inserted = true;
-              return this._insertContext.node = this._push(
-                  this._insertContext.record);
+              this._insertContext.balanced = false;
+              node = this._push(this._insertContext.record);
+              ${setNodeField('node', `$parent${index}`, 'parent')}
+              return this._insertContext.node = node;
             `}
           }
         }
@@ -679,11 +690,11 @@ export const compileAVL = TemplateClass(
       insertOrUpdate(record) {
         this._insertContext.record = record;
         this._getKeys0_();
-        this._root0 = this._insert0(this._root0);
+        this._root0 = this._insert0(0, this._root0);
         if (this._insertContext.inserted) {
           ${indices.map((_, index) => index > 0 ? `
             this._getKeys${index}_();
-            this._root${index} = this._insert${index}(this._root${index});
+            this._root${index} = this._insert${index}(0, this._root${index});
           ` : '').join('')}
         }
         return this._insertContext.inserted;
