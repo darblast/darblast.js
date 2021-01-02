@@ -664,8 +664,10 @@ export const compileAVL = TemplateClass(
             }
           } else {
             ${index > 0 ? `
-              this._insertContext.balanced = true;
-              return this._insertContext.node;
+              this._insertContext.balanced = false;
+              node = this._insertContext.node;
+              ${setNodeField('node', `$parent${index}`, 'parent')}
+              return node;
             ` : `
               this._insertContext.inserted = true;
               this._insertContext.balanced = false;
