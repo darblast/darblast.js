@@ -4,7 +4,8 @@ export namespace GL {
 export function loadShaders(
     gl: WebGLRenderingContext,
     vertexShaderSource: string,
-    fragmentShaderSource: string): WebGLProgram
+    fragmentShaderSource: string,
+    attributes?: string[]): WebGLProgram
 {
   const vertexShader = gl.createShader(gl.VERTEX_SHADER);
   if (!vertexShader) {
@@ -30,6 +31,11 @@ export function loadShaders(
   }
   gl.attachShader(program, vertexShader);
   gl.attachShader(program, fragmentShader);
+  if (attributes) {
+    for (let i = 0; i < attributes.length; i++) {
+      gl.bindAttribLocation(program, i, attributes[i]);
+    }
+  }
   gl.linkProgram(program);
   if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
     throw new Error(gl.getProgramInfoLog(program) || '');

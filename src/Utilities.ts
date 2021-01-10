@@ -23,6 +23,14 @@ export function TemplateClass(compiler: (...args: any[]) => string) {
 
 
 }  // namespace Utilities
+
+
+export function startup(fn: () => any): Object {
+  window.addEventListener('DOMContentLoaded', fn);
+  return Darblast;
+}
+
+
 }  // namespace Darblast
 
 
