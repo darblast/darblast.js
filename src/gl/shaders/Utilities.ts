@@ -1,7 +1,9 @@
 namespace Darblast {
 export namespace GL {
+export namespace Shaders {
 
-export function loadShaders(
+
+export function load(
     gl: WebGLRenderingContext,
     vertexShaderSource: string,
     fragmentShaderSource: string,
@@ -47,5 +49,7 @@ export function loadShaders(
   return program;
 }
 
+
+}  // namespace Shaders
 }  // namespace GL
 }  // namespace Darblast

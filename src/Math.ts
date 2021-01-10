@@ -644,6 +644,8 @@ export class vec4 implements ivec4 {
 
 
 export class mat2 {
+  private _array: [number, number, number, number] | null = null;
+
   public constructor(
       public m00: number,
       public m01: number,
@@ -666,6 +668,18 @@ export class mat2 {
 
   public clone(): mat2 {
     return new mat2(this.m00, this.m01, this.m10, this.m11);
+  }
+
+  public toArray(): [number, number, number, number] {
+    if (this._array) {
+      this._array[0] = this.m00;
+      this._array[1] = this.m01;
+      this._array[2] = this.m10;
+      this._array[3] = this.m11;
+    } else {
+      this._array = [this.m00, this.m01, this.m10, this.m11];
+    }
+    return this._array;
   }
 
   public determinant(): number {
@@ -721,6 +735,12 @@ export class mat2 {
 
 
 export class mat3 {
+  private _array: [
+      number, number, number,
+      number, number, number,
+      number, number, number,
+  ] | null = null;
+
   public constructor(
       public m00: number,
       public m01: number,
@@ -750,6 +770,93 @@ export class mat3 {
         this.m10, this.m11, this.m12,
         this.m20, this.m21, this.m22);
   }
+
+  public toArray(): [
+      number, number, number,
+      number, number, number,
+      number, number, number,
+  ] {
+    if (this._array) {
+      this._array[0] = this.m00;
+      this._array[1] = this.m01;
+      this._array[2] = this.m02;
+      this._array[3] = this.m10;
+      this._array[4] = this.m11;
+      this._array[5] = this.m12;
+      this._array[6] = this.m20;
+      this._array[7] = this.m21;
+      this._array[8] = this.m22;
+    } else {
+      this._array = [
+          this.m00, this.m01, this.m02,
+          this.m10, this.m11, this.m12,
+          this.m20, this.m21, this.m22,
+      ];
+    }
+    return this._array;
+  }
+}
+
+
+export class mat4 {
+  private _array: [
+      number, number, number, number,
+      number, number, number, number,
+      number, number, number, number,
+      number, number, number, number,
+  ] | null = null;
+
+  public constructor(
+      public m00: number,
+      public m01: number,
+      public m02: number,
+      public m03: number,
+      public m10: number,
+      public m11: number,
+      public m12: number,
+      public m13: number,
+      public m20: number,
+      public m21: number,
+      public m22: number,
+      public m23: number,
+      public m30: number,
+      public m31: number,
+      public m32: number,
+      public m33: number) {}
+
+  public toArray(): [
+      number, number, number, number,
+      number, number, number, number,
+      number, number, number, number,
+      number, number, number, number,
+  ] {
+    if (this._array) {
+      this._array[0] = this.m00;
+      this._array[1] = this.m01;
+      this._array[2] = this.m02;
+      this._array[3] = this.m03;
+      this._array[4] = this.m10;
+      this._array[5] = this.m11;
+      this._array[6] = this.m12;
+      this._array[7] = this.m13;
+      this._array[8] = this.m20;
+      this._array[9] = this.m21;
+      this._array[10] = this.m22;
+      this._array[11] = this.m23;
+      this._array[12] = this.m30;
+      this._array[13] = this.m31;
+      this._array[14] = this.m32;
+      this._array[15] = this.m33;
+    } else {
+      this._array = [
+          this.m00, this.m01, this.m02, this.m03,
+          this.m10, this.m11, this.m12, this.m13,
+          this.m20, this.m21, this.m22, this.m23,
+          this.m30, this.m31, this.m32, this.m33,
+      ];
+    }
+    return this._array;
+  }
 }
 
 
@@ -757,8 +864,19 @@ export class mat3 {
 }  // namespace Darblast
 
 
+type ivec2 = Darblast.Math.ivec2;
+type ivec3 = Darblast.Math.ivec3;
+type ivec4 = Darblast.Math.ivec4;
+type vec2 = Darblast.Math.vec2;
+type vec3 = Darblast.Math.vec3;
+type vec4 = Darblast.Math.vec4;
+type mat2 = Darblast.Math.mat2;
+type mat3 = Darblast.Math.mat3;
+type mat4 = Darblast.Math.mat4;
+
 const vec2 = Darblast.Math.vec2;
 const vec3 = Darblast.Math.vec3;
 const vec4 = Darblast.Math.vec4;
 const mat2 = Darblast.Math.mat2;
 const mat3 = Darblast.Math.mat3;
+const mat4 = Darblast.Math.mat4;
