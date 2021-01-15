@@ -5,6 +5,11 @@ namespace Darblast {
 export namespace Utilities {
 
 
+export function mod(a: number, b: number): number {
+  return ((a % b) + b) % b;
+}
+
+
 export function npo2(x: number): number {
   if (x <= 0) {
     return 1;
