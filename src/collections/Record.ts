@@ -226,9 +226,10 @@ class BinPacker {
  * Describes the format of a record.
  *
  * In the Darblast Collections framework, a record is a chunk of binary data
- * that can be stored in typed arrays. When read back in JavaScript it results
- * in a dictionary (an `Object` with `null` prototype) with string keys and
- * number values.
+ * that can be stored in [typed
+ * arrays](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray).
+ * When read back in JavaScript it results in a dictionary (an `Object` with
+ * `null` prototype) with string keys and number values.
  */
 export class RecordDefinition {
   /**
