@@ -14,7 +14,12 @@ export function npo2(x: number): number {
   if (x <= 0) {
     return 1;
   }
-  return 2 ** (GlobalMath.floor(GlobalMath.log2(x)) + 1);
+  let y = 1;
+  while (x) {
+    x >>>= 1;
+    y <<= 1;
+  }
+  return y;
 }
 
 
