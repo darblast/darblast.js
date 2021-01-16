@@ -32,7 +32,7 @@ export class Program {
     }
   }
 
-  public get program(): WebGLProgram {
+  public get nativeProgram(): WebGLProgram {
     return this._program;
   }
 
