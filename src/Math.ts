@@ -197,6 +197,18 @@ export class vec3 implements ivec3 {
     return new vec4(this.x, this.y, this.z, w);
   }
 
+  public get xy(): vec2 {
+    return new vec2(this.x, this.y);
+  }
+
+  public get xz(): vec2 {
+    return new vec2(this.x, this.z);
+  }
+
+  public get yz(): vec2 {
+    return new vec2(this.y, this.z);
+  }
+
   public toHomogeneous(): vec4 {
     return this.toVec4(1);
   }
@@ -465,6 +477,42 @@ export class vec4 implements ivec4 {
 
   public toVec3(): vec3 {
     return new vec3(this.x, this.y, this.z);
+  }
+
+  public get xy(): vec2 {
+    return new vec2(this.x, this.y);
+  }
+
+  public get xz(): vec2 {
+    return new vec2(this.x, this.z);
+  }
+
+  public get xw(): vec2 {
+    return new vec2(this.x, this.w);
+  }
+
+  public get yz(): vec2 {
+    return new vec2(this.y, this.z);
+  }
+
+  public get yw(): vec2 {
+    return new vec2(this.y, this.w);
+  }
+
+  public get xyz(): vec3 {
+    return new vec3(this.x, this.y, this.z);
+  }
+
+  public get xyw(): vec3 {
+    return new vec3(this.x, this.y, this.w);
+  }
+
+  public get xzw(): vec3 {
+    return new vec3(this.x, this.z, this.w);
+  }
+
+  public get yzw(): vec3 {
+    return new vec3(this.y, this.z, this.w);
   }
 
   public toStandard(): vec3 {
