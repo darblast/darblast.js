@@ -6,6 +6,11 @@ export namespace GL {
 export namespace Shaders {
 
 
+/**
+ * Loads and manages a GLSL shader program.
+ *
+ * This class can be used in conjunction with {@link ProgramManager}.
+ */
 export class Program {
   private readonly _gl: WebGLRenderingContext;
   private readonly _uniformNames: string[];
@@ -16,6 +21,19 @@ export class Program {
   private readonly _locations: {[name: string]: WebGLUniformLocation} =
       Object.create(null);
 
+  /**
+   * Creates a GLSL shader program.
+   *
+   * The constructor compiles and links the provided shader sources, fetches
+   * uniform variable locations, binds attribute locations, and throws an
+   * exception for any error encountered during the process.
+   *
+   * @param gl  the WebGL context.
+   * @param vertexShaderSource  the GLSL source code of the vertex shader.
+   * @param fragmentShaderSource  the GLSL source code of the fragment shader.
+   * @param uniformNames  list of names of all uniform variables.
+   * @param attributeNames  list of names of all attribute variables.
+   */
   public constructor(
       gl: WebGLRenderingContext,
       vertexShaderSource: string,
@@ -88,14 +106,23 @@ export class Program {
     }
   }
 
+  /**
+   * @returns  the native WebGL program object.
+   */
   public get nativeProgram(): WebGLProgram {
     return this._program;
   }
 
+  /**
+   * @returns  the list of names of uniform variables. Do not modify it.
+   */
   public get uniformNames(): string[] {
     return this._uniformNames;
   }
 
+  /**
+   * @returns  the list of names of attribute variables. Do not modify it.
+   */
   public get attributeNames(): string[] {
     return this._attributeNames;
   }
@@ -172,10 +199,22 @@ export class Program {
     this._gl.uniformMatrix4fv(this._locations[name], transpose, m.toArray());
   }
 
+  /**
+   * [Uses](https://www.khronos.org/registry/OpenGL-Refpages/es3.0/html/glUseProgram.xhtml)
+   * the program.
+   */
   public use(): void {
     this._gl.useProgram(this._program);
   }
 
+  /**
+   * Deletes the program and the associated shaders.
+   *
+   * If the program is in use it won't be deleted right away, but rather when
+   * another one is {@link use | used}.
+   *
+   * The program becomes unusable after being deleted.
+   */
   public destroy(): void {
     this._gl.deleteProgram(this._program);
     this._gl.deleteShader(this._vertexShader);
