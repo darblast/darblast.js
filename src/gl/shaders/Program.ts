@@ -13,8 +13,8 @@ export namespace Shaders {
  */
 export class Program {
   private readonly _gl: WebGLRenderingContext;
-  private readonly _uniformNames: string[];
   private readonly _attributeNames: string[];
+  private readonly _uniformNames: string[];
   private readonly _vertexShader: WebGLShader;
   private readonly _fragmentShader: WebGLShader;
   private readonly _program: WebGLProgram;
@@ -31,19 +31,19 @@ export class Program {
    * @param gl  the WebGL context.
    * @param vertexShaderSource  the GLSL source code of the vertex shader.
    * @param fragmentShaderSource  the GLSL source code of the fragment shader.
-   * @param uniformNames  list of names of all uniform variables.
    * @param attributeNames  list of names of all attribute variables.
+   * @param uniformNames  list of names of all uniform variables.
    */
   public constructor(
       gl: WebGLRenderingContext,
       vertexShaderSource: string,
       fragmentShaderSource: string,
-      uniformNames: string[],
-      attributeNames: string[])
+      attributeNames: string[],
+      uniformNames?: string[])
   {
     this._gl = gl;
-    this._uniformNames = uniformNames ? uniformNames.slice() : [];
     this._attributeNames = attributeNames ? attributeNames.slice() : [];
+    this._uniformNames = uniformNames ? uniformNames.slice() : [];
 
     const vertexShader = gl.createShader(gl.VERTEX_SHADER);
     if (!vertexShader) {
@@ -114,6 +114,13 @@ export class Program {
   }
 
   /**
+   * @returns  the list of names of attribute variables. Do not modify it.
+   */
+  public get attributeNames(): string[] {
+    return this._attributeNames;
+  }
+
+  /**
    * @returns  the list of names of uniform variables. Do not modify it.
    */
   public get uniformNames(): string[] {
@@ -121,10 +128,12 @@ export class Program {
   }
 
   /**
-   * @returns  the list of names of attribute variables. Do not modify it.
+   * For internal usage -- do not use.
+   *
+   * @hidden
    */
-  public get attributeNames(): string[] {
-    return this._attributeNames;
+  public get _uniformLocations(): {[name: string]: WebGLUniformLocation} {
+    return this._locations;
   }
 
   public uniform1f(name: string, x: number): void {
