@@ -8,21 +8,77 @@ export namespace Shaders {
 
 export class Program {
   private readonly _gl: WebGLRenderingContext;
+  private readonly _uniformNames: string[];
+  private readonly _attributeNames: string[];
+  private readonly _vertexShader: WebGLShader;
+  private readonly _fragmentShader: WebGLShader;
   private readonly _program: WebGLProgram;
-  private readonly _locations: {[name: string]: WebGLUniformLocation};
+  private readonly _locations: {[name: string]: WebGLUniformLocation} =
+      Object.create(null);
 
   public constructor(
-      gl:WebGLRenderingContext,
+      gl: WebGLRenderingContext,
       vertexShaderSource: string,
       fragmentShaderSource: string,
       uniformNames: string[],
       attributeNames: string[])
   {
     this._gl = gl;
-    this._program = Darblast.GL.Shaders.load(
-        this._gl, vertexShaderSource, fragmentShaderSource, attributeNames);
-    this._locations = Object.create(null);
-    for (const name of uniformNames) {
+    this._uniformNames = uniformNames ? uniformNames.slice() : [];
+    this._attributeNames = attributeNames ? attributeNames.slice() : [];
+
+    const vertexShader = gl.createShader(gl.VERTEX_SHADER);
+    if (!vertexShader) {
+      throw new Error('cannot create vertex shader');
+    }
+    this._vertexShader = vertexShader;
+    gl.shaderSource(this._vertexShader, vertexShaderSource);
+    gl.compileShader(this._vertexShader);
+    if (!gl.getShaderParameter(this._vertexShader, gl.COMPILE_STATUS)) {
+      throw new Error(gl.getShaderInfoLog(this._vertexShader) || '');
+    }
+
+    const fragmentShader = gl.createShader(gl.FRAGMENT_SHADER);
+    if (!fragmentShader) {
+      gl.deleteShader(this._vertexShader);
+      throw new Error('cannot create fragment shader');
+    }
+    this._fragmentShader = fragmentShader;
+    gl.shaderSource(this._fragmentShader, fragmentShaderSource);
+    gl.compileShader(this._fragmentShader);
+    if (!gl.getShaderParameter(this._fragmentShader, gl.COMPILE_STATUS)) {
+      gl.deleteShader(this._vertexShader);
+      throw new Error(gl.getShaderInfoLog(this._fragmentShader) || '');
+    }
+
+    const program = gl.createProgram();
+    if (!program) {
+      gl.deleteShader(this._vertexShader);
+      gl.deleteShader(this._fragmentShader);
+      throw new Error('cannot create shader program');
+    }
+    this._program = program;
+    gl.attachShader(this._program, vertexShader);
+    gl.attachShader(this._program, fragmentShader);
+    for (let i = 0; i < this._attributeNames.length; i++) {
+      gl.bindAttribLocation(this._program, i, this._attributeNames[i]);
+    }
+    gl.linkProgram(this._program);
+    if (!gl.getProgramParameter(this._program, gl.LINK_STATUS)) {
+      gl.deleteProgram(this._program);
+      gl.deleteShader(this._vertexShader);
+      gl.deleteShader(this._fragmentShader);
+      throw new Error(gl.getProgramInfoLog(this._program) || '');
+    }
+    gl.validateProgram(this._program);
+    if (!gl.getProgramParameter(this._program, gl.VALIDATE_STATUS)) {
+      gl.deleteProgram(this._program);
+      gl.deleteShader(this._vertexShader);
+      gl.deleteShader(this._fragmentShader);
+      throw new Error(gl.getProgramInfoLog(this._program) || '');
+    }
+
+    for (const name of this._uniformNames) {
       const location = this._gl.getUniformLocation(this._program, name);
       if (location) {
         this._locations[name] = location;
@@ -34,6 +90,14 @@ export class Program {
 
   public get nativeProgram(): WebGLProgram {
     return this._program;
+  }
+
+  public get uniformNames(): string[] {
+    return this._uniformNames;
+  }
+
+  public get attributeNames(): string[] {
+    return this._attributeNames;
   }
 
   public uniform1f(name: string, x: number): void {
@@ -114,6 +178,8 @@ export class Program {
 
   public destroy(): void {
     this._gl.deleteProgram(this._program);
+    this._gl.deleteShader(this._vertexShader);
+    this._gl.deleteShader(this._fragmentShader);
   }
 }
 
