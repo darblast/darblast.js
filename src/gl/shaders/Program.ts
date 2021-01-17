@@ -101,6 +101,9 @@ export class Program {
       if (location) {
         this._locations[name] = location;
       } else {
+        gl.deleteProgram(this._program);
+        gl.deleteShader(this._vertexShader);
+        gl.deleteShader(this._fragmentShader);
         throw new Error(`unknown uniform name ${JSON.stringify(name)}`);
       }
     }
