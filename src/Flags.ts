@@ -1,3 +1,6 @@
+/// <reference path="Utilities.ts"/>
+
+
 namespace Darblast {
 export namespace Flags {
 
@@ -254,7 +257,8 @@ function handleContentLoaded(): void {
   parseInternal();
 }
 
-window.addEventListener('DOMContentLoaded', handleContentLoaded, false);
+Utilities.getGlobal()?.addEventListener?.(
+    'DOMContentLoaded', handleContentLoaded, false);
 
 
 export function parse(): void {

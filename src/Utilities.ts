@@ -32,6 +32,9 @@ export function TemplateClass(compiler: (...args: any[]) => string) {
 }
 
 
+export const getGlobal = new Function('return this;');
+
+
 }  // namespace Utilities
 
 
