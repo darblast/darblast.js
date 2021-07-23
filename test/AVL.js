@@ -19,17 +19,30 @@ const TestAVL = AVL.fromSchema({
 describe('AVL', () => {
   let tree;
 
+  // Override this if you have a known failing sequence.
+  const presetSequence = null;
+
   const sequence = [];
 
   const value = domain => Math.floor(Math.random() * domain);
+
+  const generateElement = () => {
+    const index = sequence.length;
+    if (presetSequence && index < presetSequence.length) {
+      return presetSequence[index];
+    } else {
+      return {
+        x: value(1e9),
+        y: value(1e9),
+        z: value(1e9),
+        id: value(256),
+        status: value(256),
+      };
+    }
+  };
+
   const element = () => {
-    const element = {
-      x: value(1e9),
-      y: value(1e9),
-      z: value(1e9),
-      id: value(256),
-      status: value(256),
-    };
+    const element = generateElement();
     sequence.push(element);
     return element;
   };
