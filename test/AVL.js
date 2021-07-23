@@ -19,21 +19,34 @@ const TestAVL = AVL.fromSchema({
 describe('AVL', () => {
   let tree;
 
+  const sequence = [];
+
   const value = domain => Math.floor(Math.random() * domain);
-  const element = () => ({
-    x: value(1e9),
-    y: value(1e9),
-    z: value(1e9),
-    id: value(256),
-    status: value(256),
-  });
+  const element = () => {
+    const element = {
+      x: value(1e9),
+      y: value(1e9),
+      z: value(1e9),
+      id: value(256),
+      status: value(256),
+    };
+    sequence.push(element);
+    return element;
+  };
 
   beforeEach(() => {
     tree = new TestAVL();
   });
 
   afterEach(() => {
-    tree._checkConsistency();
+    try {
+      tree._checkConsistency();
+    } catch (e) {
+      console.error(e);
+      console.error('Failing sequence follows:');
+      console.dir(sequence);
+      throw e;
+    }
   });
 
   it('should be initially empty', () => {
