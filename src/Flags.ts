@@ -252,13 +252,15 @@ function parseInternal(): void {
 }
 
 
+const maybeWindow = Utilities.getGlobal();
+
 function handleContentLoaded(): void {
-  window.removeEventListener('DOMContentLoaded', handleContentLoaded, false);
+  maybeWindow!.removeEventListener(
+      'DOMContentLoaded', handleContentLoaded, false);
   parseInternal();
 }
 
-Utilities.getGlobal()?.addEventListener?.(
-    'DOMContentLoaded', handleContentLoaded, false);
+maybeWindow?.addEventListener?.('DOMContentLoaded', handleContentLoaded, false);
 
 
 export function parse(): void {
