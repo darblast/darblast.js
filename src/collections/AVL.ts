@@ -158,7 +158,7 @@ export const compileAVL = TemplateClass(
             if (balance !== expectedBalance) {
               throw new Error(
                   'tree #${index} has wrong balance factor (' + balance +
-                  ' instead of ' + (expectedBalance) + ')');
+                  ' instead of ' + expectedBalance + ')');
             }
             if (balance < -1 || balance > 1) {
               throw new Error('tree #${index} is unbalanced');
@@ -637,7 +637,7 @@ export const compileAVL = TemplateClass(
                   node, ${getField(`$left${index}`)});
               ${setNodeField('node', `$left${index}`, 'child')}
               if (!this._insertContext.balanced) {
-                if (${getNodeField('node', `$balance${index}`)} < -1) {
+                if (${getNodeField('node', `$balance${index}`)} < 0) {
                   if (${getNodeField('child', `$balance${index}`)} > 0) {
                     node = this._rotateLeftRight${index}(node, child);
                   } else {
@@ -657,7 +657,7 @@ export const compileAVL = TemplateClass(
                   node, ${getField(`$right${index}`)});
               ${setNodeField('node', `$right${index}`, 'child')}
               if (!this._insertContext.balanced) {
-                if (${getNodeField('node', `$balance${index}`)} > 1) {
+                if (${getNodeField('node', `$balance${index}`)} > 0) {
                   if (${getNodeField('child', `$balance${index}`)} < 0) {
                     node = this._rotateRightLeft${index}(node, child);
                   } else {
