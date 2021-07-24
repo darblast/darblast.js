@@ -525,11 +525,11 @@ export const compileAVL = TemplateClass(
           ${setNodeField('parent', `$parent${index}`, 'node')}
           ${setNodeField('node', `$parent${index}`, 'root')}
           if (${getNodeField('node', `$balance${index}`)}) {
-            ${setNodeField('parent', `$balance${index}`, '1')}
-            ${setNodeField('node', `$balance${index}`, '-1')}
-          } else {
             ${setNodeField('parent', `$balance${index}`, '0')}
             ${setNodeField('node', `$balance${index}`, '0')}
+          } else {
+            ${setNodeField('parent', `$balance${index}`, '1')}
+            ${setNodeField('node', `$balance${index}`, '-1')}
           }
           return node;
         }
@@ -545,11 +545,11 @@ export const compileAVL = TemplateClass(
           ${setNodeField('parent', `$parent${index}`, 'node')}
           ${setNodeField('node', `$parent${index}`, 'root')}
           if (${getNodeField('node', `$balance${index}`)}) {
-            ${setNodeField('parent', `$balance${index}`, '-1')}
-            ${setNodeField('node', `$balance${index}`, '1')}
-          } else {
             ${setNodeField('parent', `$balance${index}`, '0')}
             ${setNodeField('node', `$balance${index}`, '0')}
+          } else {
+            ${setNodeField('parent', `$balance${index}`, '-1')}
+            ${setNodeField('node', `$balance${index}`, '1')}
           }
           return node;
         }
