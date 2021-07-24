@@ -154,8 +154,11 @@ export const compileAVL = TemplateClass(
             const leftResult = this._checkConsistency${index}(left);
             const rightResult = this._checkConsistency${index}(right);
             const balance = ${getField(`$balance${index}`)};
-            if (balance !== rightResult.height - leftResult.height) {
-              throw new Error('tree #${index} has wrong balance factor');
+            const expectedBalance = rightResult.height - leftResult.height;
+            if (balance !== expectedBalance) {
+              throw new Error(
+                  'tree #${index} has wrong balance factor (' + balance +
+                  ' instead of ' + (expectedBalance) + ')');
             }
             if (balance < -1 || balance > 1) {
               throw new Error('tree #${index} is unbalanced');
