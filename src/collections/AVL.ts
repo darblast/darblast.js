@@ -174,6 +174,25 @@ export const compileAVL = TemplateClass(
       `).join('')}
 
       _checkConsistency() {
+        if (this._root0) {
+          if (this._size < 1) {
+            throw new Error('wrong size: ' + this._size + ' (should be > 0)');
+          }
+          ${indices.map((_, index) => `
+            if (!this._root${index}) {
+              throw new Error('tree #0 has a root but tree #${index} is empty');
+            }
+          `).join('')}
+        } else {
+          if (this._size > 0) {
+            throw new Error('wrong size: ' + this._size + ' (should be 0)');
+          }
+          ${indices.map((_, index) => `
+            if (this._root${index}) {
+              throw new Error('tree #${index} has a root but tree #0 is empty');
+            }
+          `).join('')}
+        }
         ${indices.map((_, index) => `
           if (this._root${index}) {
             if (${getNodeField(`this._root${index}`, `$parent${index}`)}) {
