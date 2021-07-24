@@ -166,7 +166,7 @@ export const compileAVL = TemplateClass(
             return {
               size: 1 + leftResult.size + rightResult.size,
               height: 1 + Math.max(leftResult.height, rightResult.height),
-            }
+            };
           } else {
             return {
               size: 0,
@@ -637,7 +637,7 @@ export const compileAVL = TemplateClass(
                   node, ${getField(`$left${index}`)});
               ${setNodeField('node', `$left${index}`, 'child')}
               if (!this._insertContext.balanced) {
-                if (${getNodeField('node', `$balance${index}`)} < 0) {
+                if (${getNodeField('node', `$balance${index}`)} < -1) {
                   if (${getNodeField('child', `$balance${index}`)} > 0) {
                     node = this._rotateLeftRight${index}(node, child);
                   } else {
@@ -657,7 +657,7 @@ export const compileAVL = TemplateClass(
                   node, ${getField(`$right${index}`)});
               ${setNodeField('node', `$right${index}`, 'child')}
               if (!this._insertContext.balanced) {
-                if (${getNodeField('node', `$balance${index}`)} > 0) {
+                if (${getNodeField('node', `$balance${index}`)} > 1) {
                   if (${getNodeField('child', `$balance${index}`)} < 0) {
                     node = this._rotateRightLeft${index}(node, child);
                   } else {

@@ -28,6 +28,10 @@ $ gulp test
 
 ## Debugging
 
+All tests are in the `test` directory. Add a `debugger` statement to the test
+you want to debug, open [`chrome://inspect`](`chrome://inspect`) in Chrome, then
+run:
+
 ```sh
-$ npm --node-options --inspect-brk test
+$ npm --node-options --inspect test
 ```
