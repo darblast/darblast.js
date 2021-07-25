@@ -843,6 +843,78 @@ export class mat3 {
     }
     return this._array;
   }
+
+  public mul_(other: mat3): mat3 {
+    const m00 = this.m00 * other.m00 + this.m01 * other.m10 + this.m02 * other.m20;
+    const m01 = this.m00 * other.m01 + this.m01 * other.m11 + this.m02 * other.m21;
+    const m02 = this.m00 * other.m02 + this.m01 * other.m12 + this.m02 * other.m22;
+    const m10 = this.m10 * other.m00 + this.m11 * other.m10 + this.m12 * other.m20;
+    const m11 = this.m10 * other.m01 + this.m11 * other.m11 + this.m12 * other.m21;
+    const m12 = this.m10 * other.m02 + this.m11 * other.m12 + this.m12 * other.m22;
+    const m20 = this.m20 * other.m00 + this.m21 * other.m10 + this.m22 * other.m20;
+    const m21 = this.m20 * other.m01 + this.m21 * other.m11 + this.m22 * other.m21;
+    const m22 = this.m20 * other.m02 + this.m21 * other.m12 + this.m22 * other.m22;
+    this.m00 = m00;
+    this.m01 = m01;
+    this.m02 = m02;
+    this.m10 = m10;
+    this.m11 = m11;
+    this.m12 = m12;
+    this.m20 = m20;
+    this.m21 = m21;
+    this.m22 = m22;
+    return this;
+  }
+
+  public mul(other: mat3): mat3 {
+    return new mat3(
+        this.m00 * other.m00 + this.m01 * other.m10 + this.m02 * other.m20,
+        this.m00 * other.m01 + this.m01 * other.m11 + this.m02 * other.m21,
+        this.m00 * other.m02 + this.m01 * other.m12 + this.m02 * other.m22,
+        this.m10 * other.m00 + this.m11 * other.m10 + this.m12 * other.m20,
+        this.m10 * other.m01 + this.m11 * other.m11 + this.m12 * other.m21,
+        this.m10 * other.m02 + this.m11 * other.m12 + this.m12 * other.m22,
+        this.m20 * other.m00 + this.m21 * other.m10 + this.m22 * other.m20,
+        this.m20 * other.m01 + this.m21 * other.m11 + this.m22 * other.m21,
+        this.m20 * other.m02 + this.m21 * other.m12 + this.m22 * other.m22);
+  }
+
+  public mulr_(r: number): mat3 {
+    this.m00 *= r;
+    this.m01 *= r;
+    this.m02 *= r;
+    this.m10 *= r;
+    this.m11 *= r;
+    this.m12 *= r;
+    this.m20 *= r;
+    this.m21 *= r;
+    this.m22 *= r;
+    return this;
+  }
+
+  public mulr(r: number): mat3 {
+    return new mat3(
+        this.m00 * r, this.m01 * r, this.m02 * r,
+        this.m10 * r, this.m11 * r, this.m12 * r,
+        this.m20 * r, this.m21 * r, this.m22 * r);
+  }
+
+  public mulv_(v: vec3): vec3 {
+    const x = this.m00 * v.x + this.m01 * v.y + this.m02 * v.z;
+    const y = this.m10 * v.x * this.m11 * v.y + this.m12 * v.z;
+    const z = this.m20 * v.x * this.m21 * v.y + this.m22 * v.z;
+    v.x = x;
+    v.y = y;
+    v.z = z;
+    return v;
+  }
+
+  public mulv(v: vec3): vec3 {
+    return new vec3(
+        this.m00 * v.x + this.m01 * v.y + this.m02 * v.z,
+        this.m10 * v.x * this.m11 * v.y + this.m12 * v.z,
+        this.m20 * v.x * this.m21 * v.y + this.m22 * v.z);
+  }
 }
 
 
