@@ -132,6 +132,10 @@ export const compileAVL = TemplateClass(
         return this._size;
       }
 
+      isEmpty() {
+        return !this._size;
+      }
+
       get capacity() {
         return this._capacity - 1;
       }
