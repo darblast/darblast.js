@@ -24,11 +24,11 @@ export class vec2 implements ivec2 {
       public x: number,
       public y: number) {}
 
-  public static fromVec3(v: vec3): vec2 {
+  public static fromVec3(v: ivec3): vec2 {
     return new vec2(v.x, v.y);
   }
 
-  public static fromVec4(v: vec4): vec2 {
+  public static fromVec4(v: ivec4): vec2 {
     return new vec2(v.x, v.y);
   }
 
@@ -48,23 +48,23 @@ export class vec2 implements ivec2 {
     return this.toVec3(1);
   }
 
-  public add_(other: vec2): vec2 {
+  public add_(other: ivec2): vec2 {
     this.x += other.x;
     this.y += other.y;
     return this;
   }
 
-  public add(other: vec2): vec2 {
+  public add(other: ivec2): vec2 {
     return new vec2(this.x + other.x, this.y + other.y);
   }
 
-  public sub_(other: vec2): vec2 {
+  public sub_(other: ivec2): vec2 {
     this.x -= other.x;
     this.y -= other.y;
     return this;
   }
 
-  public sub(other: vec2): vec2 {
+  public sub(other: ivec2): vec2 {
     return new vec2(this.x - other.x, this.y - other.y);
   }
 
@@ -88,7 +88,7 @@ export class vec2 implements ivec2 {
     return new vec2(this.x / r, this.y / r);
   }
 
-  public dot(other: vec2): number {
+  public dot(other: ivec2): number {
     return this.x * other.x + this.y * other.y;
   }
 
@@ -104,8 +104,8 @@ export class vec2 implements ivec2 {
     return this.div(this.modulus());
   }
 
-  public angle(other: vec2): number {
-    const r = this.modulus() * other.modulus();
+  public angle(other: ivec2): number {
+    const r = this.modulus() * vec2.prototype.modulus.call(other);
     return GlobalMath.acos(this.dot(other) / r);
   }
 
@@ -119,13 +119,13 @@ export class vec2 implements ivec2 {
     return new vec2(this.x + x, this.y + y);
   }
 
-  public translatev_(v: vec2): vec2 {
+  public translatev_(v: ivec2): vec2 {
     this.x += v.x;
     this.y += v.y;
     return this;
   }
 
-  public translatev(v: vec2): vec2 {
+  public translatev(v: ivec2): vec2 {
     return new vec2(this.x + v.x, this.y + v.y);
   }
 
@@ -177,11 +177,11 @@ export class vec3 implements ivec3 {
       public y: number,
       public z: number) {}
 
-  public static fromVec2(v: vec2, z: number): vec3 {
+  public static fromVec2(v: ivec2, z: number): vec3 {
     return new vec3(v.x, v.y, z);
   }
 
-  public static fromVec4(v: vec4): vec3 {
+  public static fromVec4(v: ivec4): vec3 {
     return new vec3(v.x, v.y, v.z);
   }
 
@@ -217,25 +217,25 @@ export class vec3 implements ivec3 {
     return this.toVec2().div_(this.z);
   }
 
-  public add_(other: vec3): vec3 {
+  public add_(other: ivec3): vec3 {
     this.x += other.x;
     this.y += other.y;
     this.z += other.z;
     return this;
   }
 
-  public add(other: vec3): vec3 {
+  public add(other: ivec3): vec3 {
     return new vec3(this.x + other.x, this.y + other.y, this.z + other.z);
   }
 
-  public sub_(other: vec3): vec3 {
+  public sub_(other: ivec3): vec3 {
     this.x -= other.x;
     this.y -= other.y;
     this.z -= other.z;
     return this;
   }
 
-  public sub(other: vec3): vec3 {
+  public sub(other: ivec3): vec3 {
     return new vec3(this.x - other.x, this.y - other.y, this.z - other.z);
   }
 
@@ -261,11 +261,11 @@ export class vec3 implements ivec3 {
     return new vec3(this.x / r, this.y / r, this.z / r);
   }
 
-  public dot(other: vec3): number {
+  public dot(other: ivec3): number {
     return this.x * other.x + this.y * other.y + this.z * other.z;
   }
 
-  public cross_(other: vec3): vec3 {
+  public cross_(other: ivec3): vec3 {
     const x = this.y * other.z - this.z * other.y;
     const y = this.z * other.x - this.x * other.z;
     const z = this.x * other.y - this.y * other.x;
@@ -275,7 +275,7 @@ export class vec3 implements ivec3 {
     return this;
   }
 
-  public cross(other: vec3): vec3 {
+  public cross(other: ivec3): vec3 {
     return new vec3(
         this.y * other.z - this.z * other.y,
         this.z * other.x - this.x * other.z,
@@ -294,8 +294,8 @@ export class vec3 implements ivec3 {
     return this.div(this.modulus());
   }
 
-  public angle(other: vec3): number {
-    const r = this.modulus() * other.modulus();
+  public angle(other: ivec3): number {
+    const r = this.modulus() * vec3.prototype.modulus.call(other);
     return GlobalMath.acos(this.dot(other) / r);
   }
 
@@ -312,13 +312,13 @@ export class vec3 implements ivec3 {
         this.z);
   }
 
-  public translate2v_(v: vec3): vec3 {
+  public translate2v_(v: ivec3): vec3 {
     this.x += v.x * this.z / v.z;
     this.y += v.y * this.z / v.z;
     return this;
   }
 
-  public translate2v(v: vec3): vec3 {
+  public translate2v(v: ivec3): vec3 {
     return new vec3(
         this.x + v.x * this.z / v.z,
         this.y + v.y * this.z / v.z,
@@ -336,14 +336,14 @@ export class vec3 implements ivec3 {
     return new vec3(this.x + x, this.y + y, this.z + z);
   }
 
-  public translate3v_(v: vec3): vec3 {
+  public translate3v_(v: ivec3): vec3 {
     this.x += v.x;
     this.y += v.y;
     this.z += v.z;
     return this;
   }
 
-  public translate3v(v: vec3): vec3 {
+  public translate3v(v: ivec3): vec3 {
     return new vec3(this.x + v.x, this.y + v.y, this.z + v.z);
   }
 
@@ -363,11 +363,11 @@ export class vec3 implements ivec3 {
     return this.clone().rotate2_(a, cx, cy);
   }
 
-  public rotate2c_(a: number, c: vec3): vec3 {
+  public rotate2c_(a: number, c: ivec3): vec3 {
     return this.rotate2_(a, c.x / c.z, c.y / c.z);
   }
 
-  public rotate2c(a: number, c: vec3): vec3 {
+  public rotate2c(a: number, c: ivec3): vec3 {
     return this.rotate2(a, c.x / c.z, c.y / c.z);
   }
 
@@ -397,11 +397,11 @@ export class vec3 implements ivec3 {
     return this.clone().rotate3_(a, nx, ny, nz, cx, cy, cz);
   }
 
-  public rotate3v_(a: number, n: vec3, c: vec3): vec3 {
+  public rotate3v_(a: number, n: ivec3, c: ivec3): vec3 {
     return this.rotate3_(a, n.x, n.y, n.z, c.x, c.y, c.z);
   }
 
-  public rotate3v(a: number, n: vec3, c: vec3): vec3 {
+  public rotate3v(a: number, n: ivec3, c: ivec3): vec3 {
     return this.clone().rotate3_(a, n.x, n.y, n.z, c.x, c.y, c.z);
   }
 
@@ -417,11 +417,11 @@ export class vec3 implements ivec3 {
     return this.clone().scale2_(x, y, cx, cy);
   }
 
-  public scale2c_(x: number, y: number, c: vec3): vec3 {
+  public scale2c_(x: number, y: number, c: ivec3): vec3 {
     return this.scale2_(x, y, c.x / c.z, c.y / c.z);
   }
 
-  public scale2c(x: number, y: number, c: vec3): vec3 {
+  public scale2c(x: number, y: number, c: ivec3): vec3 {
     return this.scale2(x, y, c.x / c.z, c.y / c.z);
   }
 
@@ -442,11 +442,11 @@ export class vec3 implements ivec3 {
     return this.clone().scale3_(x, y, z, cx, cy, cz);
   }
 
-  public scale3c_(x: number, y: number, z: number, c: vec3): vec3 {
+  public scale3c_(x: number, y: number, z: number, c: ivec3): vec3 {
     return this.scale3_(x, y, z, c.x, c.y, c.z);
   }
 
-  public scale3c(x: number, y: number, z: number, c: vec3): vec3 {
+  public scale3c(x: number, y: number, z: number, c: ivec3): vec3 {
     return this.clone().scale3_(x, y, z, c.x, c.y, c.z);
   }
 }
@@ -459,11 +459,11 @@ export class vec4 implements ivec4 {
       public z: number,
       public w: number) {}
 
-  public static fromVec2(v: vec2, z: number, w: number): vec4 {
+  public static fromVec2(v: ivec2, z: number, w: number): vec4 {
     return new vec4(v.x, v.y, z, w);
   }
 
-  public static fromVec3(v: vec3, w: number): vec4 {
+  public static fromVec3(v: ivec3, w: number): vec4 {
     return new vec4(v.x, v.y, v.z, w);
   }
 
@@ -519,7 +519,7 @@ export class vec4 implements ivec4 {
     return this.toVec3().div_(this.w);
   }
 
-  public add_(other: vec4): vec4 {
+  public add_(other: ivec4): vec4 {
     this.x += other.x;
     this.y += other.y;
     this.z += other.z;
@@ -527,7 +527,7 @@ export class vec4 implements ivec4 {
     return this;
   }
 
-  public add(other: vec4): vec4 {
+  public add(other: ivec4): vec4 {
     return new vec4(
         this.x + other.x,
         this.y + other.y,
@@ -535,7 +535,7 @@ export class vec4 implements ivec4 {
         this.w + other.w);
   }
 
-  public sub_(other: vec4): vec4 {
+  public sub_(other: ivec4): vec4 {
     this.x -= other.x;
     this.y -= other.y;
     this.z -= other.z;
@@ -543,7 +543,7 @@ export class vec4 implements ivec4 {
     return this;
   }
 
-  public sub(other: vec4): vec4 {
+  public sub(other: ivec4): vec4 {
     return new vec4(
         this.x - other.x,
         this.y - other.y,
@@ -575,7 +575,7 @@ export class vec4 implements ivec4 {
     return new vec4(this.x / r, this.y / r, this.z / r, this.w / r);
   }
 
-  public dot(other: vec4): number {
+  public dot(other: ivec4): number {
     return this.x * other.x + this.y * other.y + this.z * other.z +
         this.w * other.w;
   }
@@ -607,14 +607,14 @@ export class vec4 implements ivec4 {
         this.w);
   }
 
-  public translatev_(v: vec4): vec4 {
+  public translatev_(v: ivec4): vec4 {
     this.x += v.x * this.w / v.w;
     this.y += v.y * this.w / v.w;
     this.z += v.z * this.w / v.w;
     return this;
   }
 
-  public translatev(v: vec4): vec4 {
+  public translatev(v: ivec4): vec4 {
     return new vec4(
         this.x + v.x * this.w / v.w,
         this.y + v.y * this.w / v.w,
@@ -643,14 +643,14 @@ export class vec4 implements ivec4 {
     return this.clone().rotate_(a, nx, ny, nz, cx, cy, cz);
   }
 
-  public rotatev_(a: number, n: vec4, c: vec4): vec4 {
+  public rotatev_(a: number, n: ivec4, c: ivec4): vec4 {
     return this.rotate_(
         a,
         n.x / n.w, n.y / n.w, n.z / n.w,
         c.x / c.w, c.y / c.w, c.z / c.w);
   }
 
-  public rotatev(a: number, n: vec4, c: vec4): vec4 {
+  public rotatev(a: number, n: ivec4, c: ivec4): vec4 {
     return this.clone().rotate_(
         a,
         n.x / n.w, n.y / n.w, n.z / n.w,
@@ -677,13 +677,13 @@ export class vec4 implements ivec4 {
     return this.clone().scale_(x, y, z, cx, cy, cz);
   }
 
-  public scalev_(v: vec4, c: vec4): vec4 {
+  public scalev_(v: ivec4, c: ivec4): vec4 {
     return this.scale_(
         v.x / v.w, v.y / v.w, v.z / v.w,
         c.x / c.w, c.y / c.w, c.z / c.w);
   }
 
-  public scalev(v: vec4, c: vec4): vec4 {
+  public scalev(v: ivec4, c: ivec4): vec4 {
     return this.scale(
         v.x / v.w, v.y / v.w, v.z / v.w,
         c.x / c.w, c.y / c.w, c.z / c.w);
@@ -734,6 +734,23 @@ export class mat2 {
     return this.m00 * this.m11 - this.m01 * this.m10;
   }
 
+  public invert_(): mat2 {
+    const m00 = this.m11;
+    const m01 = this.m10;
+    const m10 = this.m01;
+    const m11 = this.m00;
+    this.m00 = m00;
+    this.m01 = m01;
+    this.m10 = m10;
+    this.m11 = m11;
+    return this.divr_(this.determinant());
+  }
+
+  public invert(): mat2 {
+    return new mat2(
+        this.m11, this.m10, this.m01, this.m00).divr_(this.determinant());
+  }
+
   public mul_(other: mat2): mat2 {
     const m00 = this.m00 * other.m00 + this.m01 * other.m10;
     const m01 = this.m00 * other.m01 + this.m01 * other.m11;
@@ -766,7 +783,7 @@ export class mat2 {
     return new mat2(this.m00 * r, this.m01 * r, this.m10 * r, this.m11 * r);
   }
 
-  public mulv_(v: vec2): vec2 {
+  public mulv_<tvec2 extends ivec2>(v: tvec2): tvec2 {
     const x = this.m00 * v.x + this.m01 * v.y;
     const y = this.m10 * v.x * this.m11 * v.y;
     v.x = x;
@@ -774,7 +791,7 @@ export class mat2 {
     return v;
   }
 
-  public mulv(v: vec2): vec2 {
+  public mulv(v: ivec2): vec2 {
     return new vec2(
         this.m00 * v.x + this.m01 * v.y,
         this.m10 * v.x * this.m11 * v.y);
@@ -863,6 +880,41 @@ export class mat3 {
     return m00 - m01 + m02;
   }
 
+  public invert_(): mat3 {
+    const m00 = this.m11 * this.m22 - this.m12 * this.m21;
+    const m01 = this.m10 * this.m22 - this.m12 * this.m20;
+    const m02 = this.m10 * this.m21 - this.m11 * this.m20;
+    const m10 = this.m01 * this.m22 - this.m02 * this.m21;
+    const m11 = this.m00 * this.m22 - this.m02 * this.m20;
+    const m12 = this.m00 * this.m21 - this.m01 * this.m20;
+    const m20 = this.m01 * this.m12 - this.m02 * this.m11;
+    const m21 = this.m00 * this.m12 - this.m02 * this.m10;
+    const m22 = this.m00 * this.m11 - this.m01 * this.m10;
+    this.m00 = m00;
+    this.m01 = m01;
+    this.m02 = m02;
+    this.m10 = m10;
+    this.m11 = m11;
+    this.m12 = m12;
+    this.m20 = m20;
+    this.m21 = m21;
+    this.m22 = m22;
+    return this.divr_(this.determinant());
+  }
+
+  public invert(): mat3 {
+    return new mat3(
+        this.m11 * this.m22 - this.m12 * this.m21,
+        this.m10 * this.m22 - this.m12 * this.m20,
+        this.m10 * this.m21 - this.m11 * this.m20,
+        this.m01 * this.m22 - this.m02 * this.m21,
+        this.m00 * this.m22 - this.m02 * this.m20,
+        this.m00 * this.m21 - this.m01 * this.m20,
+        this.m01 * this.m12 - this.m02 * this.m11,
+        this.m00 * this.m12 - this.m02 * this.m10,
+        this.m00 * this.m11 - this.m01 * this.m10).divr_(this.determinant());
+  }
+
   public mul_(other: mat3): mat3 {
     const m00 = this.m00 * other.m00 + this.m01 * other.m10 + this.m02 * other.m20;
     const m01 = this.m00 * other.m01 + this.m01 * other.m11 + this.m02 * other.m21;
@@ -918,7 +970,7 @@ export class mat3 {
         this.m20 * r, this.m21 * r, this.m22 * r);
   }
 
-  public mulv_(v: vec3): vec3 {
+  public mulv_<tvec3 extends ivec3>(v: tvec3): tvec3 {
     const x = this.m00 * v.x + this.m01 * v.y + this.m02 * v.z;
     const y = this.m10 * v.x * this.m11 * v.y + this.m12 * v.z;
     const z = this.m20 * v.x * this.m21 * v.y + this.m22 * v.z;
@@ -928,7 +980,7 @@ export class mat3 {
     return v;
   }
 
-  public mulv(v: vec3): vec3 {
+  public mulv(v: ivec3): vec3 {
     return new vec3(
         this.m00 * v.x + this.m01 * v.y + this.m02 * v.z,
         this.m10 * v.x * this.m11 * v.y + this.m12 * v.z,
