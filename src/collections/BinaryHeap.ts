@@ -13,6 +13,10 @@ export class BinaryHeap<Element> {
     this._compareFn = compare;
   }
 
+  public get size(): number {
+    return this._data.length;
+  }
+
   public isEmpty(): boolean {
     return !this._data.length;
   }
