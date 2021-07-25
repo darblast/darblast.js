@@ -779,6 +779,18 @@ export class mat2 {
         this.m00 * v.x + this.m01 * v.y,
         this.m10 * v.x * this.m11 * v.y);
   }
+
+  public divr_(r: number): mat2 {
+    this.m00 /= r;
+    this.m01 /= r;
+    this.m10 /= r;
+    this.m11 /= r;
+    return this;
+  }
+
+  public divr(r: number): mat2 {
+    return new mat2(this.m00 / r, this.m01 / r, this.m10 / r, this.m11 / r);
+  }
 }
 
 
@@ -914,6 +926,26 @@ export class mat3 {
         this.m00 * v.x + this.m01 * v.y + this.m02 * v.z,
         this.m10 * v.x * this.m11 * v.y + this.m12 * v.z,
         this.m20 * v.x * this.m21 * v.y + this.m22 * v.z);
+  }
+
+  public divr_(r: number): mat3 {
+    this.m00 /= r;
+    this.m01 /= r;
+    this.m02 /= r;
+    this.m10 /= r;
+    this.m11 /= r;
+    this.m12 /= r;
+    this.m20 /= r;
+    this.m21 /= r;
+    this.m22 /= r;
+    return this;
+  }
+
+  public divr(r: number): mat3 {
+    return new mat3(
+        this.m00 / r, this.m01 / r, this.m02 / r,
+        this.m10 / r, this.m11 / r, this.m12 / r,
+        this.m20 / r, this.m21 / r, this.m22 / r);
   }
 }
 
