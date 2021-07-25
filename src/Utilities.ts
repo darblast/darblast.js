@@ -10,6 +10,11 @@ export function mod(a: number, b: number): number {
 }
 
 
+/**
+ * Rounds x to the next power of 2.
+ *
+ * It is assumed that x is a positive integer.
+ */
 export function npo2(x: number): number {
   if (x <= 0) {
     return 1;

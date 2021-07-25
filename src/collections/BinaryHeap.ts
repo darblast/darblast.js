@@ -2,13 +2,14 @@ namespace Darblast {
 export namespace Collections {
 
 
-export class BinaryHeap<Element> {
-  private readonly _compareFn: (element1: Element, element2: Element) => number;
-  private readonly _data: Element[] = [];
+type CompareFn<Element> = (element1: Element, element2: Element) => number;
 
-  public constructor(
-      compare: (element1: Element, element2: Element) => number)
-  {
+
+export class BinaryHeap<Element> {
+  private readonly _compareFn: CompareFn<Element>;
+  private _data: Element[] = [];
+
+  public constructor(compare: CompareFn<Element>) {
     this._compareFn = compare;
   }
 
@@ -38,7 +39,7 @@ export class BinaryHeap<Element> {
     this._data[j] = t;
   }
 
-  public push(element: Element): number {
+  public push(element: Element): void {
     let i = this._data.length;
     this._data.push(element);
     while (i > 0) {
@@ -47,10 +48,9 @@ export class BinaryHeap<Element> {
         this._swap(i, j);
         i = j;
       } else {
-        break;
+        return;
       }
     }
-    return i;
   }
 
   public top(): Element {
@@ -61,40 +61,75 @@ export class BinaryHeap<Element> {
     }
   }
 
-  public remove(i: number): Element {
-    if (i >= this._data.length) {
-      throw new Error('out of range heap removal');
+  private _siftDown(i: number): void {
+    const j = this._left(i);
+    if (j >= this._data.length) {
+      return;
     }
-    const element = this._data[i];
-    this._data[i] = this._data[this._data.length - 1];
-    if (this._data.length > 1) {
-      this._data.length--;
-    }
-    while (true) {
-      const j = this._left(i);
-      const k = this._right(i);
+    const k = this._right(i);
+    if (k < this._data.length) {
       if (this._compare(i, j) > 0) {
-        this._swap(i, j);
-        i = j;
+        if (this._compare(j, k) > 0) {
+          this._swap(i, k);
+          this._siftDown(k);
+        } else {
+          this._swap(i, j);
+          this._siftDown(j);
+        }
       } else if (this._compare(i, k) > 0) {
         this._swap(i, k);
-        i = k;
-      } else {
-        break;
+        this._siftDown(k);
       }
+    } else if (this._compare(i, j) > 0) {
+      this._swap(i, j);
+      this._siftDown(j);
     }
-    return element;
   }
 
   public pop(): Element {
-    if (this._data.length) {
-      return this.remove(0);
-    } else {
+    if (!this._data.length) {
       throw new Error('pop invoked on empty heap');
     }
+    const element = this._data[0];
+    this._data[0] = this._data[this._data.length - 1];
+    if (this._data.length > 1) {
+      this._data.length--;
+    }
+    this._siftDown(0);
+    return element;
+  }
+
+  public clear(): void {
+    this._data.length = 0;
+  }
+
+  private _heapify(): void {
+    const halfSize = (this._data.length + 1) >>> 1;
+    for (let i = 0; i < halfSize; i++) {
+      this._siftDown(i);
+    }
+  }
+
+  public swap(data: Element[]): Element[] {
+    const result = this._data;
+    this._data = data;
+    this._heapify();
+    return result;
+  }
+
+  public static fromArray<Element>(
+      data: Element[], compare: CompareFn<Element>): BinaryHeap<Element>
+  {
+    const heap = new BinaryHeap<Element>(compare);
+    heap.swap(data);
+    return heap;
   }
 }
 
 
 }  // namespace Collections
 }  // namespace Darblast
+
+
+type BinaryHead<Element> = Darblast.Collections.BinaryHeap<Element>;
+const BinaryHeap = Darblast.Collections.BinaryHeap;
