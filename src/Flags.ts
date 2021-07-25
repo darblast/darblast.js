@@ -76,14 +76,15 @@ export function define<Type>(
 
 class BooleanFlagTraits {
   static parse(text: string): boolean {
+    text = text.trim();
     if (!text.length) {
       return true;
     }
     if ('true' === text.toLowerCase()) {
       return true;
     }
-    const parsed = parseInt(text);
-    if (!isNaN(parsed) && !parsed) {
+    const parsed = parseInt(text, 10);
+    if (!isNaN(parsed) && parsed) {
       return true;
     }
     return false;
@@ -124,7 +125,7 @@ export function defineString(
 
 class IntFlagTraits {
   static parse(text: string): number {
-    return parseInt(text);
+    return parseInt(text, 10);
   }
 
   static unparse(value: number): string {
