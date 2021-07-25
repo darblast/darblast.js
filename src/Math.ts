@@ -856,6 +856,13 @@ export class mat3 {
     return this._array;
   }
 
+  public determinant(): number {
+    const m00 = this.m11 * this.m22 - this.m12 * this.m21;
+    const m01 = this.m10 * this.m22 - this.m12 * this.m20;
+    const m02 = this.m10 * this.m21 - this.m11 * this.m20;
+    return m00 - m01 + m02;
+  }
+
   public mul_(other: mat3): mat3 {
     const m00 = this.m00 * other.m00 + this.m01 * other.m10 + this.m02 * other.m20;
     const m01 = this.m00 * other.m01 + this.m01 * other.m11 + this.m02 * other.m21;
