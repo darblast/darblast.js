@@ -108,7 +108,7 @@ export class BinaryHeap<Element> {
   }
 
   private _heapify(): void {
-    const halfSize = (this._data.length + 1) >>> 1;
+    const halfSize = this._data.length >>> 1;
     for (let i = 0; i < halfSize; i++) {
       this._siftDown(i);
     }
