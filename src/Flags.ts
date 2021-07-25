@@ -95,7 +95,7 @@ class BooleanFlagTraits {
   }
 }
 
-export function defineBoolean(
+export function defineBool(
     name: string,
     defaultValue: boolean,
     description: string = ''): FlagInterface<boolean>
