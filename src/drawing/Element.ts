@@ -112,19 +112,21 @@ export abstract class BaseElement implements ivec3 {
 }
 
 
-export class ImageElement extends BaseElement {
-  public readonly animation: FrameAnimation;
+export class StaticImageElement extends BaseElement {
+  private readonly _image: HTMLImageElement;
 
-  private _startTime: number = 0;
+  public constructor(
+      view: View, image: HTMLImageElement, x0: number = 0, y0: number = 0)
+  {
+    super(view, x0, y0, image.width, image.height);
+  }
 
-  public constructor(view: View, animation: FrameAnimation) {
-    super(view, animation.x0, animation.y0, animation.width, animation.height);
-    this.animation = animation;
+  public get image(): HTMLImageElement {
+    return this._image;
   }
 
   public draw(t0: number, t1: number, context: CanvasRenderingContext2D): void {
-    const frame = this.animation.getFrame(this._startTime, t1);
-    context.drawImage(frame.image, this.x, this.y);
+    context.drawImage(this._image, this.x, this.y);
   }
 }
 
@@ -134,5 +136,5 @@ export class ImageElement extends BaseElement {
 
 
 type BaseElement = Darblast.Drawing.BaseElement;
-type ImageElement = Darblast.Drawing.ImageElement;
-const ImageElement = Darblast.Drawing.ImageElement;
+type StaticImageElement = Darblast.Drawing.StaticImageElement;
+const StaticImageElement = Darblast.Drawing.StaticImageElement;

@@ -18,6 +18,8 @@ export class Frame {
 
 
 export class FrameAnimation {
+  public readonly duration: number;
+
   public constructor(
       public readonly frames: Frame[],
       public readonly periodic: boolean,
@@ -27,6 +29,8 @@ export class FrameAnimation {
     if (!this.frames.length) {
       throw new Error('FrameAnimation must have at least 1 frame');
     }
+    this.duration = this.frames.reduce(
+        (duration, frame) => duration + frame.duration, 0);
   }
 
   public get width(): number {
@@ -35,11 +39,6 @@ export class FrameAnimation {
 
   public get height(): number {
     return this.frames[0].height;
-  }
-
-  public getFrame(t0: number, t1: number): Frame {
-    // TODO: get the right frame
-    return this.frames[0];
   }
 }
 
