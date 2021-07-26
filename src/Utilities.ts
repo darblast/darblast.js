@@ -28,22 +28,6 @@ export function npo2(x: number): number {
 }
 
 
-/**
- * Applies mixins to a class.
- *
- * See https://www.typescriptlang.org/docs/handbook/mixins.html
- */
-export function applyMixins(derivedCtor: any, constructors: any[]) {
-  constructors.forEach(baseCtor => {
-    Object.getOwnPropertyNames(baseCtor.prototype).forEach(name => {
-      Object.defineProperty(
-          derivedCtor.prototype, name, Object.getOwnPropertyDescriptor(
-              baseCtor.prototype, name) || Object.create(null));
-    });
-  });
-}
-
-
 export function TemplateClass(compiler: (...args: any[]) => string) {
   return (...args: any[]) => {
     const compiled = compiler.apply(null, args);
@@ -69,5 +53,4 @@ export function startup(fn: () => any): Object {
 
 
 const Utilities = Darblast.Utilities;
-const applyMixins = Darblast.Utilities.applyMixins;
 const TemplateClass = Darblast.Utilities.TemplateClass;

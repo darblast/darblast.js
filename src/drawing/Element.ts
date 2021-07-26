@@ -25,7 +25,7 @@ export abstract class BaseElement implements ivec3 {
       public readonly width: number,
       public readonly height: number) {}
 
-  public _project(view: View): void {
+  public project(view: View): void {
     this.x = this.i;
     this.y = this.j;
     this.z = this.k;
@@ -44,6 +44,7 @@ export class StaticImageElement extends BaseElement {
 
   public constructor(image: HTMLImageElement, x0: number = 0, y0: number = 0) {
     super(x0, y0, image.width, image.height);
+    this._image = image;
   }
 
   public get image(): HTMLImageElement {
