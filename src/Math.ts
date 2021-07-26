@@ -32,6 +32,12 @@ export class vec2 implements ivec2 {
     return new vec2(v.x, v.y);
   }
 
+  public assign(v: ivec2): vec2 {
+    this.x = v.x;
+    this.y = v.y;
+    return this;
+  }
+
   public clone(): vec2 {
     return new vec2(this.x, this.y);
   }
@@ -183,6 +189,13 @@ export class vec3 implements ivec3 {
 
   public static fromVec4(v: ivec4): vec3 {
     return new vec3(v.x, v.y, v.z);
+  }
+
+  public assign(v: ivec3): vec3 {
+    this.x = v.x;
+    this.y = v.y;
+    this.z = v.z;
+    return this;
   }
 
   public clone(): vec3 {
@@ -467,6 +480,14 @@ export class vec4 implements ivec4 {
     return new vec4(v.x, v.y, v.z, w);
   }
 
+  public assign(v: ivec4): vec4 {
+    this.x = v.x;
+    this.y = v.y;
+    this.z = v.z;
+    this.w = v.w;
+    return this;
+  }
+
   public clone(): vec4 {
     return new vec4(this.x, this.y, this.z, this.w);
   }
@@ -714,6 +735,14 @@ export class mat2 {
     return new mat2(x, 0, 0, y);
   }
 
+  public assign(m: mat2): mat2 {
+    this.m00 = m.m00;
+    this.m01 = m.m01;
+    this.m10 = m.m10;
+    this.m11 = m.m11;
+    return this;
+  }
+
   public clone(): mat2 {
     return new mat2(this.m00, this.m01, this.m10, this.m11);
   }
@@ -839,6 +868,19 @@ export class mat3 {
 
   public static scaling(x: number, y: number, z: number = 1): mat3 {
     return new mat3(x, 0, 0, 0, y, 0, 0, 0, z);
+  }
+
+  public assign(m: mat3): mat3 {
+    this.m00 = m.m00;
+    this.m01 = m.m01;
+    this.m02 = m.m02;
+    this.m10 = m.m10;
+    this.m11 = m.m11;
+    this.m12 = m.m12;
+    this.m20 = m.m20;
+    this.m21 = m.m21;
+    this.m22 = m.m22;
+    return this;
   }
 
   public clone(): mat3 {
