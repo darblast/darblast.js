@@ -17,6 +17,10 @@ export class View {
   public project<Point extends ivec3>(point: Point): Point {
     return this._matrix.mulv_(point);
   }
+
+  public unproject(point: ivec3): vec3 {
+    return this._inverseMatrix.mulv(point);
+  }
 }
 
 
