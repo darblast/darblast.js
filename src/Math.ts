@@ -32,6 +32,10 @@ export class vec2 implements ivec2 {
     return new vec2(v.x, v.y);
   }
 
+  public toString(): string {
+    return `vec2<${this.x}, ${this.y}>`;
+  }
+
   public assign(v: ivec2): vec2 {
     this.x = v.x;
     this.y = v.y;
@@ -189,6 +193,10 @@ export class vec3 implements ivec3 {
 
   public static fromVec4(v: ivec4): vec3 {
     return new vec3(v.x, v.y, v.z);
+  }
+
+  public toString(): string {
+    return `vec3<${this.x}, ${this.y}, ${this.z}>`;
   }
 
   public assign(v: ivec3): vec3 {
@@ -480,6 +488,10 @@ export class vec4 implements ivec4 {
     return new vec4(v.x, v.y, v.z, w);
   }
 
+  public toString(): string {
+    return `vec4<${this.x}, ${this.y}, ${this.z}, ${this.w}>`;
+  }
+
   public assign(v: ivec4): vec4 {
     this.x = v.x;
     this.y = v.y;
@@ -735,6 +747,10 @@ export class mat2 {
     return new mat2(x, 0, 0, y);
   }
 
+  public toString(): string {
+    return `mat2<${this.toArray().join(', ')}>`;
+  }
+
   public assign(other: mat2): mat2 {
     this.m00 = other.m00;
     this.m01 = other.m01;
@@ -879,6 +895,10 @@ export class mat3 {
 
   public static scaling(x: number, y: number, z: number = 1): mat3 {
     return new mat3(x, 0, 0, 0, y, 0, 0, 0, z);
+  }
+
+  public toString(): string {
+    return `mat3<${this.toArray().join(', ')}>`;
   }
 
   public assign(other: mat3): mat3 {
@@ -1110,6 +1130,10 @@ export class mat4 {
       public m31: number,
       public m32: number,
       public m33: number) {}
+
+  public toString(): string {
+    return `mat4<${this.toArray().join(', ')}>`;
+  }
 
   public assign(other: mat4): mat4 {
     this.m00 = other.m00;
