@@ -58,6 +58,16 @@ export class vec2 implements ivec2 {
     return this.toVec3(1);
   }
 
+  public neg_(): vec2 {
+    this.x = -this.x;
+    this.y = -this.y;
+    return this;
+  }
+
+  public neg(): vec2 {
+    return new vec2(-this.x, -this.y);
+  }
+
   public add_(other: ivec2): vec2 {
     this.x += other.x;
     this.y += other.y;
@@ -236,6 +246,17 @@ export class vec3 implements ivec3 {
 
   public toStandard(): vec2 {
     return this.toVec2().div_(this.z);
+  }
+
+  public neg_(): vec3 {
+    this.x = -this.x;
+    this.y = -this.y;
+    this.z = -this.z;
+    return this;
+  }
+
+  public neg(): vec3 {
+    return new vec3(-this.x, -this.y, -this.z);
   }
 
   public add_(other: ivec3): vec3 {
@@ -550,6 +571,18 @@ export class vec4 implements ivec4 {
 
   public toStandard(): vec3 {
     return this.toVec3().div_(this.w);
+  }
+
+  public neg_(): vec4 {
+    this.x = -this.x;
+    this.y = -this.y;
+    this.z = -this.z;
+    this.w = -this.w;
+    return this;
+  }
+
+  public neg(): vec4 {
+    return new vec4(-this.x, -this.y, -this.z, -this.w);
   }
 
   public add_(other: ivec4): vec4 {
