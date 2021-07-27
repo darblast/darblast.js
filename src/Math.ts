@@ -735,11 +735,11 @@ export class mat2 {
     return new mat2(x, 0, 0, y);
   }
 
-  public assign(m: mat2): mat2 {
-    this.m00 = m.m00;
-    this.m01 = m.m01;
-    this.m10 = m.m10;
-    this.m11 = m.m11;
+  public assign(other: mat2): mat2 {
+    this.m00 = other.m00;
+    this.m01 = other.m01;
+    this.m10 = other.m10;
+    this.m11 = other.m11;
     return this;
   }
 
@@ -778,6 +778,17 @@ export class mat2 {
   public invert(): mat2 {
     return new mat2(
         this.m11, this.m10, this.m01, this.m00).divr_(this.determinant());
+  }
+
+  public transpose_(): mat2 {
+    const t = this.m01;
+    this.m01 = this.m10;
+    this.m10 = t;
+    return this;
+  }
+
+  public transpose(): mat2 {
+    return new mat2(this.m00, this.m10, this.m01, this.m11);
   }
 
   public mul_(other: mat2): mat2 {
@@ -870,16 +881,16 @@ export class mat3 {
     return new mat3(x, 0, 0, 0, y, 0, 0, 0, z);
   }
 
-  public assign(m: mat3): mat3 {
-    this.m00 = m.m00;
-    this.m01 = m.m01;
-    this.m02 = m.m02;
-    this.m10 = m.m10;
-    this.m11 = m.m11;
-    this.m12 = m.m12;
-    this.m20 = m.m20;
-    this.m21 = m.m21;
-    this.m22 = m.m22;
+  public assign(other: mat3): mat3 {
+    this.m00 = other.m00;
+    this.m01 = other.m01;
+    this.m02 = other.m02;
+    this.m10 = other.m10;
+    this.m11 = other.m11;
+    this.m12 = other.m12;
+    this.m20 = other.m20;
+    this.m21 = other.m21;
+    this.m22 = other.m22;
     return this;
   }
 
@@ -955,6 +966,29 @@ export class mat3 {
         this.m01 * this.m12 - this.m02 * this.m11,
         this.m00 * this.m12 - this.m02 * this.m10,
         this.m00 * this.m11 - this.m01 * this.m10).divr_(this.determinant());
+  }
+
+  public transpose_(): mat3 {
+    const m01 = this.m10;
+    const m02 = this.m20;
+    const m10 = this.m01;
+    const m12 = this.m21;
+    const m20 = this.m02;
+    const m21 = this.m12;
+    this.m01 = m01;
+    this.m02 = m02;
+    this.m10 = m10;
+    this.m12 = m12;
+    this.m20 = m20;
+    this.m21 = m21;
+    return this;
+  }
+
+  public transpose(): mat3 {
+    return new mat3(
+        this.m00, this.m10, this.m20,
+        this.m01, this.m11, this.m21,
+        this.m02, this.m12, this.m22);
   }
 
   public mul_(other: mat3): mat3 {
@@ -1077,6 +1111,34 @@ export class mat4 {
       public m32: number,
       public m33: number) {}
 
+  public assign(other: mat4): mat4 {
+    this.m00 = other.m00;
+    this.m01 = other.m01;
+    this.m02 = other.m02;
+    this.m03 = other.m03;
+    this.m10 = other.m10;
+    this.m11 = other.m11;
+    this.m12 = other.m12;
+    this.m13 = other.m13;
+    this.m20 = other.m20;
+    this.m21 = other.m21;
+    this.m22 = other.m22;
+    this.m23 = other.m23;
+    this.m30 = other.m30;
+    this.m31 = other.m31;
+    this.m32 = other.m32;
+    this.m33 = other.m33;
+    return this;
+  }
+
+  public clone(): mat4 {
+    return new mat4(
+        this.m00, this.m01, this.m02, this.m03,
+        this.m10, this.m11, this.m12, this.m13,
+        this.m20, this.m21, this.m22, this.m23,
+        this.m30, this.m31, this.m32, this.m33);
+  }
+
   public toArray(): [
       number, number, number, number,
       number, number, number, number,
@@ -1109,6 +1171,42 @@ export class mat4 {
       ];
     }
     return this._array;
+  }
+
+  public transpose_(): mat4 {
+    const m01 = this.m10;
+    const m02 = this.m20;
+    const m03 = this.m30;
+    const m10 = this.m01;
+    const m12 = this.m21;
+    const m13 = this.m31;
+    const m20 = this.m02;
+    const m21 = this.m12;
+    const m23 = this.m32;
+    const m30 = this.m03;
+    const m31 = this.m13;
+    const m32 = this.m23;
+    this.m01 = m01;
+    this.m02 = m02;
+    this.m03 = m03;
+    this.m10 = m10;
+    this.m12 = m12;
+    this.m13 = m13;
+    this.m20 = m20;
+    this.m21 = m21;
+    this.m23 = m23;
+    this.m30 = m30;
+    this.m31 = m31;
+    this.m32 = m32;
+    return this;
+  }
+
+  public transpose(): mat4 {
+    return new mat4(
+        this.m00, this.m10, this.m20, this.m30,
+        this.m01, this.m11, this.m21, this.m31,
+        this.m02, this.m12, this.m22, this.m32,
+        this.m03, this.m13, this.m23, this.m33);
   }
 }
 
