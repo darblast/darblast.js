@@ -26,11 +26,11 @@ export class BinaryHeap<Element> {
   }
 
   private _left(i: number): number {
-    return i * 2;
+    return i * 2 + 1;
   }
 
   private _right(i: number): number {
-    return i * 2 + 1;
+    return i * 2 + 2;
   }
 
   private _compare(i: number, j: number): number {
