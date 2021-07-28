@@ -42,6 +42,18 @@ export class vec2 implements ivec2 {
     return this;
   }
 
+  public assignVec3(v: ivec3): vec2 {
+    this.x = v.x;
+    this.y = v.y;
+    return this;
+  }
+
+  public assignVec4(v: ivec4): vec2 {
+    this.x = v.x;
+    this.y = v.y;
+    return this;
+  }
+
   public clone(): vec2 {
     return new vec2(this.x, this.y);
   }
@@ -209,7 +221,20 @@ export class vec3 implements ivec3 {
     return `vec3<${this.x}, ${this.y}, ${this.z}>`;
   }
 
+  public assignVec2(v: ivec2): vec3 {
+    this.x = v.x;
+    this.y = v.y;
+    return this;
+  }
+
   public assign(v: ivec3): vec3 {
+    this.x = v.x;
+    this.y = v.y;
+    this.z = v.z;
+    return this;
+  }
+
+  public assignVec4(v: ivec4): vec3 {
     this.x = v.x;
     this.y = v.y;
     this.z = v.z;
@@ -511,6 +536,19 @@ export class vec4 implements ivec4 {
 
   public toString(): string {
     return `vec4<${this.x}, ${this.y}, ${this.z}, ${this.w}>`;
+  }
+
+  public assignVec2(v: ivec2): vec4 {
+    this.x = v.x;
+    this.y = v.y;
+    return this;
+  }
+
+  public assignVec3(v: ivec3): vec4 {
+    this.x = v.x;
+    this.y = v.y;
+    this.z = v.z;
+    return this;
   }
 
   public assign(v: ivec4): vec4 {
