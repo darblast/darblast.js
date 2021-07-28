@@ -58,11 +58,11 @@ export class vec2 implements ivec2 {
     return new vec2(this.x, this.y);
   }
 
-  public toVec3(z: number): vec3 {
+  public toVec3(z: number = 0): vec3 {
     return new vec3(this.x, this.y, z);
   }
 
-  public toVec4(z: number, w: number): vec4 {
+  public toVec4(z: number = 0, w: number = 1): vec4 {
     return new vec4(this.x, this.y, z, w);
   }
 
@@ -253,7 +253,7 @@ export class vec3 implements ivec3 {
     return new vec2(this.x, this.y);
   }
 
-  public toVec4(w: number): vec4 {
+  public toVec4(w: number = 1): vec4 {
     return new vec4(this.x, this.y, this.z, w);
   }
 
