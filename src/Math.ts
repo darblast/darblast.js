@@ -24,6 +24,10 @@ export class vec2 implements ivec2 {
       public x: number,
       public y: number) {}
 
+  public static zero(): vec2 {
+    return new vec2(0, 0);
+  }
+
   public static fromVec3(v: ivec3): vec2 {
     return new vec2(v.x, v.y);
   }
@@ -128,7 +132,11 @@ export class vec2 implements ivec2 {
     return GlobalMath.hypot(this.x, this.y);
   }
 
-  public square(): number {
+  public length(): number {
+    return GlobalMath.hypot(this.x, this.y);
+  }
+
+  public squareLength(): number {
     return this.x * this.x + this.y * this.y;
   }
 
@@ -141,8 +149,12 @@ export class vec2 implements ivec2 {
   }
 
   public angle(other: ivec2): number {
-    const r = this.modulus() * vec2.prototype.modulus.call(other);
-    return GlobalMath.acos(this.dot(other) / r);
+    const r = this.squareLength() * vec2.prototype.squareLength.call(other);
+    return GlobalMath.acos(this.dot(other) / GlobalMath.sqrt(r));
+  }
+
+  public anglen(normal: ivec2): number {
+    return GlobalMath.acos(this.dot(normal) / this.modulus());
   }
 
   public translate_(x: number, y: number): vec2 {
@@ -212,6 +224,10 @@ export class vec3 implements ivec3 {
       public x: number,
       public y: number,
       public z: number) {}
+
+  public static zero(): vec3 {
+    return new vec3(0, 0, 0);
+  }
 
   public static fromVec2(v: ivec2, z: number): vec3 {
     return new vec3(v.x, v.y, z);
@@ -357,7 +373,11 @@ export class vec3 implements ivec3 {
     return GlobalMath.hypot(this.x, this.y, this.z);
   }
 
-  public square(): number {
+  public length(): number {
+    return GlobalMath.hypot(this.x, this.y, this.z);
+  }
+
+  public squareLength(): number {
     return this.x * this.x + this.y * this.y + this.z * this.z;
   }
 
@@ -372,6 +392,10 @@ export class vec3 implements ivec3 {
   public angle(other: ivec3): number {
     const r = this.modulus() * vec3.prototype.modulus.call(other);
     return GlobalMath.acos(this.dot(other) / r);
+  }
+
+  public anglen(normal: ivec3): number {
+    return GlobalMath.acos(this.dot(normal) / this.modulus());
   }
 
   public translate2_(x: number, y: number, z: number = 1): vec3 {
@@ -533,6 +557,10 @@ export class vec4 implements ivec4 {
       public y: number,
       public z: number,
       public w: number) {}
+
+  public static zero(): vec4 {
+    return new vec4(0, 0, 0, 0);
+  }
 
   public static fromVec2(v: ivec2, z: number, w: number): vec4 {
     return new vec4(v.x, v.y, z, w);
@@ -696,7 +724,11 @@ export class vec4 implements ivec4 {
     return GlobalMath.hypot(this.x, this.y, this.z, this.w);
   }
 
-  public square(): number {
+  public length(): number {
+    return GlobalMath.hypot(this.x, this.y, this.z, this.w);
+  }
+
+  public squareLength(): number {
     return this.x * this.x + this.y * this.y + this.z * this.z +
         this.w * this.w;
   }
