@@ -128,6 +128,10 @@ export class vec2 implements ivec2 {
     return GlobalMath.hypot(this.x, this.y);
   }
 
+  public square(): number {
+    return this.x * this.x + this.y * this.y;
+  }
+
   public normalize_(): vec2 {
     return this.div_(this.modulus());
   }
@@ -351,6 +355,10 @@ export class vec3 implements ivec3 {
 
   public modulus(): number {
     return GlobalMath.hypot(this.x, this.y, this.z);
+  }
+
+  public square(): number {
+    return this.x * this.x + this.y * this.y + this.z * this.z;
   }
 
   public normalize_(): vec3 {
@@ -686,6 +694,11 @@ export class vec4 implements ivec4 {
 
   public modulus(): number {
     return GlobalMath.hypot(this.x, this.y, this.z, this.w);
+  }
+
+  public square(): number {
+    return this.x * this.x + this.y * this.y + this.z * this.z +
+        this.w * this.w;
   }
 
   public normalize_(): vec4 {
