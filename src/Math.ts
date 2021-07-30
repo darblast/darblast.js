@@ -229,7 +229,7 @@ export class vec3 implements ivec3 {
     return new vec3(0, 0, 0);
   }
 
-  public static fromVec2(v: ivec2, z: number): vec3 {
+  public static fromVec2(v: ivec2, z: number = 0): vec3 {
     return new vec3(v.x, v.y, z);
   }
 
@@ -562,11 +562,11 @@ export class vec4 implements ivec4 {
     return new vec4(0, 0, 0, 0);
   }
 
-  public static fromVec2(v: ivec2, z: number, w: number): vec4 {
+  public static fromVec2(v: ivec2, z: number = 0, w: number = 1): vec4 {
     return new vec4(v.x, v.y, z, w);
   }
 
-  public static fromVec3(v: ivec3, w: number): vec4 {
+  public static fromVec3(v: ivec3, w: number = 1): vec4 {
     return new vec4(v.x, v.y, v.z, w);
   }
 

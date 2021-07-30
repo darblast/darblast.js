@@ -5,14 +5,26 @@ const {vec2, vec3, vec4, mat2, mat3, mat4} = Darblast.Math;
 
 
 describe('vec2', () => {
-  it('constructs correctly', () => {
+  it('can be constructed', () => {
     const v = new vec2(2, 3);
     expect(v.x).to.equal(2);
     expect(v.y).to.equal(3);
   });
 
+  it('has zero', () => {
+    const v = vec2.zero();
+    expect(v.x).to.equal(0);
+    expect(v.y).to.equal(0);
+  });
+
   it('can be constructed from vec3', () => {
     const v = vec2.fromVec3(new vec3(2, 3, 4));
+    expect(v.x).to.equal(2);
+    expect(v.y).to.equal(3);
+  });
+
+  it('can be constructed from vec4', () => {
+    const v = vec2.fromVec4(new vec4(2, 3, 4, 5));
     expect(v.x).to.equal(2);
     expect(v.y).to.equal(3);
   });
@@ -75,7 +87,8 @@ describe('vec2', () => {
   });
 
   it('defaults Z and W when unspecified upon conversion to vec4', () => {
-    const v = new vec2(2, 3);
+    const v = new vec2(2, 3);  // TODO
+
     const u = v.toVec4();
     expect(u.z).to.equal(0);
     expect(u.w).to.equal(1);
@@ -371,11 +384,132 @@ describe('vec2', () => {
 
 
 describe('vec3', () => {
-  it('constructs correctly', () => {
+  it('can be constructed', () => {
     const v = new vec3(2, 3, 4);
     expect(v.x).to.equal(2);
     expect(v.y).to.equal(3);
     expect(v.z).to.equal(4);
+  });
+
+  it('has zero', () => {
+    const v = vec3.zero();
+    expect(v.x).to.equal(0);
+    expect(v.y).to.equal(0);
+    expect(v.z).to.equal(0);
+  });
+
+  it('can be constructed from vec2', () => {
+    const v = vec3.fromVec2(new vec2(2, 3), 4);
+    expect(v.x).to.equal(2);
+    expect(v.y).to.equal(3);
+    expect(v.z).to.equal(4);
+  });
+
+  it('can be constructed from vec4', () => {
+    const v = vec3.fromVec4(new vec4(2, 3, 4, 5));
+    expect(v.x).to.equal(2);
+    expect(v.y).to.equal(3);
+    expect(v.z).to.equal(4);
+  });
+
+  it('can be assigned from vec2', () => {
+    const v = new vec3(2, 3, 4);
+    v.assignVec2(new vec2(5, 6));
+    expect(v.x).to.equal(5);
+    expect(v.y).to.equal(6);
+    expect(v.z).to.equal(4);
+  });
+
+  it('can be assigned', () => {
+    const v = new vec3(2, 3, 4);
+    v.assign(new vec3(5, 6, 7));
+    expect(v.x).to.equal(5);
+    expect(v.y).to.equal(6);
+    expect(v.z).to.equal(7);
+  });
+
+  it('can be assigned from vec4', () => {
+    const v = new vec3(2, 3, 4);
+    v.assignVec4(new vec4(5, 6, 7, 8));
+    expect(v.x).to.equal(5);
+    expect(v.y).to.equal(6);
+    expect(v.z).to.equal(7);
+  });
+
+  it('can be cloned', () => {
+    const v = new vec3(2, 3, 4);
+    const u = v.clone();
+    u.x = 5;
+    u.y = 6;
+    u.z = 7;
+    expect(v.x).to.equal(2);
+    expect(v.y).to.equal(3);
+    expect(v.z).to.equal(4);
+  });
+
+  it('can be converted to vec2', () => {
+    const v = new vec3(2, 3, 4);
+    const u = v.toVec2();
+    u.x = 5;
+    u.y = 6;
+    expect(v.x).to.equal(2);
+    expect(v.y).to.equal(3);
+    expect(v.z).to.equal(4);
+  });
+
+  it('can be converted to vec4', () => {
+    const v = new vec3(2, 3, 4);
+    const u = v.toVec4(5);
+    v.x = 6;
+    v.y = 7;
+    v.z = 8;
+    expect(u.x).to.equal(2);
+    expect(u.y).to.equal(3);
+    expect(u.z).to.equal(4);
+    expect(u.w).to.equal(5);
+  });
+
+  it('has the xy projection', () => {
+    const v = new vec3(2, 3, 4);
+    const u = v.xy;
+    expect(u.x).to.equal(2);
+    expect(u.y).to.equal(3);
+  });
+
+  it('has the xz projection', () => {
+    const v = new vec3(2, 3, 4);
+    const u = v.xz;
+    expect(u.x).to.equal(2);
+    expect(u.y).to.equal(4);
+  });
+
+  it('has the yz projection', () => {
+    const v = new vec3(2, 3, 4);
+    const u = v.yz;
+    expect(u.x).to.equal(3);
+    expect(u.y).to.equal(4);
+  });
+
+  it('can be converted to a homogeneous vec4', () => {
+    const v = new vec3(2, 3, 4);
+    const u = v.toHomogeneous();
+    v.x = 5;
+    v.y = 6;
+    v.z = 7;
+    expect(u.x).to.equal(2);
+    expect(u.y).to.equal(3);
+    expect(u.z).to.equal(4);
+    expect(u.w).to.equal(1);
+  });
+
+  it('can be converted to a standard vec2', () => {
+    const v = new vec3(6, 4, 2);
+    const u = v.toStandard();
+    v.x = 9;
+    v.y = 8;
+    v.z = 7;
+    expect(u.x).to.equal(3);
+    expect(u.y).to.equal(2);
   });
 
   // TODO
@@ -383,7 +517,7 @@ describe('vec3', () => {
 
 
 describe('vec4', () => {
-  it('constructs correctly', () => {
+  it('can be constructed', () => {
     const v = new vec4(2, 3, 4, 5);
     expect(v.x).to.equal(2);
     expect(v.y).to.equal(3);
