@@ -213,36 +213,160 @@ describe('vec2', () => {
   });
 
   it('measures angle in upper-right quadrant', () => {
-    const v = new vec2(0.5, Math.sqrt(3 / 4));
-    const u = new vec2(Math.sqrt(3 / 4), 0.5);
-    expect(v.angle(new vec2(1, 0))).to.be.approximately(Math.PI / 3, 0.0001);
+    const v = new vec2(1, Math.sqrt(3));
+    const u = new vec2(Math.sqrt(3), 1);
+    expect(v.angle(new vec2(2, 0))).to.be.approximately(Math.PI / 3, 0.0001);
     expect(v.angle(u)).to.be.approximately(Math.PI / 6, 0.0001);
   });
 
   it('measures angle in upper-left quadrant', () => {
-    const v = new vec2(-Math.sqrt(3 / 4), 0.5);
-    const u = new vec2(-0.5, Math.sqrt(3 / 4));
-    expect(v.angle(new vec2(1, 0))).to.be.approximately(
+    const v = new vec2(-Math.sqrt(3), 1);
+    const u = new vec2(-1, Math.sqrt(3));
+    expect(v.angle(new vec2(2, 0))).to.be.approximately(
         Math.PI * 5 / 6, 0.0001);
     expect(v.angle(u)).to.be.approximately(Math.PI / 6, 0.0001);
   });
 
   it('measures angle in lower-right quadrant', () => {
-    const v = new vec2(0.5, -Math.sqrt(3 / 4));
-    const u = new vec2(Math.sqrt(3 / 4), -0.5);
-    expect(v.angle(new vec2(1, 0))).to.be.approximately(Math.PI / 3, 0.0001);
+    const v = new vec2(1, -Math.sqrt(3));
+    const u = new vec2(Math.sqrt(3), -1);
+    expect(v.angle(new vec2(2, 0))).to.be.approximately(Math.PI / 3, 0.0001);
     expect(v.angle(u)).to.be.approximately(Math.PI / 6, 0.0001);
   });
 
   it('measures angle in lower-left quadrant', () => {
-    const v = new vec2(-Math.sqrt(3 / 4), -0.5);
-    const u = new vec2(-0.5, -Math.sqrt(3 / 4));
-    expect(v.angle(new vec2(1, 0))).to.be.approximately(
+    const v = new vec2(-Math.sqrt(3), -1);
+    const u = new vec2(-1, -Math.sqrt(3));
+    expect(v.angle(new vec2(2, 0))).to.be.approximately(
         Math.PI * 5 / 6, 0.0001);
     expect(v.angle(u)).to.be.approximately(Math.PI / 6, 0.0001);
   });
 
-  // TODO
+  it('measures angle in upper-right quadrant against normal', () => {
+    const v = new vec2(0.5, Math.sqrt(3 / 4));
+    const u = new vec2(Math.sqrt(3 / 4), 0.5);
+    expect(v.anglen(new vec2(1, 0))).to.be.approximately(Math.PI / 3, 0.0001);
+    expect(v.anglen(u)).to.be.approximately(Math.PI / 6, 0.0001);
+  });
+
+  it('measures angle in upper-left quadrant against normal', () => {
+    const v = new vec2(-Math.sqrt(3 / 4), 0.5);
+    const u = new vec2(-0.5, Math.sqrt(3 / 4));
+    expect(v.anglen(new vec2(1, 0))).to.be.approximately(
+        Math.PI * 5 / 6, 0.0001);
+    expect(v.anglen(u)).to.be.approximately(Math.PI / 6, 0.0001);
+  });
+
+  it('measures angle in lower-right quadrant against normal', () => {
+    const v = new vec2(0.5, -Math.sqrt(3 / 4));
+    const u = new vec2(Math.sqrt(3 / 4), -0.5);
+    expect(v.anglen(new vec2(1, 0))).to.be.approximately(Math.PI / 3, 0.0001);
+    expect(v.anglen(u)).to.be.approximately(Math.PI / 6, 0.0001);
+  });
+
+  it('measures angle in lower-left quadrant against normal', () => {
+    const v = new vec2(-Math.sqrt(3 / 4), -0.5);
+    const u = new vec2(-0.5, -Math.sqrt(3 / 4));
+    expect(v.anglen(new vec2(1, 0))).to.be.approximately(
+        Math.PI * 5 / 6, 0.0001);
+    expect(v.anglen(u)).to.be.approximately(Math.PI / 6, 0.0001);
+  });
+
+  it('translates in place', () => {
+    const v = new vec2(2, 3);
+    v.translate_(4, 5);
+    expect(v.x).to.equal(6);
+    expect(v.y).to.equal(8);
+  });
+
+  it('translates', () => {
+    const v = new vec2(2, 3);
+    const u = v.translate(4, 5);
+    expect(v.x).to.equal(2);
+    expect(v.y).to.equal(3);
+    expect(u.x).to.equal(6);
+    expect(u.y).to.equal(8);
+  });
+
+  it('translates by another vector in place', () => {
+    const v = new vec2(2, 3);
+    v.translatev_(new vec2(4, 5));
+    expect(v.x).to.equal(6);
+    expect(v.y).to.equal(8);
+  });
+
+  it('translates by another vector', () => {
+    const v = new vec2(2, 3);
+    const u = v.translatev(new vec2(4, 5));
+    expect(v.x).to.equal(2);
+    expect(v.y).to.equal(3);
+    expect(u.x).to.equal(6);
+    expect(u.y).to.equal(8);
+  });
+
+  it('rotates in place', () => {
+    const v = new vec2(4, 5);
+    v.rotate_(Math.PI / 2, 2, 3);
+    expect(v.x).to.equal(0);
+    expect(v.y).to.equal(5);
+  });
+
+  it('rotates', () => {
+    const v = new vec2(4, 5);
+    const u = v.rotate(Math.PI / 2, 2, 3);
+    expect(v.x).to.equal(4);
+    expect(v.y).to.equal(5);
+    expect(u.x).to.equal(0);
+    expect(u.y).to.equal(5);
+  });
+
+  it('rotates around another vector in place', () => {
+    const v = new vec2(4, 5);
+    v.rotatec_(Math.PI / 2, new vec2(2, 3));
+    expect(v.x).to.equal(0);
+    expect(v.y).to.equal(5);
+  });
+
+  it('rotates around another vector', () => {
+    const v = new vec2(4, 5);
+    const u = v.rotatec(Math.PI / 2, new vec2(2, 3));
+    expect(v.x).to.equal(4);
+    expect(v.y).to.equal(5);
+    expect(u.x).to.equal(0);
+    expect(u.y).to.equal(5);
+  });
+
+  it('scales in place', () => {
+    const v = new vec2(6, 7);
+    v.scale_(2, 3, 4, 5);
+    expect(v.x).to.equal(8);
+    expect(v.y).to.equal(11);
+  });
+
+  it('scales', () => {
+    const v = new vec2(6, 7);
+    const u = v.scale(2, 3, 4, 5);
+    expect(v.x).to.equal(6);
+    expect(v.y).to.equal(7);
+    expect(u.x).to.equal(8);
+    expect(u.y).to.equal(11);
+  });
+
+  it('scales around another vector in place', () => {
+    const v = new vec2(6, 7);
+    v.scalec_(2, 3, new vec2(4, 5));
+    expect(v.x).to.equal(8);
+    expect(v.y).to.equal(11);
+  });
+
+  it('scales around another vector', () => {
+    const v = new vec2(6, 7);
+    const u = v.scalec(2, 3, new vec2(4, 5));
+    expect(v.x).to.equal(6);
+    expect(v.y).to.equal(7);
+    expect(u.x).to.equal(8);
+    expect(u.y).to.equal(11);
+  });
 });
 
 

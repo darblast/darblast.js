@@ -188,7 +188,7 @@ export class vec2 implements ivec2 {
   }
 
   public rotate(a: number, cx: number = 0, cy: number = 0): vec2 {
-    return this.clone().rotate_(cx, cy, a);
+    return this.clone().rotate_(a, cx, cy);
   }
 
   public rotatec_(a: number, c: vec2): vec2 {
