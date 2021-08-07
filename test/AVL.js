@@ -64,12 +64,14 @@ describe('AVL', () => {
 
   it('should be initially empty', () => {
     expect(tree.size).to.equal(0);
+    expect(tree.isEmpty()).to.equal(true);
     expect(tree.capacity).to.equal(0);
   });
 
   it('grows upon insertion', () => {
     tree.insertOrUpdate(element());
     expect(tree.size).to.equal(1);
+    expect(tree.isEmpty()).to.equal(false);
     expect(tree.capacity).to.equal(1);
   });
 
@@ -77,6 +79,7 @@ describe('AVL', () => {
     tree.insertOrUpdate(element());
     tree.insertOrUpdate(element());
     expect(tree.size).to.equal(2);
+    expect(tree.isEmpty()).to.equal(false);
     expect(tree.capacity).to.equal(3);
   });
 
@@ -86,6 +89,7 @@ describe('AVL', () => {
     tree.insertOrUpdate(element());
     tree.insertOrUpdate(element());
     expect(tree.size).to.equal(4);
+    expect(tree.isEmpty()).to.equal(false);
     expect(tree.capacity).to.equal(7);
   });
 
@@ -101,9 +105,50 @@ describe('AVL', () => {
     expect(result).to.equal(false);
   });
 
-  it('retrieves an inserted element', () => {
+  it('retrieves an inserted element with the first index', () => {
     const e = element();
     tree.insertOrUpdate(e);
+    expect(tree.lookup0(e.x, e.y, e.z)).to.eql(e);
     expect(tree.lookup(e.x, e.y, e.z)).to.eql(e);
+  });
+
+  it('retrieves an inserted element with the second index', () => {
+    const e = element();
+    tree.insertOrUpdate(e);
+    expect(tree.lookup1(e.y, e.x, e.z)).to.eql(e);
+  });
+
+  it('retrieves another inserted element with the first index', () => {
+    const e1 = element();
+    const e2 = element();
+    tree.insertOrUpdate(e1);
+    tree.insertOrUpdate(e2);
+    expect(tree.lookup0(e2.x, e2.y, e2.z)).to.eql(e2);
+    expect(tree.lookup(e2.x, e2.y, e2.z)).to.eql(e2);
+  });
+
+  it('retrieves another inserted element with the second index', () => {
+    const e1 = element();
+    const e2 = element();
+    tree.insertOrUpdate(e1);
+    tree.insertOrUpdate(e2);
+    expect(tree.lookup1(e2.y, e2.x, e2.z)).to.eql(e2);
+  });
+
+  it('retrieves the first inserted element with the first index', () => {
+    const e1 = element();
+    const e2 = element();
+    tree.insertOrUpdate(e1);
+    tree.insertOrUpdate(e2);
+    expect(tree.lookup0(e1.x, e1.y, e1.z)).to.eql(e1);
+    expect(tree.lookup(e1.x, e1.y, e1.z)).to.eql(e1);
+  });
+
+  it('retrieves the first inserted element with the second index', () => {
+    const e1 = element();
+    const e2 = element();
+    tree.insertOrUpdate(e1);
+    tree.insertOrUpdate(e2);
+    expect(tree.lookup1(e1.y, e1.x, e1.z)).to.eql(e1);
   });
 });
