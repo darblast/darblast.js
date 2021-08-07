@@ -73,6 +73,17 @@ export const compileAVL = TemplateClass(
     fieldMap[field.name] = field;
   }
 
+  const getRecordField = (name: string) => {
+    if (name in fieldMap) {
+      return `this.$views.${fieldMap[name].type}[this.$node * ${
+          definition.byteSize >>> fieldMap[name].logSize} + ${
+          definition.getFieldIndex(name)}]`;
+    } else {
+      throw new Error(
+          `internal error: field ${JSON.stringify(name)} is not defined`);
+    }
+  };
+
   const getNodeField = (node: string, name: string) => {
     if (name in fieldMap) {
       return `this._views.${fieldMap[name].type}[${node} * ${
@@ -108,6 +119,25 @@ export const compileAVL = TemplateClass(
         uint32: new Uint32Array(this._data),
         float32: new Float32Array(this._data),
         float64: new Float64Array(this._data),
+      };
+
+      static Record = class Record {
+        constructor(views, node) {
+          this.$views = views;
+          this.$node = node;
+        }
+
+        ${fields.map(({name}) => `
+          get ${name}() {
+            return ${getRecordField(name)};
+          }
+
+          ${(indices[0].keys.indexOf(name) < 0) ? `
+            set ${name}(value) {
+              ${getRecordField(name)} = value;
+            }
+          ` : ''}
+        `).join('')}
       };
 
       ${indices.map((_, index) => `_root${index} = 0;`).join('')}
@@ -210,14 +240,7 @@ export const compileAVL = TemplateClass(
         `).join('')}
       }
 
-      _fillRecord(node, output) {
-        ${fields.map(field => `
-          output.${field.name} = ${getField(field.name)};
-        `).join('')}
-        return output;
-      }
-
-      _record = Object.create(null);
+      _record = new AVL.Record(this._views, 0);
 
       ${indices.map((_, index) => {
         const keys = indices[index].keys;
@@ -253,7 +276,8 @@ export const compileAVL = TemplateClass(
 
           *scan${index}_(...keys) {
             for (const node of this._scan${index}(this._root${index}, keys)) {
-              if (yield this._fillRecord(node, this._record)) {
+              this._record.$node = node;
+              if (yield this._record) {
                 return false;
               }
             }
@@ -262,7 +286,7 @@ export const compileAVL = TemplateClass(
 
           *scan${index}(...keys) {
             for (const node of this._scan${index}(this._root${index}, keys)) {
-              if (yield this._fillRecord(node, Object.create(null))) {
+              if (yield new AVL.Record(this._views, node)) {
                 return false;
               }
             }
@@ -284,7 +308,8 @@ export const compileAVL = TemplateClass(
             for (const node of this._lowerBound${index}(
                 this._root${index}, keys))
             {
-              if (yield this._fillRecord(node, this._record)) {
+              this._record.$node = node;
+              if (yield this._record) {
                 return false;
               }
             }
@@ -295,7 +320,7 @@ export const compileAVL = TemplateClass(
             for (const node of this._lowerBound${index}(
                 this._root${index}, keys))
             {
-              if (yield this._fillRecord(node, Object.create(null))) {
+              if (yield new AVL.Record(this._views, node)) {
                 return false;
               }
             }
@@ -317,7 +342,8 @@ export const compileAVL = TemplateClass(
             for (const node of this._upperBound${index}(
                 this._root${index}, keys))
             {
-              if (yield this._fillRecord(node, this._record)) {
+              this._record.$node = node;
+              if (yield this._record) {
                 return false;
               }
             }
@@ -328,7 +354,7 @@ export const compileAVL = TemplateClass(
             for (const node of this._upperBound${index}(
                 this._root${index}, keys))
             {
-              if (yield this._fillRecord(node, Object.create(null))) {
+              if (yield new AVL.Record(this._views, node)) {
                 return false;
               }
             }
@@ -354,7 +380,8 @@ export const compileAVL = TemplateClass(
             for (const node of this._range${index}(
                 this._root${index}, lowerBound, upperBound))
             {
-              if (yield this._fillRecord(node, this._record)) {
+              this._record.$node = node;
+              if (yield this._record) {
                 return false;
               }
             }
@@ -365,7 +392,7 @@ export const compileAVL = TemplateClass(
             for (const node of this._range${index}(
                 this._root${index}, lowerBound, upperBound))
             {
-              if (yield this._fillRecord(node, Object.create(null))) {
+              if (yield new AVL.Record(this._views, node)) {
                 return false;
               }
             }
@@ -402,7 +429,8 @@ export const compileAVL = TemplateClass(
           lookup${index}_(${keyArgs}) {
             const node = this._lookup${index}(${keyArgs});
             if (node) {
-              return this._fillRecord(node, this._record);
+              this._record.$node = node;
+              return this._record;
             } else {
               return null;
             }
@@ -411,7 +439,7 @@ export const compileAVL = TemplateClass(
           lookup${index}(${keyArgs}) {
             const node = this._lookup${index}(${keyArgs});
             if (node) {
-              return this._fillRecord(node, Object.create(null));
+              return new AVL.Record(this._views, node);
             } else {
               return null;
             }
@@ -470,7 +498,8 @@ export const compileAVL = TemplateClass(
         lookup_(${keyArgs}) {
           const node = this._lookup0(${keyArgs});
           if (node) {
-            return this._fillRecord(node, this._record);
+            this._record.$node = node;
+            return this._record;
           } else {
             return null;
           }
@@ -479,7 +508,7 @@ export const compileAVL = TemplateClass(
         lookup(${keyArgs}) {
           const node = this._lookup0(${keyArgs});
           if (node) {
-            return this._fillRecord(node, Object.create(null));
+            return new AVL.Record(this._views, node);
           } else {
             return null;
           }

@@ -16,6 +16,15 @@ const TestAVL = AVL.fromSchema({
 ]);
 
 
+const compareRecords = (record1, record2) => {
+  expect(record1.x).to.equal(record2.x);
+  expect(record1.y).to.equal(record2.y);
+  expect(record1.z).to.equal(record2.z);
+  expect(record1.id).to.equal(record2.id);
+  expect(record1.status).to.equal(record2.status);
+};
+
+
 describe('AVL', () => {
   let tree;
 
@@ -108,14 +117,14 @@ describe('AVL', () => {
   it('retrieves an inserted element with the first index', () => {
     const e = element();
     tree.insertOrUpdate(e);
-    expect(tree.lookup0(e.x, e.y, e.z)).to.eql(e);
-    expect(tree.lookup(e.x, e.y, e.z)).to.eql(e);
+    compareRecords(tree.lookup0(e.x, e.y, e.z), e);
+    compareRecords(tree.lookup(e.x, e.y, e.z), e);
   });
 
   it('retrieves an inserted element with the second index', () => {
     const e = element();
     tree.insertOrUpdate(e);
-    expect(tree.lookup1(e.y, e.x, e.z)).to.eql(e);
+    compareRecords(tree.lookup1(e.y, e.x, e.z), e);
   });
 
   it('retrieves another inserted element with the first index', () => {
@@ -123,8 +132,8 @@ describe('AVL', () => {
     const e2 = element();
     tree.insertOrUpdate(e1);
     tree.insertOrUpdate(e2);
-    expect(tree.lookup0(e2.x, e2.y, e2.z)).to.eql(e2);
-    expect(tree.lookup(e2.x, e2.y, e2.z)).to.eql(e2);
+    compareRecords(tree.lookup0(e2.x, e2.y, e2.z), e2);
+    compareRecords(tree.lookup0(e2.x, e2.y, e2.z), e2);
   });
 
   it('retrieves another inserted element with the second index', () => {
@@ -132,7 +141,7 @@ describe('AVL', () => {
     const e2 = element();
     tree.insertOrUpdate(e1);
     tree.insertOrUpdate(e2);
-    expect(tree.lookup1(e2.y, e2.x, e2.z)).to.eql(e2);
+    compareRecords(tree.lookup1(e2.y, e2.x, e2.z), e2);
   });
 
   it('retrieves the first inserted element with the first index', () => {
@@ -140,8 +149,8 @@ describe('AVL', () => {
     const e2 = element();
     tree.insertOrUpdate(e1);
     tree.insertOrUpdate(e2);
-    expect(tree.lookup0(e1.x, e1.y, e1.z)).to.eql(e1);
-    expect(tree.lookup(e1.x, e1.y, e1.z)).to.eql(e1);
+    compareRecords(tree.lookup0(e1.x, e1.y, e1.z), e1);
+    compareRecords(tree.lookup(e1.x, e1.y, e1.z), e1);
   });
 
   it('retrieves the first inserted element with the second index', () => {
@@ -149,6 +158,6 @@ describe('AVL', () => {
     const e2 = element();
     tree.insertOrUpdate(e1);
     tree.insertOrUpdate(e2);
-    expect(tree.lookup1(e1.y, e1.x, e1.z)).to.eql(e1);
+    compareRecords(tree.lookup1(e1.y, e1.x, e1.z), e1);
   });
 });

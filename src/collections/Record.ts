@@ -330,9 +330,6 @@ export class RecordDefinition {
 /**
  * A record as it is rendered in JavaScript after being deserialized from a
  * typed array.
- *
- * Records are created with `Object.create(null)` so that they don't have any
- * prototype. Names like `hasOwnProperty` can be correctly used as record keys.
  */
 export type Record = {[name: string]: number};
 
