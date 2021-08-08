@@ -895,21 +895,46 @@ export class mat2 {
     return this.m00 * this.m11 - this.m01 * this.m10;
   }
 
-  public invert_(): mat2 {
+  public adjugate_(): mat2 {
     const m00 = this.m11;
-    const m01 = this.m10;
-    const m10 = this.m01;
+    const m01 = -this.m10;
+    const m10 = -this.m01;
     const m11 = this.m00;
     this.m00 = m00;
-    this.m01 = m01;
-    this.m10 = m10;
+    this.m01 = m10;
+    this.m10 = m01;
     this.m11 = m11;
-    return this.divr_(this.determinant());
+    return this;
+  }
+
+  public adjugate(): mat2 {
+    const m00 = this.m11;
+    const m01 = -this.m10;
+    const m10 = -this.m01;
+    const m11 = this.m00;
+    return new mat2(m00, m10, m01, m11);
+  }
+
+  public invert_(): mat2 {
+    const d = this.determinant();
+    const m00 = this.m11 / d;
+    const m01 = -this.m10 / d;
+    const m10 = -this.m01 / d;
+    const m11 = this.m00 / d;
+    this.m00 = m00;
+    this.m01 = m10;
+    this.m10 = m01;
+    this.m11 = m11;
+    return this;
   }
 
   public invert(): mat2 {
-    return new mat2(
-        this.m11, this.m10, this.m01, this.m00).divr_(this.determinant());
+    const d = this.determinant();
+    const m00 = this.m11 / d;
+    const m01 = -this.m10 / d;
+    const m10 = -this.m01 / d;
+    const m11 = this.m00 / d;
+    return new mat2(m00, m10, m01, m11);
   }
 
   public transpose_(): mat2 {
@@ -1070,38 +1095,40 @@ export class mat3 {
   }
 
   public invert_(): mat3 {
-    const m00 = this.m11 * this.m22 - this.m12 * this.m21;
-    const m01 = this.m10 * this.m22 - this.m12 * this.m20;
-    const m02 = this.m10 * this.m21 - this.m11 * this.m20;
-    const m10 = this.m01 * this.m22 - this.m02 * this.m21;
-    const m11 = this.m00 * this.m22 - this.m02 * this.m20;
-    const m12 = this.m00 * this.m21 - this.m01 * this.m20;
-    const m20 = this.m01 * this.m12 - this.m02 * this.m11;
-    const m21 = this.m00 * this.m12 - this.m02 * this.m10;
-    const m22 = this.m00 * this.m11 - this.m01 * this.m10;
+    const d = this.determinant();
+    const m00 = (this.m11 * this.m22 - this.m12 * this.m21) / d;
+    const m01 = (this.m12 * this.m20 - this.m10 * this.m22) / d;
+    const m02 = (this.m10 * this.m21 - this.m11 * this.m20) / d;
+    const m10 = (this.m02 * this.m21 - this.m01 * this.m22) / d;
+    const m11 = (this.m00 * this.m22 - this.m02 * this.m20) / d;
+    const m12 = (this.m01 * this.m20 - this.m00 * this.m21) / d;
+    const m20 = (this.m01 * this.m12 - this.m02 * this.m11) / d;
+    const m21 = (this.m02 * this.m10 - this.m00 * this.m12) / d;
+    const m22 = (this.m00 * this.m11 - this.m01 * this.m10) / d;
     this.m00 = m00;
-    this.m01 = m01;
-    this.m02 = m02;
-    this.m10 = m10;
+    this.m01 = m10;
+    this.m02 = m20;
+    this.m10 = m01;
     this.m11 = m11;
-    this.m12 = m12;
-    this.m20 = m20;
-    this.m21 = m21;
+    this.m12 = m21;
+    this.m20 = m02;
+    this.m21 = m12;
     this.m22 = m22;
-    return this.divr_(this.determinant());
+    return this;
   }
 
   public invert(): mat3 {
-    return new mat3(
-        this.m11 * this.m22 - this.m12 * this.m21,
-        this.m10 * this.m22 - this.m12 * this.m20,
-        this.m10 * this.m21 - this.m11 * this.m20,
-        this.m01 * this.m22 - this.m02 * this.m21,
-        this.m00 * this.m22 - this.m02 * this.m20,
-        this.m00 * this.m21 - this.m01 * this.m20,
-        this.m01 * this.m12 - this.m02 * this.m11,
-        this.m00 * this.m12 - this.m02 * this.m10,
-        this.m00 * this.m11 - this.m01 * this.m10).divr_(this.determinant());
+    const d = this.determinant();
+    const m00 = (this.m11 * this.m22 - this.m12 * this.m21) / d;
+    const m01 = (this.m12 * this.m20 - this.m10 * this.m22) / d;
+    const m02 = (this.m10 * this.m21 - this.m11 * this.m20) / d;
+    const m10 = (this.m02 * this.m21 - this.m01 * this.m22) / d;
+    const m11 = (this.m00 * this.m22 - this.m02 * this.m20) / d;
+    const m12 = (this.m01 * this.m20 - this.m00 * this.m21) / d;
+    const m20 = (this.m01 * this.m12 - this.m02 * this.m11) / d;
+    const m21 = (this.m02 * this.m10 - this.m00 * this.m12) / d;
+    const m22 = (this.m00 * this.m11 - this.m01 * this.m10) / d;
+    return new mat3(m00, m10, m20, m01, m11, m21, m02, m12, m22);
   }
 
   public transpose_(): mat3 {

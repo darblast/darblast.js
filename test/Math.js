@@ -531,11 +531,59 @@ describe('vec4', () => {
 
 describe('mat2', () => {
   // TODO
+
+  it('can be inverted in place', () => {
+    const m1 = new mat2(2, 3, 4, 5);
+    const m2 = m1.clone().invert_();
+    const m3 = m1.mul(m2);
+    expect(m3.m00).to.be.approximately(1, 0.0001);
+    expect(m3.m01).to.be.approximately(0, 0.0001);
+    expect(m3.m10).to.be.approximately(0, 0.0001);
+    expect(m3.m11).to.be.approximately(1, 0.0001);
+  });
+
+  it('can be inverted', () => {
+    const m1 = new mat2(2, 3, 4, 5);
+    const m2 = m1.mul(m1.invert());
+    expect(m2.m00).to.be.approximately(1, 0.0001);
+    expect(m2.m01).to.be.approximately(0, 0.0001);
+    expect(m2.m10).to.be.approximately(0, 0.0001);
+    expect(m2.m11).to.be.approximately(1, 0.0001);
+  });
 });
 
 
 describe('mat3', () => {
   // TODO
+
+  it('can be inverted in place', () => {
+    const m1 = new mat3(2, 3, 4, 5, 6, 7, 8, 9, 12);
+    const m2 = m1.clone().invert_();
+    const m3 = m1.mul(m2);
+    expect(m3.m00).to.be.approximately(1, 0.0001);
+    expect(m3.m01).to.be.approximately(0, 0.0001);
+    expect(m3.m02).to.be.approximately(0, 0.0001);
+    expect(m3.m10).to.be.approximately(0, 0.0001);
+    expect(m3.m11).to.be.approximately(1, 0.0001);
+    expect(m3.m12).to.be.approximately(0, 0.0001);
+    expect(m3.m20).to.be.approximately(0, 0.0001);
+    expect(m3.m21).to.be.approximately(0, 0.0001);
+    expect(m3.m22).to.be.approximately(1, 0.0001);
+  });
+
+  it('can be inverted', () => {
+    const m1 = new mat3(2, 3, 4, 5, 6, 7, 8, 9, 12);
+    const m2 = m1.mul(m1.invert());
+    expect(m2.m00).to.be.approximately(1, 0.0001);
+    expect(m2.m01).to.be.approximately(0, 0.0001);
+    expect(m2.m02).to.be.approximately(0, 0.0001);
+    expect(m2.m10).to.be.approximately(0, 0.0001);
+    expect(m2.m11).to.be.approximately(1, 0.0001);
+    expect(m2.m12).to.be.approximately(0, 0.0001);
+    expect(m2.m20).to.be.approximately(0, 0.0001);
+    expect(m2.m21).to.be.approximately(0, 0.0001);
+    expect(m2.m22).to.be.approximately(1, 0.0001);
+  });
 });
 
 
