@@ -5,7 +5,7 @@ export namespace Collections {
 type CompareFn<Element> = (element1: Element, element2: Element) => number;
 
 
-export class BinaryHeap<Element> {
+export class PriorityQueue<Element> {
   private readonly _compareFn: CompareFn<Element>;
   private _data: Element[] = [];
 
@@ -126,9 +126,9 @@ export class BinaryHeap<Element> {
   }
 
   public static fromArray<Element>(
-      data: Element[], compare: CompareFn<Element>): BinaryHeap<Element>
+      data: Element[], compare: CompareFn<Element>): PriorityQueue<Element>
   {
-    const heap = new BinaryHeap<Element>(compare);
+    const heap = new PriorityQueue<Element>(compare);
     heap.swap(data);
     return heap;
   }
@@ -142,9 +142,9 @@ export class BinaryHeap<Element> {
 /**
  * @hidden
  */
-type BinaryHeap<Element> = Darblast.Collections.BinaryHeap<Element>;
+type PriorityQueue<Element> = Darblast.Collections.PriorityQueue<Element>;
 
 /**
  * @hidden
  */
-const BinaryHeap = Darblast.Collections.BinaryHeap;
+const PriorityQueue = Darblast.Collections.PriorityQueue;

@@ -1,7 +1,7 @@
 /// <reference path="View.ts"/>
 /// <reference path="Element.ts"/>
 /// <reference path="../collections/AVL.ts"/>
-/// <reference path="../collections/BinaryHeap.ts"/>
+/// <reference path="../collections/PriorityQueue.ts"/>
 
 
 namespace Darblast {
@@ -20,13 +20,13 @@ export class ElementManager {
     id: 'uint32',
   }, [['x', 'y', 'z', 'id']]);
 
-  private readonly _widthQueue: BinaryHeap<BaseElement> =
-      new BinaryHeap<BaseElement>(
+  private readonly _widthQueue: PriorityQueue<BaseElement> =
+      new PriorityQueue<BaseElement>(
           (element1: BaseElement, element2: BaseElement) =>
               element2.width - element1.width);
 
-  private readonly _heightQueue: BinaryHeap<BaseElement> =
-      new BinaryHeap<BaseElement>(
+  private readonly _heightQueue: PriorityQueue<BaseElement> =
+      new PriorityQueue<BaseElement>(
           (element1: BaseElement, element2: BaseElement) =>
               element2.height - element1.height);
 
