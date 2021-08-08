@@ -261,6 +261,27 @@ export const compileAVL = TemplateClass(
         const keys = indices[index].keys;
         const keyArgs = keys.join(', ');
         return `
+          *_fullScan${index}(node) {
+            if (node) {
+              yield* this._fullScan${index}(${getField(`$left${index}`)});
+              yield node;
+              yield* this._fullScan${index}(${getField(`$right${index}`)});
+            }
+          }
+
+          *fullScan${index}_() {
+            for (let node of this._fullScan${index}(this._root${index})) {
+              this._record.$node = node;
+              yield this._record;
+            }
+          }
+
+          *fullScan${index}() {
+            for (let node of this._fullScan${index}(this._root${index})) {
+              yield new AVL.Record(this._views, node);
+            }
+          }
+
           _comparePartial${index}(keys) {
             ${keys.map((key, i) => `
               if (keys.length > ${i}) {
@@ -477,6 +498,14 @@ export const compileAVL = TemplateClass(
         `;
       }).join('')}
 
+      fullScan_() {
+        return this.fullScan0_();
+      }
+
+      fullScan() {
+        return this.fullScan0();
+      }
+
       scan_(...keys) {
         return this.scan0_(...keys);
       }
@@ -486,7 +515,7 @@ export const compileAVL = TemplateClass(
       }
 
       [Symbol.iterator]() {
-        return this.scan();
+        return this.fullScan();
       }
 
       lowerBound_(...keys) {

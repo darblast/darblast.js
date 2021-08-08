@@ -16,12 +16,56 @@ const TestAVL = AVL.compileFromSchema({
 ]);
 
 
-const compareRecords = (record1, record2) => {
+const compareRecords0 = (record1, record2) => {
+  if (record1.x < record2.x) {
+    return -1;
+  } else if (record1.x > record2.x) {
+    return 1;
+  } else if (record1.y < record2.y) {
+    return -1;
+  } else if (record1.y > record2.y) {
+    return 1;
+  } else if (record1.z < record2.z) {
+    return -1;
+  } else if (record1.z > record2.z) {
+    return 1;
+  } else {
+    return 0;
+  }
+};
+
+const compareRecords1 = (record1, record2) => {
+  if (record1.y < record2.y) {
+    return -1;
+  } else if (record1.y > record2.y) {
+    return 1;
+  } else if (record1.x < record2.x) {
+    return -1;
+  } else if (record1.x > record2.x) {
+    return 1;
+  } else if (record1.z < record2.z) {
+    return -1;
+  } else if (record1.z > record2.z) {
+    return 1;
+  } else {
+    return 0;
+  }
+};
+
+
+const checkRecords = (record1, record2) => {
   expect(record1.x).to.equal(record2.x);
   expect(record1.y).to.equal(record2.y);
   expect(record1.z).to.equal(record2.z);
   expect(record1.id).to.equal(record2.id);
   expect(record1.status).to.equal(record2.status);
+};
+
+const checkRecordArray = (array1, array2) => {
+  expect(array1.length).to.equal(array2.length);
+  for (let i = 0; i < array1.length; i++) {
+    checkRecords(array1[i], array2[i]);
+  }
 };
 
 
@@ -114,17 +158,78 @@ describe('AVL', () => {
     expect(result).to.equal(false);
   });
 
+  it('yields nothing when empty', () => {
+    checkRecordArray([...tree.fullScan0()], []);
+    checkRecordArray([...tree.fullScan0_()], []);
+    checkRecordArray([...tree.fullScan1()], []);
+    checkRecordArray([...tree.fullScan1_()], []);
+    checkRecordArray([...tree.fullScan()], []);
+    checkRecordArray([...tree.fullScan_()], []);
+    checkRecordArray([...tree.scan0()], []);
+    checkRecordArray([...tree.scan0_()], []);
+    checkRecordArray([...tree.scan1()], []);
+    checkRecordArray([...tree.scan1_()], []);
+    checkRecordArray([...tree.scan()], []);
+    checkRecordArray([...tree.scan_()], []);
+  });
+
+  it('yields an inserted element on the first index', () => {
+    const e = element();
+    tree.insertOrUpdate(e);
+    const array = [e];
+    checkRecordArray([...tree.fullScan0()], array);
+    checkRecordArray([...tree.fullScan0_()], array);
+    checkRecordArray([...tree.fullScan()], array);
+    checkRecordArray([...tree.fullScan_()], array);
+    checkRecordArray([...tree.scan0()], array);
+    checkRecordArray([...tree.scan0_()], array);
+    checkRecordArray([...tree.scan()], array);
+    checkRecordArray([...tree.scan_()], array);
+  });
+
+  it('yields an inserted element on the second index', () => {
+    const e = element();
+    tree.insertOrUpdate(e);
+    const array = [e];
+    checkRecordArray([...tree.fullScan1()], array);
+    checkRecordArray([...tree.fullScan1_()], array);
+    checkRecordArray([...tree.scan1()], array);
+    checkRecordArray([...tree.scan1_()], array);
+  });
+
+  it('yields two inserted elements on the first index', () => {
+    const e1 = element();
+    const e2 = element();
+    tree.insertOrUpdate(e1);
+    tree.insertOrUpdate(e2);
+    const array = [e1, e2].sort(compareRecords0);
+    checkRecordArray([...tree.fullScan0()], array);
+    checkRecordArray([...tree.fullScan()], array);
+    checkRecordArray([...tree.scan0()], array);
+    checkRecordArray([...tree.scan()], array);
+  });
+
+  it('yields two inserted elements on the second index', () => {
+    const e1 = element();
+    const e2 = element();
+    tree.insertOrUpdate(e1);
+    tree.insertOrUpdate(e2);
+    const array = [e1, e2].sort(compareRecords1);
+    checkRecordArray([...tree.fullScan1()], array);
+    checkRecordArray([...tree.scan1()], array);
+  });
+
   it('retrieves an inserted element with the first index', () => {
     const e = element();
     tree.insertOrUpdate(e);
-    compareRecords(tree.lookup0(e.x, e.y, e.z), e);
-    compareRecords(tree.lookup(e.x, e.y, e.z), e);
+    checkRecords(tree.lookup0(e.x, e.y, e.z), e);
+    checkRecords(tree.lookup(e.x, e.y, e.z), e);
   });
 
   it('retrieves an inserted element with the second index', () => {
     const e = element();
     tree.insertOrUpdate(e);
-    compareRecords(tree.lookup1(e.y, e.x, e.z), e);
+    checkRecords(tree.lookup1(e.y, e.x, e.z), e);
   });
 
   it('retrieves another inserted element with the first index', () => {
@@ -132,8 +237,8 @@ describe('AVL', () => {
     const e2 = element();
     tree.insertOrUpdate(e1);
     tree.insertOrUpdate(e2);
-    compareRecords(tree.lookup0(e2.x, e2.y, e2.z), e2);
-    compareRecords(tree.lookup0(e2.x, e2.y, e2.z), e2);
+    checkRecords(tree.lookup0(e2.x, e2.y, e2.z), e2);
+    checkRecords(tree.lookup0(e2.x, e2.y, e2.z), e2);
   });
 
   it('retrieves another inserted element with the second index', () => {
@@ -141,7 +246,7 @@ describe('AVL', () => {
     const e2 = element();
     tree.insertOrUpdate(e1);
     tree.insertOrUpdate(e2);
-    compareRecords(tree.lookup1(e2.y, e2.x, e2.z), e2);
+    checkRecords(tree.lookup1(e2.y, e2.x, e2.z), e2);
   });
 
   it('retrieves the first inserted element with the first index', () => {
@@ -149,8 +254,8 @@ describe('AVL', () => {
     const e2 = element();
     tree.insertOrUpdate(e1);
     tree.insertOrUpdate(e2);
-    compareRecords(tree.lookup0(e1.x, e1.y, e1.z), e1);
-    compareRecords(tree.lookup(e1.x, e1.y, e1.z), e1);
+    checkRecords(tree.lookup0(e1.x, e1.y, e1.z), e1);
+    checkRecords(tree.lookup(e1.x, e1.y, e1.z), e1);
   });
 
   it('retrieves the first inserted element with the second index', () => {
@@ -158,7 +263,7 @@ describe('AVL', () => {
     const e2 = element();
     tree.insertOrUpdate(e1);
     tree.insertOrUpdate(e2);
-    compareRecords(tree.lookup1(e1.y, e1.x, e1.z), e1);
+    checkRecords(tree.lookup1(e1.y, e1.x, e1.z), e1);
   });
 });
 
