@@ -338,5 +338,12 @@ export type Record = {[name: string]: number};
 }  // namespace Darblast
 
 
+/**
+ * @hidden
+ */
 const FieldDefinition = Darblast.Collections.FieldDefinition;
+
+/**
+ * @hidden
+ */
 const RecordDefinition = Darblast.Collections.RecordDefinition;

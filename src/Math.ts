@@ -1355,19 +1355,77 @@ export class mat4 {
 }  // namespace Darblast
 
 
+/**
+ * @hidden
+ */
 type ivec2 = Darblast.Math.ivec2;
+
+/**
+ * @hidden
+ */
 type ivec3 = Darblast.Math.ivec3;
+
+/**
+ * @hidden
+ */
 type ivec4 = Darblast.Math.ivec4;
+
+/**
+ * @hidden
+ */
 type vec2 = Darblast.Math.vec2;
+
+/**
+ * @hidden
+ */
 type vec3 = Darblast.Math.vec3;
+
+/**
+ * @hidden
+ */
 type vec4 = Darblast.Math.vec4;
+
+/**
+ * @hidden
+ */
 type mat2 = Darblast.Math.mat2;
+
+/**
+ * @hidden
+ */
 type mat3 = Darblast.Math.mat3;
+
+/**
+ * @hidden
+ */
 type mat4 = Darblast.Math.mat4;
 
+/**
+ * @hidden
+ */
 const vec2 = Darblast.Math.vec2;
+
+/**
+ * @hidden
+ */
 const vec3 = Darblast.Math.vec3;
+
+/**
+ * @hidden
+ */
 const vec4 = Darblast.Math.vec4;
+
+/**
+ * @hidden
+ */
 const mat2 = Darblast.Math.mat2;
+
+/**
+ * @hidden
+ */
 const mat3 = Darblast.Math.mat3;
+
+/**
+ * @hidden
+ */
 const mat4 = Darblast.Math.mat4;

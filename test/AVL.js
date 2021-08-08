@@ -1,7 +1,7 @@
 const {expect} = require('chai');
 
 const Darblast = require('../dist/darblast.js');
-const {AVL} = Darblast.Collections;
+const {AVL, LinkedList} = Darblast.Collections;
 
 
 const TestAVL = AVL.fromSchema({
@@ -159,5 +159,43 @@ describe('AVL', () => {
     tree.insertOrUpdate(e1);
     tree.insertOrUpdate(e2);
     compareRecords(tree.lookup1(e1.y, e1.x, e1.z), e1);
+  });
+});
+
+
+describe('Stress-tested AVL', () => {
+  const TestAVL = AVL.fromSchema({asd: 'uint32'}, [['asd']]);
+
+  it('stays balanced throughout incremental insertion', () => {
+    const tree = new TestAVL();
+    for (let value = 0; value < 1024; value++) {
+      tree.insertOrUpdate({asd: value});
+      tree._checkConsistency();
+    }
+    expect(tree.size).to.equal(1024);
+  });
+
+  it('stays balanced throughout level-wise insertion', () => {
+    const tree = new TestAVL();
+    const queue = new LinkedList({
+      offset: 0,
+      value: 512,
+    });
+    while (queue.size > 0) {
+      const {offset, value} = queue.shift();
+      tree.insertOrUpdate({asd: value - 1});
+      tree._checkConsistency();
+      if (value > offset) {
+        const half = (value - offset) >>> 1;
+        queue.push({
+          offset: offset,
+          value: offset + half,
+        }, {
+          offset: value,
+          value: value + half,
+        });
+      }
+    }
+    expect(tree.size).to.equal(1024);
   });
 });

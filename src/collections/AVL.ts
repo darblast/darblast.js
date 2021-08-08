@@ -834,5 +834,12 @@ export class AVL {
 }  // namespace Darblast
 
 
+/**
+ * @hidden
+ */
 const compileAVL = Darblast.Collections.compileAVL;
+
+/**
+ * @hidden
+ */
 const AVL = Darblast.Collections.AVL;

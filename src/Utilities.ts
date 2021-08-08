@@ -52,5 +52,12 @@ export function startup(fn: () => any): Object {
 }  // namespace Darblast
 
 
+/**
+ * @hidden
+ */
 const Utilities = Darblast.Utilities;
+
+/**
+ * @hidden
+ */
 const TemplateClass = Darblast.Utilities.TemplateClass;

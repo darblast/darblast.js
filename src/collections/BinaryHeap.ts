@@ -17,6 +17,10 @@ export class BinaryHeap<Element> {
     return this._data.length;
   }
 
+  public get length(): number {
+    return this._data.length;
+  }
+
   public isEmpty(): boolean {
     return !this._data.length;
   }
