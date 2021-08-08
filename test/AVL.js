@@ -164,18 +164,18 @@ describe('AVL', () => {
 
 
 describe('Stress-tested AVL', () => {
-  const TestAVL = AVL.compileFromSchema({asd: 'uint32'}, [['asd']]);
+  const TestAVL = AVL.compileFromSchema({value: 'uint32'}, [['value']]);
 
   it('stays balanced throughout incremental insertion', () => {
     const tree = new TestAVL();
     for (let value = 0; value < 1024; value++) {
-      tree.insertOrUpdate({asd: value});
+      tree.insertOrUpdate({value});
       tree._checkConsistency();
     }
     expect(tree.size).to.equal(1024);
     let i = 0;
-    for (let {asd} of tree) {
-      expect(asd).to.equal(i++);
+    for (let {value} of tree) {
+      expect(value).to.equal(i++);
     }
   });
 
@@ -187,7 +187,7 @@ describe('Stress-tested AVL', () => {
     });
     while (queue.size > 0) {
       const {offset, value} = queue.shift();
-      tree.insertOrUpdate({asd: value});
+      tree.insertOrUpdate({value});
       tree._checkConsistency();
       if (value > offset) {
         const half = (value - offset) >>> 1;
@@ -202,8 +202,8 @@ describe('Stress-tested AVL', () => {
     }
     expect(tree.size).to.equal(1024);
     let i = 0;
-    for (let {asd} of tree) {
-      expect(asd).to.equal(i++);
+    for (let {value} of tree) {
+      expect(value).to.equal(i++);
     }
   });
 });

@@ -414,12 +414,12 @@ export const compileAVL = TemplateClass(
             return true;
           }
 
-          _compare${index}(node, ${keyArgs}) {
+          _compare${index}($node, ${keyArgs}) {
             ${keys.map(key => `
               {
-                const value = ${getField(key)};
-                if (${key} !== value) {
-                  return ${key} - value;
+                const $value = ${getNodeField('$node', key)};
+                if (${key} !== $value) {
+                  return ${key} - $value;
                 }
               }
             `).join('')}
@@ -427,24 +427,24 @@ export const compileAVL = TemplateClass(
           }
 
           _lookup${index}(${keyArgs}) {
-            let node = this._root${index};
-            while (node) {
-              const cmp = this._compare${index}(node, ${keyArgs});
-              if (cmp < 0) {
-                node = ${getField(`$left${index}`)};
-              } else if (cmp > 0) {
-                node = ${getField(`$right${index}`)};
+            let $node = this._root${index};
+            while ($node) {
+              const $cmp = this._compare${index}($node, ${keyArgs});
+              if ($cmp < 0) {
+                $node = ${getNodeField('$node', `$left${index}`)};
+              } else if ($cmp > 0) {
+                $node = ${getNodeField('$node', `$right${index}`)};
               } else {
-                return node;
+                return $node;
               }
             }
             return 0;
           }
 
           lookup${index}_(${keyArgs}) {
-            const node = this._lookup${index}(${keyArgs});
-            if (node) {
-              this._record.$node = node;
+            const $node = this._lookup${index}(${keyArgs});
+            if ($node) {
+              this._record.$node = $node;
               return this._record;
             } else {
               return null;
@@ -452,9 +452,9 @@ export const compileAVL = TemplateClass(
           }
 
           lookup${index}(${keyArgs}) {
-            const node = this._lookup${index}(${keyArgs});
-            if (node) {
-              return new AVL.Record(this._views, node);
+            const $node = this._lookup${index}(${keyArgs});
+            if ($node) {
+              return new AVL.Record(this._views, $node);
             } else {
               return null;
             }
@@ -462,9 +462,9 @@ export const compileAVL = TemplateClass(
 
           ${fields.map(field => `
             lookup${index}_${field.name}(${keyArgs}) {
-              const node = this._lookup${index}(${keyArgs});
-              if (node) {
-                return ${getField(field.name)};
+              const $node = this._lookup${index}(${keyArgs});
+              if ($node) {
+                return ${getNodeField('$node', field.name)};
               } else {
                 return null;
               }
@@ -515,9 +515,9 @@ export const compileAVL = TemplateClass(
 
       ${(keyArgs => `
         lookup_(${keyArgs}) {
-          const node = this._lookup0(${keyArgs});
-          if (node) {
-            this._record.$node = node;
+          const $node = this._lookup0(${keyArgs});
+          if ($node) {
+            this._record.$node = $node;
             return this._record;
           } else {
             return null;
@@ -525,9 +525,9 @@ export const compileAVL = TemplateClass(
         }
 
         lookup(${keyArgs}) {
-          const node = this._lookup0(${keyArgs});
-          if (node) {
-            return new AVL.Record(this._views, node);
+          const $node = this._lookup0(${keyArgs});
+          if ($node) {
+            return new AVL.Record(this._views, $node);
           } else {
             return null;
           }
@@ -535,9 +535,9 @@ export const compileAVL = TemplateClass(
 
         ${fields.map(field => `
           lookup_${field.name}(${keyArgs}) {
-            const node = this._lookup0(${keyArgs});
-            if (node) {
-              return ${getField(field.name)};
+            const $node = this._lookup0(${keyArgs});
+            if ($node) {
+              return ${getNodeField('$node', field.name)};
             } else {
               return null;
             }
@@ -788,10 +788,10 @@ export const compileAVL = TemplateClass(
         ${indices.map((_, index) => {
           const keyArgs = indices[index].keys.join(', ');
           return `
-            update${index}_${field.name}(value, ${keyArgs}) {
-              const node = this._lookup${index}(${keyArgs});
-              if (node) {
-                ${setField(field.name, 'value')}
+            update${index}_${field.name}($value, ${keyArgs}) {
+              const $node = this._lookup${index}(${keyArgs});
+              if ($node) {
+                ${setNodeField('$node', field.name, '$value')}
                 return true;
               } else {
                 return false;
@@ -801,10 +801,10 @@ export const compileAVL = TemplateClass(
         }).join('')}
 
         ${(keyArgs => `
-          update_${field.name}(value, ${keyArgs}) {
-            const node = this._lookup0(${keyArgs});
-            if (node) {
-              ${setField(field.name, 'value')}
+          update_${field.name}($value, ${keyArgs}) {
+            const $node = this._lookup0(${keyArgs});
+            if ($node) {
+              ${setNodeField('$node', field.name, '$value')}
               return true;
             } else {
               return false;
