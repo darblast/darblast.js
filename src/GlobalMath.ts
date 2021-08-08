@@ -1,1 +1,4 @@
+/**
+ * @hidden
+ */
 const GlobalMath = Math;

@@ -139,5 +139,12 @@ export class BinaryHeap<Element> {
 }  // namespace Darblast
 
 
+/**
+ * @hidden
+ */
 type BinaryHeap<Element> = Darblast.Collections.BinaryHeap<Element>;
+
+/**
+ * @hidden
+ */
 const BinaryHeap = Darblast.Collections.BinaryHeap;

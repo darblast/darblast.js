@@ -117,6 +117,7 @@ describe('AVL', () => {
 
   it('should be initially empty', () => {
     expect(tree.size).to.equal(0);
+    expect(tree.length).to.equal(0);
     expect(tree.isEmpty()).to.equal(true);
     expect(tree.capacity).to.equal(0);
   });
@@ -124,6 +125,7 @@ describe('AVL', () => {
   it('grows upon insertion', () => {
     tree.insertOrUpdate(element());
     expect(tree.size).to.equal(1);
+    expect(tree.length).to.equal(1);
     expect(tree.isEmpty()).to.equal(false);
     expect(tree.capacity).to.equal(1);
   });
@@ -132,6 +134,7 @@ describe('AVL', () => {
     tree.insertOrUpdate(element());
     tree.insertOrUpdate(element());
     expect(tree.size).to.equal(2);
+    expect(tree.length).to.equal(2);
     expect(tree.isEmpty()).to.equal(false);
     expect(tree.capacity).to.equal(3);
   });
@@ -142,6 +145,7 @@ describe('AVL', () => {
     tree.insertOrUpdate(element());
     tree.insertOrUpdate(element());
     expect(tree.size).to.equal(4);
+    expect(tree.length).to.equal(4);
     expect(tree.isEmpty()).to.equal(false);
     expect(tree.capacity).to.equal(7);
   });

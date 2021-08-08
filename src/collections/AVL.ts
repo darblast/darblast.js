@@ -177,6 +177,10 @@ export const compileAVL = TemplateClass(
         return this._size;
       }
 
+      get length() {
+        return this._size;
+      }
+
       isEmpty() {
         return !this._size;
       }
@@ -901,7 +905,7 @@ export const compileAVL = TemplateClass(
         return this._insertContext.inserted;
       }
 
-      insertOrUpdateAll(records) {
+      insertOrUpdateAll(...records) {
         let result = true;
         for (const record of records) {
           result = result && this.insertOrUpdate(record);
@@ -942,13 +946,18 @@ export const compileAVL = TemplateClass(
 });
 
 
+export interface AVLConstructor {
+  new(): AVL;
+};
+
+
 /**
  * Provides methods to compile AVL trees.
  *
  * The provided methods are just convenience wrappers for
  * {@link Darblast.Collections.compileAVL}.
  */
-export class AVL {
+export abstract class AVL {
   /**
    * Alias for {@link Darblast.Collections.compileAVL}.
    */
@@ -965,14 +974,17 @@ export class AVL {
    * @param keys  List of fields to use as keys. This has the same meaning as in
    *              the {@link compileAVL} function.
    */
-  public static compileFromSchema(schema: Schema, indices: string[][]) {
+  public static compileFromSchema(
+      schema: Schema, indices: string[][]): AVLConstructor
+  {
     const fields: FieldDefinition[] = [];
     for (const name in schema) {
       if (schema.hasOwnProperty(name)) {
         fields.push(new FieldDefinition(name, schema[name]));
       }
     }
-    return compileAVL(fields, indices.map(keys => new Index(keys)));
+    return compileAVL(
+        fields, indices.map(keys => new Index(keys))) as AVLConstructor;
   }
 
   /**
@@ -989,8 +1001,222 @@ export class AVL {
    */
   public static fromSchema(schema: Schema, indices: string[][]) {
     const AVLClass = AVL.compileFromSchema(schema, indices);
-    return new AVLClass();
+    return new AVLClass() as AVL;
   }
+
+  /**
+   * @returns the number of elements in the tree.
+   */
+  public abstract get size(): number;
+
+  /**
+   * Synonymous with {@link size}.
+   *
+   * @returns the number of elements in the tree.
+   */
+  public abstract get length(): number;
+
+  /**
+   * @returns a boolean indicating whether the tree is empty.
+   */
+  public abstract isEmpty(): boolean;
+
+  /**
+   * @returns the capacity of the underlying buffer, which may be higher than
+   *    {@link size}.
+   */
+  public abstract get capacity(): number;
+
+  /**
+   * Performs a full scan of the tree yielding the elements in the order defined
+   * by the first index.
+   */
+  public abstract fullScan0(): Generator<Record, void>;
+
+  /**
+   * Like {@link fullScan0} but it recycles the yielded object.
+   */
+  public abstract fullScan0_(): Generator<Record, void>;
+
+  /**
+   * Synonymous with {@link fullScan0}.
+   */
+  public abstract fullScan(): Generator<Record, void>;
+
+  /**
+   * Synonymous with {@link fullScan0_}.
+   */
+  public abstract fullScan_(): Generator<Record, void>;
+
+  /**
+   * Scans the elements in the tree satisfying the constraint that the first _k_
+   * keys are equal to the _k_ ones specified. The scanned elements are yielded
+   * in the order defined by the first index.
+   *
+   * Note that _k_ may be less than the number of keys in the index, and it may
+   * also be 0:
+   *
+   * * when _k_ == 0 the full tree is scanned and this method is equivalent to
+   *   {@link fullScan0};
+   * * when _k_ == the number of keys in the index and the tree is empty, no
+   *   elements are yielded;
+   * * when _k_ == the number of keys in the index and the tree is not empty,
+   *   exactly one element is yielded and this method is equivalent to
+   *   {@link lookup0};
+   * * when 0 < _k_ < number of keys in the index, more than one element may be
+   *   yielded.
+   */
+  public abstract scan0(...keys: number[]): Generator<Record, void>;
+
+  /**
+   * Like {@link scan0} but it recycles the yielded object.
+   */
+  public abstract scan0_(...keys: number[]): Generator<Record, void>;
+
+  /**
+   * Synonymous with {@link scan0}.
+   */
+  public abstract scan(...keys: number[]): Generator<Record, void>;
+
+  /**
+   * Synonymous with {@link scan0_}.
+   */
+  public abstract scan_(...keys: number[]): Generator<Record, void>;
+
+  /**
+   * Makes the AVL tree iterable. The implementation is backed by
+   * {@link fullScan}.
+   */
+  public abstract [Symbol.iterator](): Generator<Record, void>;
+
+  /**
+   * Scans the elements in the tree satisfying the constraint that the first _k_
+   * keys are greater than or equal to the _k_ ones specified, based on the
+   * order defined by the first index. The scanned elements are yielded in the
+   * order defined by the first index.
+   *
+   * Note that _k_ may be less than the number of keys in the index, and it may
+   * also be 0. When _k_ == 0 the full tree is scanned and this method is
+   * equivalent to {@link fullScan0}.
+   */
+  public abstract lowerBound0(...keys: number[]): Generator<Record, void>;
+
+  /**
+   * Like {@link lowerBound0} but it recycles the yielded object.
+   */
+  public abstract lowerBound0_(...keys: number[]): Generator<Record, void>;
+
+  /**
+   * Synonymous with {@link lowerBound0}.
+   */
+  public abstract lowerBound(...keys: number[]): Generator<Record, void>;
+
+  /**
+  * Synonymous with {@link lowerBound0_}.
+   */
+  public abstract lowerBound_(...keys: number[]): Generator<Record, void>;
+
+  /**
+  * Scans the elements in the tree satisfying the constraint that the first _k_
+  * keys are strictly less than the _k_ ones specified, based on the order
+  * defined by the first index. The scanned elements are yielded in the order
+  * defined by the first index.
+  *
+  * Note that _k_ may be less than the number of keys in the index, and it may
+  * also be 0. When _k_ == 0 the full tree is scanned and this method is
+  * equivalent to {@link fullScan0}.
+   */
+  public abstract upperBound0(...keys: number[]): Generator<Record, void>;
+
+  /**
+   * Like {@link upperBound0} but it recycles the yielded object.
+   */
+  public abstract upperBound0_(...keys: number[]): Generator<Record, void>;
+
+  /**
+   * Synonymous with {@link upperBound0}.
+   */
+  public abstract upperBound(...keys: number[]): Generator<Record, void>;
+
+  /**
+   * Synonymous with {@link upperBound0_}.
+   */
+  public abstract upperBound_(...keys: number[]): Generator<Record, void>;
+
+  /**
+   *
+   */
+  public abstract range0(
+      lowerBound: number[], upperBound: number[]): Generator<Record, void>;
+
+  /**
+   *
+   */
+  public abstract range0_(
+      lowerBound: number[], upperBound: number[]): Generator<Record, void>;
+
+  /**
+   *
+   */
+  public abstract range(
+      lowerBound: number[], upperBound: number[]): Generator<Record, void>;
+
+  /**
+   *
+   */
+  public abstract range_(
+      lowerBound: number[], upperBound: number[]): Generator<Record, void>;
+
+  /**
+   * Looks up the element identified by the provided keys based on the first
+   * index.
+   *
+   * @returns the requested element, or `null` if not found.
+   */
+  public abstract lookup0(...keys: number[]): Record | null;
+
+  /**
+   * Like {@link lookup0} but it recycles the returned object.
+   */
+  public abstract lookup0_(...keys: number[]): Record | null;
+
+  /**
+   * Synonymous with {@link lookup0}.
+   */
+  public abstract lookup(...keys: number[]): Record | null;
+
+  /**
+   * Synonymous with {@link lookup0_}.
+   */
+  public abstract lookup_(...keys: number[]): Record | null;
+
+  /**
+   * @returns a boolean indicating whether the tree contains an elements
+   *    identified by the provided keys (based on the first index).
+   */
+  public abstract contains0(...keys: number[]): boolean;
+
+  /**
+   * Synonymous with {@link contains0}.
+   */
+  public abstract contains(...keys: number[]): boolean;
+
+  /**
+   * Inserts the provided record into the tree. If a record with the same keys
+   * is already in the tree, it will be updated with the values from the
+   * provided one.
+   *
+   * @returns `true` if a new record was inserted, `false` if one existed and
+   *    was updated.
+   */
+  public abstract insertOrUpdate(record: Record): boolean;
+
+  /**
+   * Inserts or updates all the provided records.
+   *
+   * The implementation simply calls {@link insertOrUpdate} multiple times.
+   */
+  public abstract insertOrUpdateAll(...records: Record[]): boolean;
 };
 
 
@@ -1002,6 +1228,11 @@ export class AVL {
  * @hidden
  */
 const compileAVL = Darblast.Collections.compileAVL;
+
+/**
+ * @hidden
+ */
+type AVL = Darblast.Collections.AVL;
 
 /**
  * @hidden

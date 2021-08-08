@@ -47,5 +47,12 @@ export class FrameAnimation {
 }  // namespace Darblast
 
 
+/**
+ * @hidden
+ */
 type FrameAnimation = Darblast.Drawing.FrameAnimation;
+
+/**
+ * @hidden
+ */
 const FrameAnimation = Darblast.Drawing.FrameAnimation;

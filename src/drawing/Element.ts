@@ -61,6 +61,17 @@ export class StaticImageElement extends BaseElement {
 }  // namespace Darblast
 
 
+/**
+ * @hidden
+ */
 type BaseElement = Darblast.Drawing.BaseElement;
+
+/**
+ * @hidden
+ */
 type StaticImageElement = Darblast.Drawing.StaticImageElement;
+
+/**
+ * @hidden
+ */
 const StaticImageElement = Darblast.Drawing.StaticImageElement;
