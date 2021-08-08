@@ -605,9 +605,9 @@ export const compileAVL = TemplateClass(
       }
 
       _reverse = {
-        [Symbol.iterator]() {
+        [Symbol.iterator]: () => {
           return this.reverseFullScan();
-        }
+        },
       };
 
       get reverse() {

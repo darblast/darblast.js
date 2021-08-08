@@ -328,6 +328,10 @@ describe('Stress-tested AVL', () => {
     for (let {value} of tree) {
       expect(value).to.equal(i++);
     }
+    i = 1023;
+    for (let {value} of tree.reverse) {
+      expect(value).to.equal(i--);
+    }
   });
 
   it('stays balanced throughout level-wise insertion', () => {
@@ -355,6 +359,10 @@ describe('Stress-tested AVL', () => {
     let i = 0;
     for (let {value} of tree) {
       expect(value).to.equal(i++);
+    }
+    i = 1023;
+    for (let {value} of tree.reverse) {
+      expect(value).to.equal(i--);
     }
   });
 });
