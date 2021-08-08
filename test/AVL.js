@@ -4,7 +4,7 @@ const Darblast = require('../dist/darblast.js');
 const {AVL, LinkedList} = Darblast.Collections;
 
 
-const TestAVL = AVL.fromSchema({
+const TestAVL = AVL.compileFromSchema({
   x: 'int32',
   y: 'int32',
   z: 'int32',
@@ -164,7 +164,7 @@ describe('AVL', () => {
 
 
 describe('Stress-tested AVL', () => {
-  const TestAVL = AVL.fromSchema({asd: 'uint32'}, [['asd']]);
+  const TestAVL = AVL.compileFromSchema({asd: 'uint32'}, [['asd']]);
 
   it('stays balanced throughout incremental insertion', () => {
     const tree = new TestAVL();
@@ -173,6 +173,10 @@ describe('Stress-tested AVL', () => {
       tree._checkConsistency();
     }
     expect(tree.size).to.equal(1024);
+    let i = 0;
+    for (let {asd} of tree) {
+      expect(asd).to.equal(i++);
+    }
   });
 
   it('stays balanced throughout level-wise insertion', () => {
@@ -183,7 +187,7 @@ describe('Stress-tested AVL', () => {
     });
     while (queue.size > 0) {
       const {offset, value} = queue.shift();
-      tree.insertOrUpdate({asd: value - 1});
+      tree.insertOrUpdate({asd: value});
       tree._checkConsistency();
       if (value > offset) {
         const half = (value - offset) >>> 1;
@@ -197,5 +201,9 @@ describe('Stress-tested AVL', () => {
       }
     }
     expect(tree.size).to.equal(1024);
+    let i = 0;
+    for (let {asd} of tree) {
+      expect(asd).to.equal(i++);
+    }
   });
 });

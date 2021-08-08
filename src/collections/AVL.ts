@@ -50,6 +50,21 @@ function validateSchema(fields: FieldDefinition[], indices: Index[]): void {
 /**
  * Compiles a JavaScript class to construct fast AVL trees.
  *
+ * The compiled classes returned by this function use typed arrays under the
+ * hood, and are highly optimized for speed, memory locality, and low heap
+ * footprint. The compiled output depends on the specified fields (the schema is
+ * used to infer the layout of the elements in the internal typed array buffer).
+ *
+ * The tradeoff is that this data structure is limited to numeric fields, so if
+ * you need to store strings, dynamic arrays, function closures, or other
+ * complex data types, you'll have to use another data structure. If you still
+ * need an _ordered_ associative container you may want to take a look at
+ * {@link OrderedMap}.
+ *
+ * The provided data structure is a multi-key and multi-index self-balancing
+ * tree. Insertions, deletions, and lookups are all performed in O(log2(N))
+ * time, with N = number of elements currently in the tree.
+ *
  * TODO(jim): provide more details.
  */
 export const compileAVL = TemplateClass(
@@ -470,6 +485,10 @@ export const compileAVL = TemplateClass(
         return this.scan0(...keys);
       }
 
+      [Symbol.iterator]() {
+        return this.scan();
+      }
+
       lowerBound_(...keys) {
         return this.lowerBound0_(...keys);
       }
@@ -813,12 +832,15 @@ export class AVL {
   /**
    * Convenience function to compile an AVL tree class from a {@link Schema}.
    *
+   * Note that this function returns the compiled AVL class. If you want to get
+   * an AVL object directly you need to use {@link fromSchema}.
+   *
    * @param schema  A {@link Schema} describing the fields of the
    *                {@link Record}s to store in the tree.
    * @param keys  List of fields to use as keys. This has the same meaning as in
    *              the {@link compileAVL} function.
    */
-  public static fromSchema(schema: Schema, indices: string[][]) {
+  public static compileFromSchema(schema: Schema, indices: string[][]) {
     const fields: FieldDefinition[] = [];
     for (const name in schema) {
       if (schema.hasOwnProperty(name)) {
@@ -826,6 +848,23 @@ export class AVL {
       }
     }
     return compileAVL(fields, indices.map(keys => new Index(keys)));
+  }
+
+  /**
+   * Convenience function to construct an AVL tree from a {@link Schema}.
+   *
+   * Notice that the difference between this method and
+   * {@link compileFromSchema} is that the latter returns the compiled AVL
+   * class, while this function returns an instantiated AVL object.
+   *
+   * @param schema  A {@link Schema} describing the fields of the
+   *                {@link Record}s to store in the tree.
+   * @param keys  List of fields to use as keys. This has the same meaning as in
+   *              the {@link compileAVL} function.
+   */
+  public static fromSchema(schema: Schema, indices: string[][]) {
+    const AVLClass = AVL.compileFromSchema(schema, indices);
+    return new AVLClass();
   }
 };
 
