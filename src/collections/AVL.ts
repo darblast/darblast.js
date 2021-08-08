@@ -282,6 +282,33 @@ export const compileAVL = TemplateClass(
             }
           }
 
+          *_reverseFullScan${index}(node) {
+            if (node) {
+              yield* this._reverseFullScan${index}(
+                  ${getField(`$right${index}`)});
+              yield node;
+              yield* this._reverseFullScan${index}(
+                  ${getField(`$left${index}`)});
+            }
+          }
+
+          *reverseFullScan${index}_() {
+            for (let node of this._reverseFullScan${index}(
+                this._root${index}))
+            {
+              this._record.$node = node;
+              yield this._record;
+            }
+          }
+
+          *reverseFullScan${index}() {
+            for (let node of this._reverseFullScan${index}(
+                this._root${index}))
+            {
+              yield new AVL.Record(this._views, node);
+            }
+          }
+
           _comparePartial${index}(keys) {
             ${keys.map((key, i) => `
               if (keys.length > ${i}) {
@@ -322,6 +349,49 @@ export const compileAVL = TemplateClass(
 
           *scan${index}(...keys) {
             for (const node of this._scan${index}(this._root${index}, keys)) {
+              if (yield new AVL.Record(this._views, node)) {
+                return false;
+              }
+            }
+            return true;
+          }
+
+          *_reverseScan${index}(node, keys) {
+            if (!node) {
+              return;
+            }
+            const cmp = this._comparePartial${index}(node, keys);
+            if (cmp < 0) {
+              yield* this._reverseScan${index}(
+                  ${getField(`$left${index}`)}, keys);
+            } else if (cmp > 0) {
+              yield* this._reverseScan${index}(
+                  ${getField(`$right${index}`)}, keys);
+            } else {
+              yield* this._reverseScan${index}(
+                  ${getField(`$right${index}`)}, keys);
+              yield node;
+              yield* this._reverseScan${index}(
+                  ${getField(`$left${index}`)}, keys);
+            }
+          }
+
+          *reverseScan${index}_(...keys) {
+            for (const node of this._reverseScan${index}(
+                this._root${index}, keys))
+            {
+              this._record.$node = node;
+              if (yield this._record) {
+                return false;
+              }
+            }
+            return true;
+          }
+
+          *reverseScan${index}(...keys) {
+            for (const node of this._reverseScan${index}(
+                this._root${index}, keys))
+            {
               if (yield new AVL.Record(this._views, node)) {
                 return false;
               }
@@ -506,6 +576,14 @@ export const compileAVL = TemplateClass(
         return this.fullScan0();
       }
 
+      reverseFullScan_() {
+        return this.reverseFullScan0_();
+      }
+
+      reverseFullScan() {
+        return this.reverseFullScan0();
+      }
+
       scan_(...keys) {
         return this.scan0_(...keys);
       }
@@ -514,8 +592,26 @@ export const compileAVL = TemplateClass(
         return this.scan0(...keys);
       }
 
+      reverseScan_(...keys) {
+        return this.reverseScan0_(...keys);
+      }
+
+      reverseScan(...keys) {
+        return this.reverseScan0(...keys);
+      }
+
       [Symbol.iterator]() {
         return this.fullScan();
+      }
+
+      _reverse = {
+        [Symbol.iterator]() {
+          return this.reverseFullScan();
+        }
+      };
+
+      get reverse() {
+        return this._reverse;
       }
 
       lowerBound_(...keys) {

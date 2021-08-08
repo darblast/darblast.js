@@ -165,12 +165,24 @@ describe('AVL', () => {
     checkRecordArray([...tree.fullScan1_()], []);
     checkRecordArray([...tree.fullScan()], []);
     checkRecordArray([...tree.fullScan_()], []);
+    checkRecordArray([...tree.reverseFullScan0()], []);
+    checkRecordArray([...tree.reverseFullScan0_()], []);
+    checkRecordArray([...tree.reverseFullScan1()], []);
+    checkRecordArray([...tree.reverseFullScan1_()], []);
+    checkRecordArray([...tree.reverseFullScan()], []);
+    checkRecordArray([...tree.reverseFullScan_()], []);
     checkRecordArray([...tree.scan0()], []);
     checkRecordArray([...tree.scan0_()], []);
     checkRecordArray([...tree.scan1()], []);
     checkRecordArray([...tree.scan1_()], []);
     checkRecordArray([...tree.scan()], []);
     checkRecordArray([...tree.scan_()], []);
+    checkRecordArray([...tree.reverseScan0()], []);
+    checkRecordArray([...tree.reverseScan0_()], []);
+    checkRecordArray([...tree.reverseScan1()], []);
+    checkRecordArray([...tree.reverseScan1_()], []);
+    checkRecordArray([...tree.reverseScan()], []);
+    checkRecordArray([...tree.reverseScan_()], []);
   });
 
   it('yields an inserted element on the first index', () => {
@@ -181,10 +193,18 @@ describe('AVL', () => {
     checkRecordArray([...tree.fullScan0_()], array);
     checkRecordArray([...tree.fullScan()], array);
     checkRecordArray([...tree.fullScan_()], array);
+    checkRecordArray([...tree.reverseFullScan0()], array);
+    checkRecordArray([...tree.reverseFullScan0_()], array);
+    checkRecordArray([...tree.reverseFullScan()], array);
+    checkRecordArray([...tree.reverseFullScan_()], array);
     checkRecordArray([...tree.scan0()], array);
     checkRecordArray([...tree.scan0_()], array);
     checkRecordArray([...tree.scan()], array);
     checkRecordArray([...tree.scan_()], array);
+    checkRecordArray([...tree.reverseScan0()], array);
+    checkRecordArray([...tree.reverseScan0_()], array);
+    checkRecordArray([...tree.reverseScan()], array);
+    checkRecordArray([...tree.reverseScan_()], array);
   });
 
   it('yields an inserted element on the second index', () => {
@@ -193,8 +213,12 @@ describe('AVL', () => {
     const array = [e];
     checkRecordArray([...tree.fullScan1()], array);
     checkRecordArray([...tree.fullScan1_()], array);
+    checkRecordArray([...tree.reverseFullScan1()], array);
+    checkRecordArray([...tree.reverseFullScan1_()], array);
     checkRecordArray([...tree.scan1()], array);
     checkRecordArray([...tree.scan1_()], array);
+    checkRecordArray([...tree.reverseScan1()], array);
+    checkRecordArray([...tree.reverseScan1_()], array);
   });
 
   it('yields two inserted elements on the first index', () => {
@@ -209,6 +233,18 @@ describe('AVL', () => {
     checkRecordArray([...tree.scan()], array);
   });
 
+  it('yields two inserted elements on the first index in reverse order', () => {
+    const e1 = element();
+    const e2 = element();
+    tree.insertOrUpdate(e1);
+    tree.insertOrUpdate(e2);
+    const array = [e1, e2].sort(compareRecords0).reverse();
+    checkRecordArray([...tree.reverseFullScan0()], array);
+    checkRecordArray([...tree.reverseFullScan()], array);
+    checkRecordArray([...tree.reverseScan0()], array);
+    checkRecordArray([...tree.reverseScan()], array);
+  });
+
   it('yields two inserted elements on the second index', () => {
     const e1 = element();
     const e2 = element();
@@ -217,6 +253,16 @@ describe('AVL', () => {
     const array = [e1, e2].sort(compareRecords1);
     checkRecordArray([...tree.fullScan1()], array);
     checkRecordArray([...tree.scan1()], array);
+  });
+
+  it('yields two inserted elements on the second index in reverse order', () => {
+    const e1 = element();
+    const e2 = element();
+    tree.insertOrUpdate(e1);
+    tree.insertOrUpdate(e2);
+    const array = [e1, e2].sort(compareRecords1).reverse();
+    checkRecordArray([...tree.reverseFullScan1()], array);
+    checkRecordArray([...tree.reverseScan1()], array);
   });
 
   it('retrieves an inserted element with the first index', () => {
