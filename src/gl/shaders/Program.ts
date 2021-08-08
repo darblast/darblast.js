@@ -175,27 +175,27 @@ export class Program {
     this._gl.uniform4i(this._locations[name], x, y, z, w);
   }
 
-  public uniform2fv(name: string, v: vec2): void {
+  public uniform2fv(name: string, v: ivec2): void {
     this._gl.uniform2f(this._locations[name], v.x, v.y);
   }
 
-  public uniform3fv(name: string, v: vec3): void {
+  public uniform3fv(name: string, v: ivec3): void {
     this._gl.uniform3f(this._locations[name], v.x, v.y, v.z);
   }
 
-  public uniform4fv(name: string, v: vec4): void {
+  public uniform4fv(name: string, v: ivec4): void {
     this._gl.uniform4f(this._locations[name], v.x, v.y, v.z, v.w);
   }
 
-  public uniform2iv(name: string, v: vec2): void {
+  public uniform2iv(name: string, v: ivec2): void {
     this._gl.uniform2i(this._locations[name], v.x, v.y);
   }
 
-  public uniform3iv(name: string, v: vec3): void {
+  public uniform3iv(name: string, v: ivec3): void {
     this._gl.uniform3i(this._locations[name], v.x, v.y, v.z);
   }
 
-  public uniform4iv(name: string, v: vec4): void {
+  public uniform4iv(name: string, v: ivec4): void {
     this._gl.uniform4i(this._locations[name], v.x, v.y, v.z, v.w);
   }
 
