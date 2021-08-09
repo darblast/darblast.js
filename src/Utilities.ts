@@ -40,6 +40,27 @@ export function npo2(x: number): number {
 }
 
 
+/**
+ * Shuffles an array in place.
+ *
+ * This function produces a uniformly distributed pseudo-random permutation. It
+ * uses the [Knuth / Fisher-Yates shuffle
+ * algorithm](https://en.wikipedia.org/wiki/Fisher%E2%80%93Yates_shuffle).
+ *
+ * It is not safe for cryptographic purposes because it uses `Math.random` for
+ * randomization, which is in turn not cryptographically safe.
+ */
+export function shuffle<Element>(array: Element[]): Element[] {
+  for (let i = 0; i < array.length; i++) {
+    const j = i + GlobalMath.floor(GlobalMath.random() * (array.length - i));
+    const t = array[i];
+    array[i] = array[j];
+    array[j] = t;
+  }
+  return array;
+}
+
+
 export function TemplateClass(compiler: (...args: any[]) => string) {
   return (...args: any[]) => {
     const compiled = compiler.apply(null, args);

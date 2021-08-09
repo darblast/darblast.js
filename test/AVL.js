@@ -1,6 +1,7 @@
 const {expect} = require('chai');
 
 const Darblast = require('../dist/darblast.js');
+const {Utilities} = Darblast;
 const {AVL, LinkedList} = Darblast.Collections;
 
 
@@ -375,15 +376,11 @@ describe('Stress-tested AVL', () => {
     for (let i = 0; i < 1024; i++) {
       elements.push(i);
     }
-    for (let i = 0; i < elements.length; i++) {
-      const j = i + Math.floor(Math.random() * (elements.length - i));
-      const t = elements[i];
-      elements[i] = elements[j];
-      elements[j] = t;
-    }
+    Utilities.shuffle(elements);
     const tree = new TestAVL();
     for (value of elements) {
       tree.insertOrUpdate({value});
+      tree._checkConsistency();
     }
     expect(tree.size).to.equal(1024);
     let i = 0;
