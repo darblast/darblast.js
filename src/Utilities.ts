@@ -41,6 +41,25 @@ export function npo2(x: number): number {
 
 
 /**
+ * Generates an array of `length` consecutive integers.
+ *
+ * The returned integers may optionally start from an `offset`, which defaults
+ * to 0.
+ *
+ * For example, `range(6, 4)` will return `[4, 5, 6, 7, 8, 9]`.
+ *
+ * @param length the number of integers to generate.
+ * @param offset the offset of the generated values (the values range from
+ *    `offset` to `length - offset`, inclusive).
+ *
+ * @returns the generated array.
+ */
+export function range(length: number, offset: number = 0): number[] {
+  return Array.from({length}, (_, i) => offset + i);
+}
+
+
+/**
  * Shuffles an array in place.
  *
  * This function produces a uniformly distributed pseudo-random permutation. It
@@ -49,6 +68,8 @@ export function npo2(x: number): number {
  *
  * It is not safe for cryptographic purposes because it uses `Math.random` for
  * randomization, which is in turn not cryptographically safe.
+ *
+ * @returns the input array.
  */
 export function shuffle<Element>(array: Element[]): Element[] {
   for (let i = 0; i < array.length; i++) {
