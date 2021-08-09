@@ -87,8 +87,7 @@ describe('vec2', () => {
   });
 
   it('defaults Z and W when unspecified upon conversion to vec4', () => {
-    const v = new vec2(2, 3);  // TODO
-
+    const v = new vec2(2, 3);
     const u = v.toVec4();
     expect(u.z).to.equal(0);
     expect(u.w).to.equal(1);

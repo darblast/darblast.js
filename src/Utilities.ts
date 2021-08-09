@@ -48,9 +48,9 @@ export function npo2(x: number): number {
  *
  * For example, `range(6, 4)` will return `[4, 5, 6, 7, 8, 9]`.
  *
- * @param length the number of integers to generate.
- * @param offset the offset of the generated values (the values range from
- *    `offset` to `length - offset`, inclusive).
+ * @param length  the number of integers to generate.
+ * @param offset  the offset of the generated values (the values range from
+ *                `offset` to `length - offset`, inclusive).
  *
  * @returns the generated array.
  */

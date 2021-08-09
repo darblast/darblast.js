@@ -1,6 +1,11 @@
 namespace Darblast {
 export namespace Loader {
 
+/**
+ * Loads an image asynchronously from the given URL.
+ *
+ * The returned Promise will resolve to an `HTMLImageElement`.
+ */
 export function loadImage(url: string): Promise<HTMLImageElement> {
   return new Promise<HTMLImageElement>((resolve, reject) => {
     const image = new Image();
@@ -18,10 +23,20 @@ export function loadImage(url: string): Promise<HTMLImageElement> {
   });
 }
 
+/**
+ * Loads many images in parallel from the given URLs.
+ *
+ * The returned Promise will resolve to an array of `HTMLImageElement`s.
+ */
 export function loadImages(urls: string[]): Promise<HTMLImageElement[]> {
   return Promise.all(urls.map(url => loadImage(url)));
 }
 
+/**
+ * Loads an audio file asynchronously from the given URL.
+ *
+ * The returned Promise will resolve to an `HTMLAudioElement`.
+ */
 export function loadSound(url: string): Promise<HTMLAudioElement> {
   return new Promise<HTMLAudioElement>((resolve, reject) => {
     const audio = new Audio(url);
@@ -39,6 +54,11 @@ export function loadSound(url: string): Promise<HTMLAudioElement> {
   });
 }
 
+/**
+ * Loads many audio files in parallel from the given URLs.
+ *
+ * The returned Promise will resolve to an array of `HTMLAudioElement`s.
+ */
 export function loadSounds(urls: string[]): Promise<HTMLAudioElement[]> {
   return Promise.all(urls.map(url => Loader.loadSound(url)));
 }
