@@ -195,13 +195,17 @@ export const compileAVL = TemplateClass(
             const left = ${getField(`$left${index}`)};
             if (left) {
               if (${getNodeField('left', `$parent${index}`)} !== node) {
-                throw new Error('tree #${index} has incorrect left link')
+                throw new Error(
+                    'tree #${index} with ' + this._size +
+                    ' elements has incorrect left link');
               }
             }
             const right = ${getField(`$right${index}`)};
             if (right) {
               if (${getNodeField('right', `$parent${index}`)} !== node) {
-                throw new Error('tree #${index} has incorrect right link')
+                throw new Error(
+                    'tree #${index} with ' + this._size +
+                    ' elements has incorrect right link');
               }
             }
             const leftResult = this._checkConsistency${index}(left);
@@ -210,11 +214,13 @@ export const compileAVL = TemplateClass(
             const expectedBalance = rightResult.height - leftResult.height;
             if (balance !== expectedBalance) {
               throw new Error(
-                  'tree #${index} has wrong balance factor (' + balance +
+                  'tree #${index} with ' + this._size +
+                  ' elements has wrong balance factor (' + balance +
                   ' instead of ' + expectedBalance + ')');
             }
             if (balance < -1 || balance > 1) {
-              throw new Error('tree #${index} is unbalanced');
+              throw new Error(
+                  'tree #${index} ' + this._size + ' elements is unbalanced');
             }
             return {
               size: 1 + leftResult.size + rightResult.size,
@@ -238,6 +244,18 @@ export const compileAVL = TemplateClass(
             if (!this._root${index}) {
               throw new Error('tree #0 has a root but tree #${index} is empty');
             }
+            if (${getNodeField(`this._root${index}`, `$parent${index}`)}) {
+              throw new Error(
+                  'tree #${index} with ' + this._size +
+                  ' elements has dangling parent link');
+            }
+            const results${index} = this._checkConsistency${index}(
+                this._root${index});
+            if (results${index}.size !== this._size) {
+              throw new Error(
+                  'wrong size: ' + this._size + ' instead of ' +
+                  results${index}.size);
+            }
           `).join('')}
         } else {
           if (this._size > 0) {
@@ -249,14 +267,6 @@ export const compileAVL = TemplateClass(
             }
           `).join('')}
         }
-        ${indices.map((_, index) => `
-          if (this._root${index}) {
-            if (${getNodeField(`this._root${index}`, `$parent${index}`)}) {
-              throw new Error('tree #${index} has dangling parent link');
-            }
-            this._checkConsistency${index}(this._root${index});
-          }
-        `).join('')}
       }
 
       _record = new AVL.Record(this._views, 0);
