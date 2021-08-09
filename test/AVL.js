@@ -332,9 +332,9 @@ describe('Stress-tested AVL', () => {
     for (let {value} of tree) {
       expect(value).to.equal(i++);
     }
-    i = 1023;
+    i = 1024;
     for (let {value} of tree.reverse) {
-      expect(value).to.equal(i--);
+      expect(value).to.equal(--i);
     }
   });
 
@@ -364,9 +364,35 @@ describe('Stress-tested AVL', () => {
     for (let {value} of tree) {
       expect(value).to.equal(i++);
     }
-    i = 1023;
+    i = 1024;
     for (let {value} of tree.reverse) {
-      expect(value).to.equal(i--);
+      expect(value).to.equal(--i);
+    }
+  });
+
+  it('stays balanced throughout random insertion', () => {
+    const elements = [];
+    for (let i = 0; i < 1024; i++) {
+      elements.push(i);
+    }
+    for (let i = 0; i < elements.length; i++) {
+      const j = i + Math.floor(Math.random() * (elements.length - i));
+      const t = elements[i];
+      elements[i] = elements[j];
+      elements[j] = t;
+    }
+    const tree = new TestAVL();
+    for (value of elements) {
+      tree.insertOrUpdate({value});
+    }
+    expect(tree.size).to.equal(1024);
+    let i = 0;
+    for (let {value} of tree) {
+      expect(value).to.equal(i++);
+    }
+    i = 1024;
+    for (let {value} of tree.reverse) {
+      expect(value).to.equal(--i);
     }
   });
 });
