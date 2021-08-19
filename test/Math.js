@@ -529,6 +529,18 @@ describe('vec4', () => {
 
 
 describe('mat2', () => {
+  it('can be compared with an identical one', () => {
+    const m1 = new mat2(2, 3, 4, 5);
+    const m2 = new mat2(2, 3, 4, 5);
+    expect(m1.equals(m2)).to.be.true;
+  });
+
+  it('can be compared with a different one', () => {
+    const m1 = new mat2(2, 3, 4, 5);
+    const m2 = new mat2(6, 7, 8, 9);
+    expect(m1.equals(m2)).to.be.false;
+  });
+
   // TODO
 
   it('has a determinant', () => {
@@ -558,72 +570,45 @@ describe('mat2', () => {
 
 
 describe('mat3', () => {
+  it('can be compared with an identical one', () => {
+    const m1 = new mat3(2, 3, 4, 5, 6, 7, 8, 9, 10);
+    const m2 = new mat3(2, 3, 4, 5, 6, 7, 8, 9, 10);
+    expect(m1.equals(m2)).to.be.true;
+  });
+
+  it('can be compared with a different one', () => {
+    const m1 = new mat3(2, 3, 4, 5, 6, 7, 8, 9, 10);
+    const m2 = new mat3(10, 9, 8, 7, 6, 5, 4, 3, 2);
+    expect(m1.equals(m2)).to.be.false;
+  });
+
   it('makes the identity matrix', () => {
     const m = mat3.identity();
-    expect(m.m00).to.equal(1);
-    expect(m.m01).to.equal(0);
-    expect(m.m02).to.equal(0);
-    expect(m.m10).to.equal(0);
-    expect(m.m11).to.equal(1);
-    expect(m.m12).to.equal(0);
-    expect(m.m20).to.equal(0);
-    expect(m.m21).to.equal(0);
-    expect(m.m22).to.equal(1);
+    expect(m.equals(new mat3(1, 0, 0, 0, 1, 0, 0, 0, 1))).to.be.true;
   });
 
   it('makes a translation matrix', () => {
     const m = mat3.translation(2, 3);
-    expect(m.m00).to.equal(1);
-    expect(m.m01).to.equal(0);
-    expect(m.m02).to.equal(2);
-    expect(m.m10).to.equal(0);
-    expect(m.m11).to.equal(1);
-    expect(m.m12).to.equal(3);
-    expect(m.m20).to.equal(0);
-    expect(m.m21).to.equal(0);
-    expect(m.m22).to.equal(1);
+    expect(m.equals(new mat3(1, 0, 2, 0, 1, 3, 0, 0, 1))).to.be.true;
   });
 
   it('makes a scaling matrix', () => {
     const m = mat3.scaling(2, 3, 4);
-    expect(m.m00).to.equal(2);
-    expect(m.m01).to.equal(0);
-    expect(m.m02).to.equal(0);
-    expect(m.m10).to.equal(0);
-    expect(m.m11).to.equal(3);
-    expect(m.m12).to.equal(0);
-    expect(m.m20).to.equal(0);
-    expect(m.m21).to.equal(0);
-    expect(m.m22).to.equal(4);
+    expect(m.equals(new mat3(2, 0, 0, 0, 3, 0, 0, 0, 4))).to.be.true;
   });
 
   it('can be assigned to', () => {
     const m1 = new mat3(2, 3, 4, 5, 6, 7, 8, 9, 10);
     const m2 = new mat3(11, 12, 13, 14, 15, 16, 17, 18, 19);
     m1.assign(m2);
-    expect(m1.m00).to.equal(11);
-    expect(m1.m01).to.equal(12);
-    expect(m1.m02).to.equal(13);
-    expect(m1.m10).to.equal(14);
-    expect(m1.m11).to.equal(15);
-    expect(m1.m12).to.equal(16);
-    expect(m1.m20).to.equal(17);
-    expect(m1.m21).to.equal(18);
-    expect(m1.m22).to.equal(19);
+    expect(m1.equals(m2)).to.be.true;
   });
 
   it('can be cloned', () => {
     const m1 = new mat3(2, 3, 4, 5, 6, 7, 8, 9, 10);
     const m2 = m1.clone();
-    expect(m2.m00).to.equal(2);
-    expect(m2.m01).to.equal(3);
-    expect(m2.m02).to.equal(4);
-    expect(m2.m10).to.equal(5);
-    expect(m2.m11).to.equal(6);
-    expect(m2.m12).to.equal(7);
-    expect(m2.m20).to.equal(8);
-    expect(m2.m21).to.equal(9);
-    expect(m2.m22).to.equal(10);
+    expect(m1).to.not.equal(m2);
+    expect(m1.equals(m2)).to.be.true;
   });
 
   it('has a determinant', () => {

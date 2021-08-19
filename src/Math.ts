@@ -867,6 +867,13 @@ export class mat2 {
     return `mat2<${this.toArray().join(', ')}>`;
   }
 
+  public equals(other: mat2): boolean {
+    return this.m00 === other.m00 &&
+        this.m01 === other.m01 &&
+        this.m10 === other.m10 &&
+        this.m11 === other.m11;
+  }
+
   public assign(other: mat2): mat2 {
     this.m00 = other.m00;
     this.m01 = other.m01;
@@ -1040,6 +1047,18 @@ export class mat3 {
 
   public toString(): string {
     return `mat3<${this.toArray().join(', ')}>`;
+  }
+
+  public equals(other: mat3): boolean {
+    return this.m00 === other.m00 &&
+        this.m01 === other.m01 &&
+        this.m02 === other.m02 &&
+        this.m10 === other.m10 &&
+        this.m11 === other.m11 &&
+        this.m12 === other.m12 &&
+        this.m20 === other.m20 &&
+        this.m21 === other.m21 &&
+        this.m22 === other.m22;
   }
 
   public assign(other: mat3): mat3 {
