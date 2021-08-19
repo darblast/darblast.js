@@ -648,5 +648,23 @@ describe('mat3', () => {
 
 
 describe('mat4', () => {
+  it('can be compared with an identical one', () => {
+    const m1 = new mat4(2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13);
+    const m2 = new mat4(2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13);
+    expect(m1.equals(m2)).to.be.true;
+  });
+
+  it('can be compared with a different one', () => {
+    const m1 = new mat4(2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13);
+    const m2 = new mat4(13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2);
+    expect(m1.equals(m2)).to.be.false;
+  });
+
+  it('makes the identity matrix', () => {
+    const m1 = mat3.identity();
+    const m2 = new mat4(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
+    expect(m1.equals(m2)).to.be.true;
+  });
+
   // TODO
 });
