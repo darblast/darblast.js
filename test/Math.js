@@ -11,7 +11,7 @@ describe('vec2', () => {
     expect(v.y).to.equal(3);
   });
 
-  it('has zero', () => {
+  it('makes the zero vector', () => {
     const v = vec2.zero();
     expect(v.x).to.equal(0);
     expect(v.y).to.equal(0);
@@ -27,6 +27,18 @@ describe('vec2', () => {
     const v = vec2.fromVec4(new vec4(2, 3, 4, 5));
     expect(v.x).to.equal(2);
     expect(v.y).to.equal(3);
+  });
+
+  it('can be compared with an identical vector', () => {
+    const v = new vec2(2, 3);
+    const u = new vec2(2, 3);
+    expect(v.equals(u)).to.be.true;
+  });
+
+  it('can be compared with a different vector', () => {
+    const v = new vec3(2, 3);
+    const u = new vec3(4, 5);
+    expect(v.equals(u)).to.be.false;
   });
 
   it('can be assigned', () => {
@@ -390,7 +402,7 @@ describe('vec3', () => {
     expect(v.z).to.equal(4);
   });
 
-  it('has zero', () => {
+  it('makes the zero vector', () => {
     const v = vec3.zero();
     expect(v.x).to.equal(0);
     expect(v.y).to.equal(0);
@@ -409,6 +421,18 @@ describe('vec3', () => {
     expect(v.x).to.equal(2);
     expect(v.y).to.equal(3);
     expect(v.z).to.equal(4);
+  });
+
+  it('can be compared with an identical vector', () => {
+    const v = new vec3(2, 3, 4);
+    const u = new vec3(2, 3, 4);
+    expect(v.equals(u)).to.be.true;
+  });
+
+  it('can be compared with a different vector', () => {
+    const v = new vec3(2, 3, 4);
+    const u = new vec3(5, 6, 7);
+    expect(v.equals(u)).to.be.false;
   });
 
   it('can be assigned from vec2', () => {
@@ -539,6 +563,10 @@ describe('mat2', () => {
     const m1 = new mat2(2, 3, 4, 5);
     const m2 = new mat2(6, 7, 8, 9);
     expect(m1.equals(m2)).to.be.false;
+  });
+
+  it('makes the identity matrix', () => {
+    expect(mat2.identity().equals(new mat2(1, 0, 0, 1))).to.be.true;
   });
 
   // TODO

@@ -6,6 +6,19 @@ export namespace Utilities {
 
 
 /**
+ * Compares two numbers with a tolerance.
+ *
+ * @param a  The first number.
+ * @param b  The second number.
+ * @param e  The tolerance.
+ * @returns `true` iff `b` is in the closed range `[a-e, a+e]`.
+ */
+export function almostEquals(a: number, b: number, e: number): boolean {
+  return b >= a - e && b <= a + e;
+}
+
+
+/**
  * Calculates a "wrap around" version of the modulus.
  *
  * The formula is:

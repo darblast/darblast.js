@@ -1,4 +1,5 @@
 /// <reference path="GlobalMath.ts"/>
+/// <reference path="Utilities.ts"/>
 
 
 namespace Darblast {
@@ -38,6 +39,15 @@ export class vec2 implements ivec2 {
 
   public toString(): string {
     return `vec2<${this.x}, ${this.y}>`;
+  }
+
+  public equals(other: ivec2): boolean {
+    return this.x === other.x && this.y === other.y;
+  }
+
+  public almostEquals(other: ivec2, e: number): boolean {
+    return Utilities.almostEquals(this.x, other.x, e) &&
+        Utilities.almostEquals(this.y, other.y, e);
   }
 
   public assign(v: ivec2): vec2 {
@@ -239,6 +249,18 @@ export class vec3 implements ivec3 {
 
   public toString(): string {
     return `vec3<${this.x}, ${this.y}, ${this.z}>`;
+  }
+
+  public equals(other: ivec3): boolean {
+    return this.x === other.x &&
+        this.y === other.y &&
+        this.z === other.z;
+  }
+
+  public almostEquals(other: ivec3, e: number): boolean {
+    return Utilities.almostEquals(this.x, other.x, e) &&
+        Utilities.almostEquals(this.y, other.y, e) &&
+        Utilities.almostEquals(this.z, other.z, e);
   }
 
   public assignVec2(v: ivec2): vec3 {
@@ -572,6 +594,20 @@ export class vec4 implements ivec4 {
 
   public toString(): string {
     return `vec4<${this.x}, ${this.y}, ${this.z}, ${this.w}>`;
+  }
+
+  public equals(other: ivec4): boolean {
+    return this.x === other.x &&
+        this.y === other.y &&
+        this.z === other.z &&
+        this.w === other.w;
+  }
+
+  public almostEquals(other: ivec4, e: number): boolean {
+    return Utilities.almostEquals(this.x, other.x, e) &&
+        Utilities.almostEquals(this.y, other.y, e) &&
+        Utilities.almostEquals(this.z, other.z, e) &&
+        Utilities.almostEquals(this.w, other.w, e);
   }
 
   public assignVec2(v: ivec2): vec4 {
