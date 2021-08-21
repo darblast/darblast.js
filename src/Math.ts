@@ -991,6 +991,50 @@ export class mat2 {
     return new mat2(this.m00, this.m10, this.m01, this.m11);
   }
 
+  public neg_(): mat2 {
+    this.m00 = -this.m00;
+    this.m01 = -this.m01;
+    this.m10 = -this.m10;
+    this.m11 = -this.m11;
+    return this;
+  }
+
+  public neg(): mat2 {
+    return new mat2(-this.m00, -this.m01, -this.m10, -this.m11);
+  }
+
+  public add_(other: mat2): mat2 {
+    this.m00 += other.m00;
+    this.m01 += other.m01;
+    this.m10 += other.m10;
+    this.m11 += other.m11;
+    return this;
+  }
+
+  public add(other: mat2): mat2 {
+    return new mat2(
+        this.m00 + other.m00,
+        this.m01 + other.m01,
+        this.m10 + other.m10,
+        this.m11 + other.m11);
+  }
+
+  public sub_(other: mat2): mat2 {
+    this.m00 -= other.m00;
+    this.m01 -= other.m01;
+    this.m10 -= other.m10;
+    this.m11 -= other.m11;
+    return this;
+  }
+
+  public sub(other: mat2): mat2 {
+    return new mat2(
+        this.m00 - other.m00,
+        this.m01 - other.m01,
+        this.m10 - other.m10,
+        this.m11 - other.m11);
+  }
+
   public mul_(other: mat2): mat2 {
     const m00 = this.m00 * other.m00 + this.m01 * other.m10;
     const m01 = this.m00 * other.m01 + this.m01 * other.m11;
@@ -1207,6 +1251,78 @@ export class mat3 {
         this.m00, this.m10, this.m20,
         this.m01, this.m11, this.m21,
         this.m02, this.m12, this.m22);
+  }
+
+  public neg_(): mat3 {
+    this.m00 = -this.m00;
+    this.m01 = -this.m01;
+    this.m02 = -this.m02;
+    this.m10 = -this.m10;
+    this.m11 = -this.m11;
+    this.m12 = -this.m12;
+    this.m20 = -this.m20;
+    this.m21 = -this.m21;
+    this.m22 = -this.m22;
+    return this;
+  }
+
+  public neg(): mat3 {
+    return new mat3(
+        -this.m00, -this.m01, -this.m02,
+        -this.m10, -this.m11, -this.m12,
+        -this.m20, -this.m21, -this.m22);
+  }
+
+  public add_(other: mat3): mat3 {
+    this.m00 += other.m00;
+    this.m01 += other.m01;
+    this.m02 += other.m02;
+    this.m10 += other.m10;
+    this.m11 += other.m11;
+    this.m12 += other.m12;
+    this.m20 += other.m20;
+    this.m21 += other.m21;
+    this.m22 += other.m22;
+    return this;
+  }
+
+  public add(other: mat3): mat3 {
+    return new mat3(
+        this.m00 + other.m00,
+        this.m01 + other.m01,
+        this.m02 + other.m02,
+        this.m10 + other.m10,
+        this.m11 + other.m11,
+        this.m12 + other.m12,
+        this.m20 + other.m20,
+        this.m21 + other.m21,
+        this.m22 + other.m22);
+  }
+
+  public sub_(other: mat3): mat3 {
+    this.m00 -= other.m00;
+    this.m01 -= other.m01;
+    this.m02 -= other.m02;
+    this.m10 -= other.m10;
+    this.m11 -= other.m11;
+    this.m12 -= other.m12;
+    this.m20 -= other.m20;
+    this.m21 -= other.m21;
+    this.m22 -= other.m22;
+    return this;
+  }
+
+  public sub(other: mat3): mat3 {
+    return new mat3(
+        this.m00 - other.m00,
+        this.m01 - other.m01,
+        this.m02 - other.m02,
+        this.m10 - other.m10,
+        this.m11 - other.m11,
+        this.m12 - other.m12,
+        this.m20 - other.m20,
+        this.m21 - other.m21,
+        this.m22 - other.m22);
   }
 
   public mul_(other: mat3): mat3 {
