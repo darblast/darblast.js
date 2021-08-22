@@ -339,6 +339,23 @@ describe('Stress-tested AVL', () => {
     }
   });
 
+  it('stays balanced throughout reverse incremental insertion', () => {
+    const tree = new TestAVL();
+    for (let value = 1024; value > 0; value--) {
+      tree.insertOrUpdate({value});
+      tree._checkConsistency();
+    }
+    expect(tree.size).to.equal(1024);
+    let i = 0;
+    for (let {value} of tree) {
+      expect(value).to.equal(++i);
+    }
+    i = 1024;
+    for (let {value} of tree.reverse) {
+      expect(value).to.equal(i--);
+    }
+  });
+
   it('stays balanced throughout level-wise insertion', () => {
     const tree = new TestAVL();
     const queue = new LinkedList({
