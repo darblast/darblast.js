@@ -798,11 +798,11 @@ export const compileAVL = TemplateClass(
           ${setNodeField('child', `$parent${index}`, 'root')}
           const balance = ${getNodeField('child', `$balance${index}`)};
           if (balance > 0) {
-            ${setNodeField('parent', `$balance${index}`, '1')}
-            ${setNodeField('node', `$balance${index}`, '0')}
-          } else if (balance < 0) {
             ${setNodeField('parent', `$balance${index}`, '0')}
             ${setNodeField('node', `$balance${index}`, '-1')}
+          } else if (balance < 0) {
+            ${setNodeField('parent', `$balance${index}`, '1')}
+            ${setNodeField('node', `$balance${index}`, '0')}
           } else {
             ${setNodeField('parent', `$balance${index}`, '0')}
             ${setNodeField('node', `$balance${index}`, '0')}
