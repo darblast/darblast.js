@@ -201,6 +201,7 @@ export class OrderedMap<Key, Value> {
       parent.balance = 0;
       node.balance = 0;
     }
+    child.balance = 0;
     return child;
   }
 
@@ -213,15 +214,16 @@ export class OrderedMap<Key, Value> {
     child.rightChild = parent;
     child.leftChild = node;
     if (child.balance > 0) {
-      parent.balance = 1;
-      node.balance = 0;
-    } else if (child.balance < 0) {
       parent.balance = 0;
       node.balance = -1;
+    } else if (child.balance < 0) {
+      parent.balance = 1;
+      node.balance = 0;
     } else {
       parent.balance = 0;
       node.balance = 0;
     }
+    child.balance = 0;
     return child;
   }
 
