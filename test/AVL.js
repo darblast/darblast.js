@@ -388,23 +388,23 @@ describe('Stress-tested AVL', () => {
     }
   });
 
+  // Override this if you have a known failing sequence.
+  const presetSequence = null;
+
   it('stays balanced throughout random insertion', () => {
-    const elements = [];
-    for (let i = 0; i < 1024; i++) {
-      elements.push(i);
-    }
-    Utilities.shuffle(elements);
+    const elements = presetSequence || Utilities.shuffle(
+        Array.from({length: 1024}, (_, i) => i));
     const tree = new TestAVL();
     for (value of elements) {
       tree.insertOrUpdate({value});
       tree._checkConsistency();
     }
-    expect(tree.size).to.equal(1024);
+    expect(tree.size).to.equal(elements.length);
     let i = 0;
     for (let {value} of tree) {
       expect(value).to.equal(i++);
     }
-    i = 1024;
+    i = tree.size;
     for (let {value} of tree.reverse) {
       expect(value).to.equal(--i);
     }

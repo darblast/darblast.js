@@ -774,6 +774,7 @@ export const compileAVL = TemplateClass(
             ${setNodeField('parent', `$balance${index}`, '0')}
             ${setNodeField('node', `$balance${index}`, '0')}
           }
+          ${setNodeField('child', `$balance${index}`, '0')}
           return child;
         }
 
@@ -806,6 +807,7 @@ export const compileAVL = TemplateClass(
             ${setNodeField('parent', `$balance${index}`, '0')}
             ${setNodeField('node', `$balance${index}`, '0')}
           }
+          ${setNodeField('child', `$balance${index}`, '0')}
           return child;
         }
       `).join('')}
