@@ -1031,7 +1031,7 @@ export abstract class AVL implements IterableAVLInterface {
    * @param keys  List of fields to use as keys. This has the same meaning as in
    *              the {@link compileAVL} function.
    */
-  public static fromSchema(schema: Schema, indices: string[][]) {
+  public static fromSchema(schema: Schema, indices: string[][]): AVL {
     const AVLClass = AVL.compileFromSchema(schema, indices);
     return new AVLClass() as AVL;
   }
