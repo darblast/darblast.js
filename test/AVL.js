@@ -170,24 +170,24 @@ describe('AVL', () => {
     checkRecordArray([...tree.fullScan1_()], []);
     checkRecordArray([...tree.fullScan()], []);
     checkRecordArray([...tree.fullScan_()], []);
-    checkRecordArray([...tree.reverseFullScan0()], []);
-    checkRecordArray([...tree.reverseFullScan0_()], []);
-    checkRecordArray([...tree.reverseFullScan1()], []);
-    checkRecordArray([...tree.reverseFullScan1_()], []);
-    checkRecordArray([...tree.reverseFullScan()], []);
-    checkRecordArray([...tree.reverseFullScan_()], []);
+    checkRecordArray([...tree.reverse.fullScan0()], []);
+    checkRecordArray([...tree.reverse.fullScan0_()], []);
+    checkRecordArray([...tree.reverse.fullScan1()], []);
+    checkRecordArray([...tree.reverse.fullScan1_()], []);
+    checkRecordArray([...tree.reverse.fullScan()], []);
+    checkRecordArray([...tree.reverse.fullScan_()], []);
     checkRecordArray([...tree.scan0()], []);
     checkRecordArray([...tree.scan0_()], []);
     checkRecordArray([...tree.scan1()], []);
     checkRecordArray([...tree.scan1_()], []);
     checkRecordArray([...tree.scan()], []);
     checkRecordArray([...tree.scan_()], []);
-    checkRecordArray([...tree.reverseScan0()], []);
-    checkRecordArray([...tree.reverseScan0_()], []);
-    checkRecordArray([...tree.reverseScan1()], []);
-    checkRecordArray([...tree.reverseScan1_()], []);
-    checkRecordArray([...tree.reverseScan()], []);
-    checkRecordArray([...tree.reverseScan_()], []);
+    checkRecordArray([...tree.reverse.scan0()], []);
+    checkRecordArray([...tree.reverse.scan0_()], []);
+    checkRecordArray([...tree.reverse.scan1()], []);
+    checkRecordArray([...tree.reverse.scan1_()], []);
+    checkRecordArray([...tree.reverse.scan()], []);
+    checkRecordArray([...tree.reverse.scan_()], []);
   });
 
   it('yields an inserted element on the first index', () => {
@@ -198,18 +198,18 @@ describe('AVL', () => {
     checkRecordArray([...tree.fullScan0_()], array);
     checkRecordArray([...tree.fullScan()], array);
     checkRecordArray([...tree.fullScan_()], array);
-    checkRecordArray([...tree.reverseFullScan0()], array);
-    checkRecordArray([...tree.reverseFullScan0_()], array);
-    checkRecordArray([...tree.reverseFullScan()], array);
-    checkRecordArray([...tree.reverseFullScan_()], array);
+    checkRecordArray([...tree.reverse.fullScan0()], array);
+    checkRecordArray([...tree.reverse.fullScan0_()], array);
+    checkRecordArray([...tree.reverse.fullScan()], array);
+    checkRecordArray([...tree.reverse.fullScan_()], array);
     checkRecordArray([...tree.scan0()], array);
     checkRecordArray([...tree.scan0_()], array);
     checkRecordArray([...tree.scan()], array);
     checkRecordArray([...tree.scan_()], array);
-    checkRecordArray([...tree.reverseScan0()], array);
-    checkRecordArray([...tree.reverseScan0_()], array);
-    checkRecordArray([...tree.reverseScan()], array);
-    checkRecordArray([...tree.reverseScan_()], array);
+    checkRecordArray([...tree.reverse.scan0()], array);
+    checkRecordArray([...tree.reverse.scan0_()], array);
+    checkRecordArray([...tree.reverse.scan()], array);
+    checkRecordArray([...tree.reverse.scan_()], array);
   });
 
   it('yields an inserted element on the second index', () => {
@@ -218,12 +218,12 @@ describe('AVL', () => {
     const array = [e];
     checkRecordArray([...tree.fullScan1()], array);
     checkRecordArray([...tree.fullScan1_()], array);
-    checkRecordArray([...tree.reverseFullScan1()], array);
-    checkRecordArray([...tree.reverseFullScan1_()], array);
+    checkRecordArray([...tree.reverse.fullScan1()], array);
+    checkRecordArray([...tree.reverse.fullScan1_()], array);
     checkRecordArray([...tree.scan1()], array);
     checkRecordArray([...tree.scan1_()], array);
-    checkRecordArray([...tree.reverseScan1()], array);
-    checkRecordArray([...tree.reverseScan1_()], array);
+    checkRecordArray([...tree.reverse.scan1()], array);
+    checkRecordArray([...tree.reverse.scan1_()], array);
   });
 
   it('yields two inserted elements on the first index', () => {
@@ -244,10 +244,10 @@ describe('AVL', () => {
     tree.insertOrUpdate(e1);
     tree.insertOrUpdate(e2);
     const array = [e1, e2].sort(compareRecords0).reverse();
-    checkRecordArray([...tree.reverseFullScan0()], array);
-    checkRecordArray([...tree.reverseFullScan()], array);
-    checkRecordArray([...tree.reverseScan0()], array);
-    checkRecordArray([...tree.reverseScan()], array);
+    checkRecordArray([...tree.reverse.fullScan0()], array);
+    checkRecordArray([...tree.reverse.fullScan()], array);
+    checkRecordArray([...tree.reverse.scan0()], array);
+    checkRecordArray([...tree.reverse.scan()], array);
   });
 
   it('yields two inserted elements on the second index', () => {
@@ -266,8 +266,8 @@ describe('AVL', () => {
     tree.insertOrUpdate(e1);
     tree.insertOrUpdate(e2);
     const array = [e1, e2].sort(compareRecords1).reverse();
-    checkRecordArray([...tree.reverseFullScan1()], array);
-    checkRecordArray([...tree.reverseScan1()], array);
+    checkRecordArray([...tree.reverse.fullScan1()], array);
+    checkRecordArray([...tree.reverse.scan1()], array);
   });
 
   it('retrieves an inserted element with the first index', () => {

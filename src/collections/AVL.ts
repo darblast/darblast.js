@@ -284,14 +284,14 @@ export const compileAVL = TemplateClass(
           }
 
           *fullScan${index}_() {
-            for (let node of this._fullScan${index}(this._root${index})) {
+            for (const node of this._fullScan${index}(this._root${index})) {
               this._record.$node = node;
               yield this._record;
             }
           }
 
           *fullScan${index}() {
-            for (let node of this._fullScan${index}(this._root${index})) {
+            for (const node of this._fullScan${index}(this._root${index})) {
               yield new AVL.Record(this._views, node);
             }
           }
@@ -303,23 +303,6 @@ export const compileAVL = TemplateClass(
               yield node;
               yield* this._reverseFullScan${index}(
                   ${getField(`$left${index}`)});
-            }
-          }
-
-          *reverseFullScan${index}_() {
-            for (let node of this._reverseFullScan${index}(
-                this._root${index}))
-            {
-              this._record.$node = node;
-              yield this._record;
-            }
-          }
-
-          *reverseFullScan${index}() {
-            for (let node of this._reverseFullScan${index}(
-                this._root${index}))
-            {
-              yield new AVL.Record(this._views, node);
             }
           }
 
@@ -388,29 +371,6 @@ export const compileAVL = TemplateClass(
               yield* this._reverseScan${index}(
                   ${getField(`$left${index}`)}, keys);
             }
-          }
-
-          *reverseScan${index}_(...keys) {
-            for (const node of this._reverseScan${index}(
-                this._root${index}, keys))
-            {
-              this._record.$node = node;
-              if (yield this._record) {
-                return false;
-              }
-            }
-            return true;
-          }
-
-          *reverseScan${index}(...keys) {
-            for (const node of this._reverseScan${index}(
-                this._root${index}, keys))
-            {
-              if (yield new AVL.Record(this._views, node)) {
-                return false;
-              }
-            }
-            return true;
           }
 
           *_lowerBound${index}(node, keys) {
@@ -590,14 +550,6 @@ export const compileAVL = TemplateClass(
         return this.fullScan0();
       }
 
-      reverseFullScan_() {
-        return this.reverseFullScan0_();
-      }
-
-      reverseFullScan() {
-        return this.reverseFullScan0();
-      }
-
       scan_(...keys) {
         return this.scan0_(...keys);
       }
@@ -606,21 +558,77 @@ export const compileAVL = TemplateClass(
         return this.scan0(...keys);
       }
 
-      reverseScan_(...keys) {
-        return this.reverseScan0_(...keys);
-      }
-
-      reverseScan(...keys) {
-        return this.reverseScan0(...keys);
-      }
-
       [Symbol.iterator]() {
-        return this.fullScan();
+        return this.fullScan0();
       }
 
       _reverse = {
-        [Symbol.iterator]: () => {
-          return this.reverseFullScan();
+        $parent: this,
+
+        ${indices.map((_, index) => `
+          *fullScan${index}_() {
+            const self = this.$parent;
+            for (const node of self._reverseFullScan${index}(
+                self._root${index}))
+            {
+              self._record.$node = node;
+              yield self._record;
+            }
+          },
+
+          *fullScan${index}() {
+            const self = this.$parent;
+            for (const node of self._reverseFullScan${index}(
+                self._root${index}))
+            {
+              yield new AVL.Record(self._views, node);
+            }
+          },
+
+          *scan${index}_(...keys) {
+            const self = this.$parent;
+            for (const node of self._reverseScan${index}(
+                self._root${index}, keys))
+            {
+              self._record.$node = node;
+              if (yield self._record) {
+                return false;
+              }
+            }
+            return true;
+          },
+
+          *scan${index}(...keys) {
+            const self = this.$parent;
+            for (const node of self._reverseScan${index}(
+                self._root${index}, keys))
+            {
+              if (yield new AVL.Record(self._views, node)) {
+                return false;
+              }
+            }
+            return true;
+          },
+        `).join('')}
+
+        fullScan_() {
+          return this.fullScan0_();
+        },
+
+        fullScan() {
+          return this.fullScan0();
+        },
+
+        scan_(...keys) {
+          return this.scan0_(...keys);
+        },
+
+        scan(...keys) {
+          return this.scan0(...keys);
+        },
+
+        [Symbol.iterator]() {
+          return this.fullScan0();
         },
       };
 
@@ -963,13 +971,25 @@ export interface AVLConstructor {
 };
 
 
+export interface IterableAVLInterface extends Iterable<Record> {
+  fullScan0(): Generator<Record, void>;
+  fullScan0_(): Generator<Record, void>;
+  fullScan(): Generator<Record, void>;
+  fullScan_(): Generator<Record, void>;
+  scan0(...keys: number[]): Generator<Record, void>;
+  scan0_(...keys: number[]): Generator<Record, void>;
+  scan(...keys: number[]): Generator<Record, void>;
+  scan_(...keys: number[]): Generator<Record, void>;
+};
+
+
 /**
  * Provides methods to compile AVL trees.
  *
  * The provided methods are just convenience wrappers for
  * {@link Darblast.Collections.compileAVL}.
  */
-export abstract class AVL {
+export abstract class AVL implements IterableAVLInterface {
   /**
    * Alias for {@link Darblast.Collections.compileAVL}.
    */
@@ -1178,6 +1198,14 @@ export abstract class AVL {
    */
   public abstract range_(
       lowerBound: number[], upperBound: number[]): Generator<Record, void>;
+
+  /**
+   * Provides an interface to iterate over this AVL tree in reverse.
+   *
+   * All provided methods will yield the same elements as the corresponding
+   * methods in the AVL itself, but in reverse order.
+   */
+  public abstract get reverse(): IterableAVLInterface;
 
   /**
    * Looks up the element identified by the provided keys based on the first
