@@ -173,6 +173,42 @@ export const compileAVL = TemplateClass(
         this._views.float64 = new Float64Array(this._data);
       }
 
+      _move(node, destination) {
+        if (destination === node) {
+          return;
+        }
+        ${fields.map(({name}) => `
+          ${setNodeField('destination', name, `${getField(name)}`)}
+        `).join('')}
+        ${indices.map((_, index) => `
+          const parent${index} = ${getField(`$parent${index}`)};
+          if (parent${index}) {
+            switch (node) {
+            case ${getNodeField(`parent${index}`, `$left${index}`)}:
+              ${setNodeField(`parent${index}`, `$left${index}`, 'destination')}
+              break;
+            case ${getNodeField(`parent${index}`, `$right${index}`)}:
+              ${setNodeField(`parent${index}`, `$right${index}`, 'destination')}
+              break;
+            default:
+              throw new Error('internal error');
+            }
+          }
+          const left${index} = ${getField(`$left${index}`)};
+          if (left${index}) {
+            ${setNodeField(`left${index}`, `$parent${index}`, 'destination')}
+          }
+          const right${index} = ${getField(`$right${index}`)};
+          if (right${index}) {
+            ${setNodeField(`right${index}`, `$parent${index}`, 'destination')}
+          }
+        `).join('')}
+      }
+
+      _moveLast(destination) {
+        this._move(this._size, destination);
+      }
+
       get size() {
         return this._size;
       }
@@ -961,6 +997,51 @@ export const compileAVL = TemplateClass(
           }
         `)(indices[0].keys.join(', '))}
       `).join('')}
+
+      _removeContext = {
+        keys: [],
+        removed: false,
+        balanced: true,
+      };
+
+      ${indices.map((_, index) => `
+        _remove${index}(parent, node) {
+          if (node) {
+            const cmp = this._compare${index}(
+                node, ...this._removeContext.keys);
+            if (cmp < 0) {
+              const child = this._remove(node, ${getField(`$left${index}`)});
+              ${setField(`$left${index}`, 'child')}
+              return node;
+            } else if (cmp > 0) {
+              const child = this._remove(node, ${getField(`$right${index}`)});
+              ${setField(`$right${index}`, 'child')}
+              return node;
+            } else {
+              // TODO
+            }
+          } else {
+            this._removeContext.balanced = true;
+            return 0;
+          }
+        }
+
+        remove${index}(...keys) {
+          this._removeContext.keys = keys;
+          this._removeContext.removed = false;
+          this._root${index} = this._remove${index}(0, this._root${index});
+          return this._removeContext.removed;
+        }
+      `).join('')}
+
+      remove(...keys) {
+        return this.remove0(...keys);
+      }
+
+      removeRecord(record) {
+        return this.remove0(${indices[0].keys.map(
+            key => `record.${key}`).join(', ')});
+      }
     }
   `;
 });
@@ -1257,6 +1338,25 @@ export abstract class AVL implements IterableAVLInterface {
    * The implementation simply calls {@link insertOrUpdate} multiple times.
    */
   public abstract insertOrUpdateAll(...records: Record[]): boolean;
+
+  /**
+   * Removes the element identified by the specified keys, relative to index 0.
+   *
+   * @returns `true` iff the element was found and removed.
+   */
+  public abstract remove0(...keys: number[]): boolean;
+
+  /**
+   * Synonymous for {@link remove0}.
+   */
+  public abstract remove(...keys: number[]): boolean;
+
+  /**
+   * Removes the specified record.
+   *
+   * @returns `true` iff the record was found in the tree and removed.
+   */
+  public abstract removeRecord(record: Record): boolean;
 };
 
 
