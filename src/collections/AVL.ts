@@ -1014,6 +1014,12 @@ export const compileAVL = TemplateClass(
       };
 
       ${indices.map((_, index) => `
+        _successor${index}(node) {
+          node = ${getField(`$right${index}`)};
+          for (let left = ${getField(`$left${index}`)}; left; node = left) {}
+          return node;
+        }
+
         _remove${index}(parent, node) {
           if (node) {
             const cmp = this._compare${index}(
@@ -1028,13 +1034,22 @@ export const compileAVL = TemplateClass(
               return node;
             } else {
               this._removeContext.balanced = false;
-              node = this._pop(node);
               const parent = ${getField(`$parent${index}`)};
               const left = ${getField(`$left${index}`)};
               const right = ${getField(`$right${index}`)};
+              const balance = ${getField(`$balance${index}`)};
+              ${(index < indices.length - 1) ? '' : `node = this._pop(node);`}
               if (left) {
                 if (right) {
-                  // TODO
+                  node = this._successor${index}(node);
+                  ${setNodeField(
+                      getField(`$parent${index}`), `$left${index}`,
+                      getField(`$right${index}`))}
+                  ${setField(`$parent${index}`, 'parent')}
+                  ${setField(`$left${index}`, 'left')}
+                  ${setField(`$right${index}`, 'right')}
+                  ${setField(`$balance${index}`, 'balance')}
+                  return node;
                 } else {
                   ${setNodeField('left', `$parent${index}`, 'parent')}
                   return left;
