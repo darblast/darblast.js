@@ -1033,9 +1033,11 @@ export const compileAVL = TemplateClass(
                 if (right) {
                   // TODO
                 } else {
+                  ${setNodeField('left', `$parent${index}`, 'parent')}
                   return left;
                 }
               } else if (right) {
+                ${setNodeField('right', `$parent${index}`, 'parent')}
                 return right;
               } else {
                 return 0;
