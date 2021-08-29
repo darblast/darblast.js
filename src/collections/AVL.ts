@@ -753,7 +753,8 @@ export const compileAVL = TemplateClass(
       }
 
       _pop(node) {
-        this._swap(node, this.size--);
+        this._swap(node, this.size);
+        return this.size--;
       }
 
       ${indices.map((_, index) => `
@@ -1026,6 +1027,8 @@ export const compileAVL = TemplateClass(
               ${setField(`$right${index}`, 'child')}
               return node;
             } else {
+              this._removeContext.balanced = false;
+              node = this._pop(node);
               const parent = ${getField(`$parent${index}`)};
               const left = ${getField(`$left${index}`)};
               const right = ${getField(`$right${index}`)};
