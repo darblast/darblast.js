@@ -173,42 +173,6 @@ export const compileAVL = TemplateClass(
         this._views.float64 = new Float64Array(this._data);
       }
 
-      _move(node, destination) {
-        if (destination === node) {
-          return;
-        }
-        ${fields.map(({name}) => `
-          ${setNodeField('destination', name, `${getField(name)}`)}
-        `).join('')}
-        ${indices.map((_, index) => `
-          const parent${index} = ${getField(`$parent${index}`)};
-          if (parent${index}) {
-            switch (node) {
-            case ${getNodeField(`parent${index}`, `$left${index}`)}:
-              ${setNodeField(`parent${index}`, `$left${index}`, 'destination')}
-              break;
-            case ${getNodeField(`parent${index}`, `$right${index}`)}:
-              ${setNodeField(`parent${index}`, `$right${index}`, 'destination')}
-              break;
-            default:
-              throw new Error('internal error');
-            }
-          }
-          const left${index} = ${getField(`$left${index}`)};
-          if (left${index}) {
-            ${setNodeField(`left${index}`, `$parent${index}`, 'destination')}
-          }
-          const right${index} = ${getField(`$right${index}`)};
-          if (right${index}) {
-            ${setNodeField(`right${index}`, `$parent${index}`, 'destination')}
-          }
-        `).join('')}
-      }
-
-      _moveLast(destination) {
-        this._move(this._size, destination);
-      }
-
       get size() {
         return this._size;
       }
@@ -748,6 +712,50 @@ export const compileAVL = TemplateClass(
         return node;
       }
 
+      _relink(node) {
+        ${indices.map((_, index) => `
+          const parent${index} = ${getField(`$parent${index}`)};
+          if (parent${index}) {
+            switch (node) {
+            case ${getNodeField(`parent${index}`, `$left${index}`)}:
+              ${setNodeField(`parent${index}`, `$left${index}`, 'node')}
+              break;
+            case ${getNodeField(`parent${index}`, `$right${index}`)}:
+              ${setNodeField(`parent${index}`, `$right${index}`, 'node')}
+              break;
+            default:
+              throw new Error('internal error');
+            }
+          }
+          const left${index} = ${getField(`$left${index}`)};
+          if (left${index}) {
+            ${setNodeField(`left${index}`, `$parent${index}`, 'node')}
+          }
+          const right${index} = ${getField(`$right${index}`)};
+          if (right${index}) {
+            ${setNodeField(`right${index}`, `$parent${index}`, 'node')}
+          }
+        `).join('')}
+      }
+
+      _swap(node1, node2) {
+        if (node1 === node2) {
+          return;
+        }
+        let t;
+        ${fields.map(({name}) => `
+          t = ${getNodeField('node1', name)};
+          ${setNodeField('node1', name, `${getNodeField('node2', name)}`)}
+          ${setNodeField('node2', name, 't')}
+        `).join('')}
+        this._relink(node1);
+        this._relink(node2);
+      }
+
+      _pop(node) {
+        this._swap(node, this.size--);
+      }
+
       ${indices.map((_, index) => `
         _rotateLeft${index}(parent, node) {
           const child = ${getNodeField('node', `$left${index}`)};
@@ -1018,7 +1026,20 @@ export const compileAVL = TemplateClass(
               ${setField(`$right${index}`, 'child')}
               return node;
             } else {
-              // TODO
+              const parent = ${getField(`$parent${index}`)};
+              const left = ${getField(`$left${index}`)};
+              const right = ${getField(`$right${index}`)};
+              if (left) {
+                if (right) {
+                  // TODO
+                } else {
+                  return left;
+                }
+              } else if (right) {
+                return right;
+              } else {
+                return 0;
+              }
             }
           } else {
             this._removeContext.balanced = true;
