@@ -95,6 +95,23 @@ export function shuffle<Element>(array: Element[]): Element[] {
 }
 
 
+/**
+ * Flattens an array of arrays.
+ *
+ * The argument is a mixed array containing raw elements and/or sub-arrays of
+ * raw elements. `flatten` returns a new flat array of raw elements. The input
+ * array is not modified.
+ *
+ * Note that this function can be used to flatten two-dimensional arrays but not
+ * three or higher dimensional arrays.
+ *
+ * @returns the flattened array.
+ */
+export function flatten<Element>(array: (Element|Element[])[]): Element[] {
+  return Array.prototype.concat.apply([], array);
+}
+
+
 export function TemplateClass(compiler: (...args: any[]) => string) {
   return (...args: any[]) => {
     const compiled = compiler.apply(null, args);
