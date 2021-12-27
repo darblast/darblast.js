@@ -934,6 +934,10 @@ export class mat2 {
     return this._array;
   }
 
+  public toNewArray(): [number, number, number, number] {
+    return [this.m00, this.m01, this.m10, this.m11];
+  }
+
   public determinant(): number {
     return this.m00 * this.m11 - this.m01 * this.m10;
   }
@@ -1184,6 +1188,18 @@ export class mat3 {
       ];
     }
     return this._array;
+  }
+
+  public toNewArray(): [
+      number, number, number,
+      number, number, number,
+      number, number, number,
+  ] {
+    return [
+        this.m00, this.m01, this.m02,
+        this.m10, this.m11, this.m12,
+        this.m20, this.m21, this.m22,
+    ];
   }
 
   public determinant(): number {
@@ -1530,6 +1546,20 @@ export class mat4 {
     return this._array;
   }
 
+  public toNewArray(): [
+      number, number, number, number,
+      number, number, number, number,
+      number, number, number, number,
+      number, number, number, number,
+  ] {
+    return [
+        this.m00, this.m01, this.m02, this.m03,
+        this.m10, this.m11, this.m12, this.m13,
+        this.m20, this.m21, this.m22, this.m23,
+        this.m30, this.m31, this.m32, this.m33,
+    ];
+  }
+
   public transpose_(): mat4 {
     const m01 = this.m10;
     const m02 = this.m20;
@@ -1564,6 +1594,222 @@ export class mat4 {
         this.m01, this.m11, this.m21, this.m31,
         this.m02, this.m12, this.m22, this.m32,
         this.m03, this.m13, this.m23, this.m33);
+  }
+
+  public neg_(): mat4 {
+    this.m00 = -this.m00;
+    this.m01 = -this.m01;
+    this.m02 = -this.m02;
+    this.m03 = -this.m03;
+    this.m10 = -this.m10;
+    this.m11 = -this.m11;
+    this.m12 = -this.m12;
+    this.m13 = -this.m13;
+    this.m20 = -this.m20;
+    this.m21 = -this.m21;
+    this.m22 = -this.m22;
+    this.m23 = -this.m23;
+    this.m30 = -this.m30;
+    this.m31 = -this.m31;
+    this.m32 = -this.m32;
+    this.m33 = -this.m33;
+    return this;
+  }
+
+  public neg(): mat4 {
+    return new mat4(
+        -this.m00, -this.m10, -this.m20, -this.m30,
+        -this.m01, -this.m11, -this.m21, -this.m31,
+        -this.m02, -this.m12, -this.m22, -this.m32,
+        -this.m03, -this.m13, -this.m23, -this.m33);
+  }
+
+  public add_(other: mat4): mat4 {
+    this.m00 += other.m00;
+    this.m01 += other.m01;
+    this.m02 += other.m02;
+    this.m03 += other.m03;
+    this.m10 += other.m10;
+    this.m11 += other.m11;
+    this.m12 += other.m12;
+    this.m13 += other.m13;
+    this.m20 += other.m20;
+    this.m21 += other.m21;
+    this.m22 += other.m22;
+    this.m23 += other.m23;
+    this.m30 += other.m30;
+    this.m31 += other.m31;
+    this.m32 += other.m32;
+    this.m33 += other.m33;
+    return this;
+  }
+
+  public add(other: mat4): mat4 {
+    return new mat4(
+        this.m00 + other.m00, this.m01 + other.m01, this.m02 + other.m02, this.m03 + other.m03,
+        this.m10 + other.m10, this.m11 + other.m11, this.m12 + other.m12, this.m13 + other.m13,
+        this.m20 + other.m20, this.m21 + other.m21, this.m22 + other.m22, this.m23 + other.m23,
+        this.m30 + other.m30, this.m31 + other.m31, this.m32 + other.m32, this.m33 + other.m33);
+  }
+
+  public sub_(other: mat4): mat4 {
+    this.m00 -= other.m00;
+    this.m01 -= other.m01;
+    this.m02 -= other.m02;
+    this.m03 -= other.m03;
+    this.m10 -= other.m10;
+    this.m11 -= other.m11;
+    this.m12 -= other.m12;
+    this.m13 -= other.m13;
+    this.m20 -= other.m20;
+    this.m21 -= other.m21;
+    this.m22 -= other.m22;
+    this.m23 -= other.m23;
+    this.m30 -= other.m30;
+    this.m31 -= other.m31;
+    this.m32 -= other.m32;
+    this.m33 -= other.m33;
+    return this;
+  }
+
+  public sub(other: mat4): mat4 {
+    return new mat4(
+        this.m00 - other.m00, this.m01 - other.m01, this.m02 - other.m02, this.m03 - other.m03,
+        this.m10 - other.m10, this.m11 - other.m11, this.m12 - other.m12, this.m13 - other.m13,
+        this.m20 - other.m20, this.m21 - other.m21, this.m22 - other.m22, this.m23 - other.m23,
+        this.m30 - other.m30, this.m31 - other.m31, this.m32 - other.m32, this.m33 - other.m33);
+  }
+
+  public mul_(other: mat4): mat4 {
+    const m00 = this.m00 * other.m00 + this.m01 * other.m10 + this.m02 * other.m20 + this.m03 * other.m30;
+    const m01 = this.m00 * other.m01 + this.m01 * other.m11 + this.m02 * other.m21 + this.m03 * other.m31;
+    const m02 = this.m00 * other.m02 + this.m01 * other.m12 + this.m02 * other.m22 + this.m03 * other.m32;
+    const m03 = this.m00 * other.m03 + this.m01 * other.m13 + this.m02 * other.m23 + this.m03 * other.m33;
+    const m10 = this.m10 * other.m00 + this.m11 * other.m10 + this.m12 * other.m20 + this.m13 * other.m30;
+    const m11 = this.m10 * other.m01 + this.m11 * other.m11 + this.m12 * other.m21 + this.m13 * other.m31;
+    const m12 = this.m10 * other.m02 + this.m11 * other.m12 + this.m12 * other.m22 + this.m13 * other.m32;
+    const m13 = this.m10 * other.m03 + this.m11 * other.m13 + this.m12 * other.m23 + this.m13 * other.m33;
+    const m20 = this.m20 * other.m00 + this.m21 * other.m10 + this.m22 * other.m20 + this.m23 * other.m30;
+    const m21 = this.m20 * other.m01 + this.m21 * other.m11 + this.m22 * other.m21 + this.m23 * other.m31;
+    const m22 = this.m20 * other.m02 + this.m21 * other.m12 + this.m22 * other.m22 + this.m23 * other.m32;
+    const m23 = this.m20 * other.m03 + this.m21 * other.m13 + this.m22 * other.m23 + this.m23 * other.m33;
+    const m30 = this.m30 * other.m00 + this.m31 * other.m10 + this.m32 * other.m20 + this.m33 * other.m30;
+    const m31 = this.m30 * other.m01 + this.m31 * other.m11 + this.m32 * other.m21 + this.m33 * other.m31;
+    const m32 = this.m30 * other.m02 + this.m31 * other.m12 + this.m32 * other.m22 + this.m33 * other.m32;
+    const m33 = this.m30 * other.m03 + this.m31 * other.m13 + this.m32 * other.m23 + this.m33 * other.m33;
+    this.m00 = m00;
+    this.m01 = m01;
+    this.m02 = m02;
+    this.m03 = m03;
+    this.m10 = m10;
+    this.m11 = m11;
+    this.m12 = m12;
+    this.m13 = m13;
+    this.m20 = m20;
+    this.m21 = m21;
+    this.m22 = m22;
+    this.m23 = m23;
+    this.m30 = m30;
+    this.m31 = m31;
+    this.m32 = m32;
+    this.m33 = m33;
+    return this;
+  }
+
+  public mul(other: mat4): mat4 {
+    return new mat4(
+        this.m00 * other.m00 + this.m01 * other.m10 + this.m02 * other.m20 + this.m03 * other.m30,
+        this.m00 * other.m01 + this.m01 * other.m11 + this.m02 * other.m21 + this.m03 * other.m31,
+        this.m00 * other.m02 + this.m01 * other.m12 + this.m02 * other.m22 + this.m03 * other.m32,
+        this.m00 * other.m03 + this.m01 * other.m13 + this.m02 * other.m23 + this.m03 * other.m33,
+        this.m10 * other.m00 + this.m11 * other.m10 + this.m12 * other.m20 + this.m13 * other.m30,
+        this.m10 * other.m01 + this.m11 * other.m11 + this.m12 * other.m21 + this.m13 * other.m31,
+        this.m10 * other.m02 + this.m11 * other.m12 + this.m12 * other.m22 + this.m13 * other.m32,
+        this.m10 * other.m03 + this.m11 * other.m13 + this.m12 * other.m23 + this.m13 * other.m33,
+        this.m20 * other.m00 + this.m21 * other.m10 + this.m22 * other.m20 + this.m23 * other.m30,
+        this.m20 * other.m01 + this.m21 * other.m11 + this.m22 * other.m21 + this.m23 * other.m31,
+        this.m20 * other.m02 + this.m21 * other.m12 + this.m22 * other.m22 + this.m23 * other.m32,
+        this.m20 * other.m03 + this.m21 * other.m13 + this.m22 * other.m23 + this.m23 * other.m33,
+        this.m30 * other.m00 + this.m31 * other.m10 + this.m32 * other.m20 + this.m33 * other.m30,
+        this.m30 * other.m01 + this.m31 * other.m11 + this.m32 * other.m21 + this.m33 * other.m31,
+        this.m30 * other.m02 + this.m31 * other.m12 + this.m32 * other.m22 + this.m33 * other.m32,
+        this.m30 * other.m03 + this.m31 * other.m13 + this.m32 * other.m23 + this.m33 * other.m33);
+  }
+
+  public mulr_(r: number): mat4 {
+    this.m00 *= r;
+    this.m01 *= r;
+    this.m02 *= r;
+    this.m03 *= r;
+    this.m10 *= r;
+    this.m11 *= r;
+    this.m12 *= r;
+    this.m13 *= r;
+    this.m20 *= r;
+    this.m21 *= r;
+    this.m22 *= r;
+    this.m23 *= r;
+    this.m30 *= r;
+    this.m31 *= r;
+    this.m32 *= r;
+    this.m33 *= r;
+    return this;
+  }
+
+  public mulr(r: number): mat4 {
+    return new mat4(
+        this.m00 * r, this.m01 * r, this.m02 * r, this.m03 * r,
+        this.m10 * r, this.m11 * r, this.m12 * r, this.m13 * r,
+        this.m20 * r, this.m21 * r, this.m22 * r, this.m23 * r,
+        this.m30 * r, this.m31 * r, this.m32 * r, this.m33 * r);
+  }
+
+  public mulv_<tvec4 extends ivec4>(v: tvec4): tvec4 {
+    const x = this.m00 * v.x + this.m01 * v.y + this.m02 * v.z + this.m03 * v.w;
+    const y = this.m10 * v.x * this.m11 * v.y + this.m12 * v.z + this.m13 * v.w;
+    const z = this.m20 * v.x * this.m21 * v.y + this.m22 * v.z + this.m23 * v.w;
+    const w = this.m30 * v.x * this.m31 * v.y + this.m32 * v.z + this.m33 * v.w;
+    v.x = x;
+    v.y = y;
+    v.z = z;
+    v.w = w;
+    return v;
+  }
+
+  public mulv(v: ivec4): vec4 {
+    return new vec4(
+        this.m00 * v.x + this.m01 * v.y + this.m02 * v.z + this.m03 * v.w,
+        this.m10 * v.x * this.m11 * v.y + this.m12 * v.z + this.m13 * v.w,
+        this.m20 * v.x * this.m21 * v.y + this.m22 * v.z + this.m23 * v.w,
+        this.m30 * v.x * this.m31 * v.y + this.m32 * v.z + this.m33 * v.w);
+  }
+
+  public divr_(r: number): mat4 {
+    this.m00 /= r;
+    this.m01 /= r;
+    this.m02 /= r;
+    this.m03 /= r;
+    this.m10 /= r;
+    this.m11 /= r;
+    this.m12 /= r;
+    this.m13 /= r;
+    this.m20 /= r;
+    this.m21 /= r;
+    this.m22 /= r;
+    this.m23 /= r;
+    this.m30 /= r;
+    this.m31 /= r;
+    this.m32 /= r;
+    this.m33 /= r;
+    return this;
+  }
+
+  public divr(r: number): mat4 {
+    return new mat4(
+        this.m00 / r, this.m01 / r, this.m02 / r, this.m03 / r,
+        this.m10 / r, this.m11 / r, this.m12 / r, this.m13 / r,
+        this.m20 / r, this.m21 / r, this.m22 / r, this.m23 / r,
+        this.m30 / r, this.m31 / r, this.m32 / r, this.m33 / r);
   }
 }
 
