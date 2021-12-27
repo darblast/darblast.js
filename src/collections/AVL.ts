@@ -11,7 +11,15 @@ export class Index {
 }
 
 
-function validateSchema(fields: FieldDefinition[], indices: Index[]): void {
+interface SchemaValidationResults {
+  reference: string[],
+  permutations: number[][];
+}
+
+
+function validateSchema(
+    fields: FieldDefinition[], indices: Index[]): SchemaValidationResults
+{
   if (!fields.length) {
     throw new Error('at least one field must be specified');
   }
@@ -44,6 +52,11 @@ function validateSchema(fields: FieldDefinition[], indices: Index[]): void {
       throw new Error(`index ${JSON.stringify(indices[0].keys)} has different keys than ${JSON.stringify(indices[i].keys)}`);
     }
   }
+  return {
+    reference: reference,
+    permutations: indices.map(({keys}) => keys.map(
+        key => reference.indexOf(key))),
+  };
 }
 
 
@@ -70,7 +83,7 @@ function validateSchema(fields: FieldDefinition[], indices: Index[]): void {
 export const compileAVL = TemplateClass(
     (fields: FieldDefinition[], indices: Index[]): string =>
 {
-  validateSchema(fields, indices);
+  const {reference, permutations} = validateSchema(fields, indices);
 
   const allFields = fields.slice();
   indices.forEach((_, index) => {
@@ -1008,7 +1021,9 @@ export const compileAVL = TemplateClass(
       `).join('')}
 
       _removeContext = {
-        keys: [],
+        ${indices.map((_, index) => `
+          keys${index}: null,
+        `).join('')}
         node: 0,
         balanced: true,
       };
@@ -1023,7 +1038,7 @@ export const compileAVL = TemplateClass(
         _remove${index}(parent, node) {
           if (node) {
             const cmp = this._compare${index}(
-                node, ...this._removeContext.keys);
+                node, ...this._removeContext.keys${index});
             if (cmp < 0) {
               const child = this._remove${index}(
                   node, ${getField(`$left${index}`)});
@@ -1068,21 +1083,27 @@ export const compileAVL = TemplateClass(
             return 0;
           }
         }
+
+        remove${index}(...keys) {
+          ${indices.map(({keys}, index2) => `
+            this._removeContext.keys${index2} = [${keys.map((_, i) =>
+                `keys[${permutations[index][permutations[index2].indexOf(i)]}]`
+                ).join(', ')}];
+          `).join('')}
+          this._removeContext.node = 0;
+          this._root${index} = this._remove${index}(0, this._root${index});
+          const node = this._removeContext.node;
+          if (node) {
+            this._pop(node);
+            return true;
+          } else {
+            return false;
+          }
+        }
       `).join('')}
 
       remove(...keys) {
-        this._removeContext.keys = keys;
-        this._removeContext.node = 0;
-        ${indices.map((_, index) => `
-          this._root${index} = this._remove${index}(0, this._root${index});
-        `).join('')}
-        const node = this._removeContext.node;
-        if (node) {
-          this._pop(node);
-          return true;
-        } else {
-          return false;
-        }
+        return this.remove0(...keys);
       }
 
       removeRecord(record) {
