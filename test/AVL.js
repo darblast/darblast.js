@@ -316,6 +316,12 @@ describe('AVL', () => {
     tree.insertOrUpdate(e2);
     checkRecords(tree.lookup1(e1.y, e1.x, e1.z), e1);
   });
+
+  it('removes an element', () => {
+    const e = element();
+    tree.insertOrUpdate(e);
+    tree.removeRecord(e);
+  });
 });
 
 

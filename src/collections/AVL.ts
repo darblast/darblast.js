@@ -753,8 +753,8 @@ export const compileAVL = TemplateClass(
       }
 
       _pop(node) {
-        this._swap(node, this.size);
-        return this.size--;
+        this._swap(node, this._size);
+        return this._size--;
       }
 
       ${indices.map((_, index) => `
@@ -1009,7 +1009,7 @@ export const compileAVL = TemplateClass(
 
       _removeContext = {
         keys: [],
-        removed: false,
+        node: 0,
         balanced: true,
       };
 
@@ -1025,11 +1025,13 @@ export const compileAVL = TemplateClass(
             const cmp = this._compare${index}(
                 node, ...this._removeContext.keys);
             if (cmp < 0) {
-              const child = this._remove(node, ${getField(`$left${index}`)});
+              const child = this._remove${index}(
+                  node, ${getField(`$left${index}`)});
               ${setField(`$left${index}`, 'child')}
               return node;
             } else if (cmp > 0) {
-              const child = this._remove(node, ${getField(`$right${index}`)});
+              const child = this._remove${index}(
+                  node, ${getField(`$right${index}`)});
               ${setField(`$right${index}`, 'child')}
               return node;
             } else {
@@ -1038,7 +1040,7 @@ export const compileAVL = TemplateClass(
               const left = ${getField(`$left${index}`)};
               const right = ${getField(`$right${index}`)};
               const balance = ${getField(`$balance${index}`)};
-              ${(index < indices.length - 1) ? '' : `node = this._pop(node);`}
+              ${(index > 0) ? '' : `this._removeContext.node = node;`}
               if (left) {
                 if (right) {
                   node = this._successor${index}(node);
@@ -1066,21 +1068,25 @@ export const compileAVL = TemplateClass(
             return 0;
           }
         }
-
-        remove${index}(...keys) {
-          this._removeContext.keys = keys;
-          this._removeContext.removed = false;
-          this._root${index} = this._remove${index}(0, this._root${index});
-          return this._removeContext.removed;
-        }
       `).join('')}
 
       remove(...keys) {
-        return this.remove0(...keys);
+        this._removeContext.keys = keys;
+        this._removeContext.node = 0;
+        ${indices.map((_, index) => `
+          this._root${index} = this._remove${index}(0, this._root${index});
+        `).join('')}
+        const node = this._removeContext.node;
+        if (node) {
+          this._pop(node);
+          return true;
+        } else {
+          return false;
+        }
       }
 
       removeRecord(record) {
-        return this.remove0(${indices[0].keys.map(
+        return this.remove(${indices[0].keys.map(
             key => `record.${key}`).join(', ')});
       }
     }
