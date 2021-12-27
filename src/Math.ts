@@ -910,6 +910,13 @@ export class mat2 {
         this.m11 === other.m11;
   }
 
+  public almostEquals(other: mat2, e: number): boolean {
+    return Utilities.almostEquals(this.m00, other.m00, e) &&
+        Utilities.almostEquals(this.m01, other.m01, e) &&
+        Utilities.almostEquals(this.m10, other.m10, e) &&
+        Utilities.almostEquals(this.m11, other.m11, e);
+  }
+
   public assign(other: mat2): mat2 {
     this.m00 = other.m00;
     this.m01 = other.m01;
@@ -1143,6 +1150,18 @@ export class mat3 {
         this.m20 === other.m20 &&
         this.m21 === other.m21 &&
         this.m22 === other.m22;
+  }
+
+  public almostEquals(other: mat3, e: number): boolean {
+    return Utilities.almostEquals(this.m00, other.m00, e) &&
+        Utilities.almostEquals(this.m01, other.m01, e) &&
+        Utilities.almostEquals(this.m02, other.m02, e) &&
+        Utilities.almostEquals(this.m10, other.m10, e) &&
+        Utilities.almostEquals(this.m11, other.m11, e) &&
+        Utilities.almostEquals(this.m12, other.m12, e) &&
+        Utilities.almostEquals(this.m20, other.m20, e) &&
+        Utilities.almostEquals(this.m21, other.m21, e) &&
+        Utilities.almostEquals(this.m22, other.m22, e);
   }
 
   public assign(other: mat3): mat3 {
@@ -1461,6 +1480,30 @@ export class mat4 {
       public m32: number,
       public m33: number) {}
 
+  public static identity(): mat4 {
+    return new mat4(
+        1, 0, 0, 0,
+        0, 1, 0, 0,
+        0, 0, 1, 0,
+        0, 0, 0, 1);
+  }
+
+  public static translation(x: number, y: number, z: number): mat4 {
+    return new mat4(
+        1, 0, 0, x,
+        0, 1, 0, y,
+        0, 0, 1, z,
+        0, 0, 0, 1);
+  }
+
+  public static scaling(x: number, y: number, z: number): mat4 {
+    return new mat4(
+        x, 0, 0, 0,
+        0, y, 0, 0,
+        0, 0, z, 0,
+        0, 0, 0, 1);
+  }
+
   public toString(): string {
     return `mat4<${this.toArray().join(', ')}>`;
   }
@@ -1482,6 +1525,25 @@ export class mat4 {
         this.m31 === other.m31 &&
         this.m32 === other.m32 &&
         this.m33 === other.m33;
+  }
+
+  public almostEquals(other: mat4, e: number): boolean {
+    return Utilities.almostEquals(this.m00, other.m00, e) &&
+        Utilities.almostEquals(this.m01, other.m01, e) &&
+        Utilities.almostEquals(this.m02, other.m02, e) &&
+        Utilities.almostEquals(this.m03, other.m03, e) &&
+        Utilities.almostEquals(this.m10, other.m10, e) &&
+        Utilities.almostEquals(this.m11, other.m11, e) &&
+        Utilities.almostEquals(this.m12, other.m12, e) &&
+        Utilities.almostEquals(this.m13, other.m13, e) &&
+        Utilities.almostEquals(this.m20, other.m20, e) &&
+        Utilities.almostEquals(this.m21, other.m21, e) &&
+        Utilities.almostEquals(this.m22, other.m22, e) &&
+        Utilities.almostEquals(this.m23, other.m23, e) &&
+        Utilities.almostEquals(this.m30, other.m30, e) &&
+        Utilities.almostEquals(this.m31, other.m31, e) &&
+        Utilities.almostEquals(this.m32, other.m32, e) &&
+        Utilities.almostEquals(this.m33, other.m33, e);
   }
 
   public assign(other: mat4): mat4 {
