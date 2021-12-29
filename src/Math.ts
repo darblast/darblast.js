@@ -1145,6 +1145,37 @@ export class mat3 {
     return new mat3(1, 0, v.x, 0, 1, v.y, 0, 0, 1);
   }
 
+  public static rotation2(a: number, cx: number = 0, cy: number = 0): mat3 {
+    const sin = GlobalMath.sin(a);
+    const cos = GlobalMath.cos(a);
+    return new mat3(
+        cos, -sin, cx - cx * cos + cy * sin,
+        sin, cos, cy - cx * sin - cy * cos,
+        0, 0, 1);
+  }
+
+  public static rotation2v(a: number, c: ivec2): mat3 {
+    return mat3.rotation2(a, c.x, c.y);
+  }
+
+  public static rotation3x(a: number): mat3 {
+    const sin = GlobalMath.sin(a);
+    const cos = GlobalMath.cos(a);
+    return new mat3(1, 0, 0, 0, cos, -sin, 0, sin, cos);
+  }
+
+  public static rotation3y(a: number): mat3 {
+    const sin = GlobalMath.sin(a);
+    const cos = GlobalMath.cos(a);
+    return new mat3(cos, 0, sin, 0, 1, 0, -sin, 0, cos);
+  }
+
+  public static rotation3z(a: number): mat3 {
+    const sin = GlobalMath.sin(a);
+    const cos = GlobalMath.cos(a);
+    return new mat3(cos, -sin, 0, sin, cos, 0, 0, 0, 1);
+  }
+
   public static scaling(x: number, y: number, z: number = 1): mat3 {
     return new mat3(x, 0, 0, 0, y, 0, 0, 0, z);
   }
@@ -1157,17 +1188,11 @@ export class mat3 {
       x: number, y: number,
       cx: number = 0, cy: number = 0): mat3
   {
-    return new mat3(
-        x, 0, cx * (x - 1),
-        0, y, cy * (y - 1),
-        0, 0, 1);
+    return new mat3(x, 0, cx - cx * x, 0, y, cy - cy * y, 0, 0, 1);
   }
 
   public static scaling2v(v: ivec2, c: ivec2): mat3 {
-    return new mat3(
-        v.x, 0, v.x * c.x - v.x,
-        0, v.y, v.y * c.y - v.y,
-        0, 0, 1);
+    return new mat3(v.x, 0, c.x - c.x * v.x, 0, v.y, c.y - c.y * v.y, 0, 0, 1);
   }
 
   public toString(): string {
