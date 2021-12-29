@@ -954,6 +954,28 @@ export class mat2 {
     return [this.m00, this.m01, this.m10, this.m11];
   }
 
+  public map_(
+      fn: (x: number, i: number, j: number) => number,
+      scope?: any): mat2
+  {
+    this.m00 = fn.call(scope, this.m00, 0, 0);
+    this.m01 = fn.call(scope, this.m01, 0, 1);
+    this.m10 = fn.call(scope, this.m10, 1, 0);
+    this.m11 = fn.call(scope, this.m11, 1, 1);
+    return this;
+  }
+
+  public map(
+      fn: (x: number, i: number, j: number) => number,
+      scope?: any): mat2
+  {
+    return new mat2(
+        fn.call(scope, this.m00, 0, 0),
+        fn.call(scope, this.m01, 0, 1),
+        fn.call(scope, this.m10, 1, 0),
+        fn.call(scope, this.m11, 1, 1));
+  }
+
   public determinant(): number {
     return this.m00 * this.m11 - this.m01 * this.m10;
   }
@@ -1278,6 +1300,38 @@ export class mat3 {
         this.m10, this.m11, this.m12,
         this.m20, this.m21, this.m22,
     ];
+  }
+
+  public map_(
+      fn: (x: number, i: number, j: number) => number,
+      scope?: any): mat3
+  {
+    this.m00 = fn.call(scope, this.m00, 0, 0);
+    this.m01 = fn.call(scope, this.m01, 0, 1);
+    this.m02 = fn.call(scope, this.m02, 0, 2);
+    this.m10 = fn.call(scope, this.m10, 1, 0);
+    this.m11 = fn.call(scope, this.m11, 1, 1);
+    this.m12 = fn.call(scope, this.m12, 1, 2);
+    this.m20 = fn.call(scope, this.m20, 2, 0);
+    this.m21 = fn.call(scope, this.m21, 2, 1);
+    this.m22 = fn.call(scope, this.m22, 2, 2);
+    return this;
+  }
+
+  public map(
+      fn: (x: number, i: number, j: number) => number,
+      scope?: any): mat3
+  {
+    return new mat3(
+        fn.call(scope, this.m00, 0, 0),
+        fn.call(scope, this.m01, 0, 1),
+        fn.call(scope, this.m02, 0, 2),
+        fn.call(scope, this.m10, 1, 0),
+        fn.call(scope, this.m11, 1, 1),
+        fn.call(scope, this.m12, 1, 2),
+        fn.call(scope, this.m20, 2, 0),
+        fn.call(scope, this.m21, 2, 1),
+        fn.call(scope, this.m22, 2, 2));
   }
 
   public determinant(): number {
@@ -1695,6 +1749,52 @@ export class mat4 {
         this.m20, this.m21, this.m22, this.m23,
         this.m30, this.m31, this.m32, this.m33,
     ];
+  }
+
+  public map_(
+      fn: (x: number, i: number, j: number) => number,
+      scope?: any): mat4
+  {
+    this.m00 = fn.call(scope, this.m00, 0, 0);
+    this.m01 = fn.call(scope, this.m01, 0, 1);
+    this.m02 = fn.call(scope, this.m02, 0, 2);
+    this.m03 = fn.call(scope, this.m03, 0, 3);
+    this.m10 = fn.call(scope, this.m10, 1, 0);
+    this.m11 = fn.call(scope, this.m11, 1, 1);
+    this.m12 = fn.call(scope, this.m12, 1, 2);
+    this.m13 = fn.call(scope, this.m13, 1, 3);
+    this.m20 = fn.call(scope, this.m20, 2, 0);
+    this.m21 = fn.call(scope, this.m21, 2, 1);
+    this.m22 = fn.call(scope, this.m22, 2, 2);
+    this.m23 = fn.call(scope, this.m23, 2, 3);
+    this.m30 = fn.call(scope, this.m30, 3, 0);
+    this.m31 = fn.call(scope, this.m31, 3, 1);
+    this.m32 = fn.call(scope, this.m32, 3, 2);
+    this.m33 = fn.call(scope, this.m33, 3, 3);
+    return this;
+  }
+
+  public map(
+      fn: (x: number, i: number, j: number) => number,
+      scope?: any): mat4
+  {
+    return new mat4(
+        fn.call(scope, this.m00, 0, 0),
+        fn.call(scope, this.m01, 0, 1),
+        fn.call(scope, this.m02, 0, 2),
+        fn.call(scope, this.m03, 0, 3),
+        fn.call(scope, this.m10, 1, 0),
+        fn.call(scope, this.m11, 1, 1),
+        fn.call(scope, this.m12, 1, 2),
+        fn.call(scope, this.m13, 1, 3),
+        fn.call(scope, this.m20, 2, 0),
+        fn.call(scope, this.m21, 2, 1),
+        fn.call(scope, this.m22, 2, 2),
+        fn.call(scope, this.m23, 2, 3),
+        fn.call(scope, this.m30, 3, 0),
+        fn.call(scope, this.m31, 3, 1),
+        fn.call(scope, this.m32, 3, 2),
+        fn.call(scope, this.m33, 3, 3));
   }
 
   public transpose_(): mat4 {
