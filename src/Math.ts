@@ -201,11 +201,11 @@ export class vec2 implements ivec2 {
     return this.clone().rotate_(a, cx, cy);
   }
 
-  public rotatec_(a: number, c: vec2): vec2 {
+  public rotatec_(a: number, c: ivec2): vec2 {
     return this.rotate_(a, c.x, c.y);
   }
 
-  public rotatec(a: number, c: vec2): vec2 {
+  public rotatec(a: number, c: ivec2): vec2 {
     return this.clone().rotate_(a, c.x, c.y);
   }
 
@@ -219,11 +219,11 @@ export class vec2 implements ivec2 {
     return this.clone().scale_(x, y, cx, cy);
   }
 
-  public scalec_(x: number, y: number, c: vec2): vec2 {
+  public scalec_(x: number, y: number, c: ivec2): vec2 {
     return this.scale_(x, y, c.x, c.y);
   }
 
-  public scalec(x: number, y: number, c: vec2): vec2 {
+  public scalec(x: number, y: number, c: ivec2): vec2 {
     return this.clone().scale_(x, y, c.x, c.y);
   }
 }
@@ -313,6 +313,10 @@ export class vec3 implements ivec3 {
 
   public toStandard(): vec2 {
     return this.toVec2().div_(this.z);
+  }
+
+  public toStandard_(): vec3 {
+    return this.div_(this.z);
   }
 
   public neg_(): vec3 {
@@ -683,6 +687,10 @@ export class vec4 implements ivec4 {
     return this.toVec3().div_(this.w);
   }
 
+  public toStandard_(): vec4 {
+    return this.div_(this.w);
+  }
+
   public neg_(): vec4 {
     this.x = -this.x;
     this.y = -this.y;
@@ -760,21 +768,19 @@ export class vec4 implements ivec4 {
     return GlobalMath.hypot(this.x, this.y, this.z, this.w);
   }
 
-  public length(): number {
-    return GlobalMath.hypot(this.x, this.y, this.z, this.w);
+  public normalize3_(): vec4 {
+    const w = this.w;
+    const r = GlobalMath.hypot(this.x / w, this.y / w, this.z / w);
+    this.x /= r;
+    this.y /= r;
+    this.z /= r;
+    return this;
   }
 
-  public squareLength(): number {
-    return this.x * this.x + this.y * this.y + this.z * this.z +
-        this.w * this.w;
-  }
-
-  public normalize_(): vec4 {
-    return this.div_(this.modulus());
-  }
-
-  public normalize(): vec4 {
-    return this.div(this.modulus());
+  public normalize3(): vec4 {
+    const w = this.w;
+    const r = GlobalMath.hypot(this.x / w, this.y / w, this.z / w);
+    return new vec4(this.x / r, this.y / r, this.z / r, this.w);
   }
 
   public translate_(x: number, y: number, z: number, w: number = 1): vec4 {
@@ -813,10 +819,9 @@ export class vec4 implements ivec4 {
       cx: number = 0, cy: number = 0, cz: number = 0): vec4
   {
     const v = this.toStandard().rotate3_(a, nx, ny, nz, cx, cy, cz);
-    this.x = v.x;
-    this.y = v.y;
-    this.z = v.z;
-    this.w = 1;
+    this.x = v.x * this.w;
+    this.y = v.y * this.w;
+    this.z = v.z * this.w;
     return this;
   }
 
@@ -897,6 +902,10 @@ export class mat2 {
 
   public static scaling(x: number, y: number): mat2 {
     return new mat2(x, 0, 0, y);
+  }
+
+  public static scalingv(v: ivec2): mat2 {
+    return new mat2(v.x, 0, 0, v.y);
   }
 
   public toString(): string {
@@ -1132,8 +1141,33 @@ export class mat3 {
     return new mat3(1, 0, x, 0, 1, y, 0, 0, 1);
   }
 
+  public static translationv(v: ivec2): mat3 {
+    return new mat3(1, 0, v.x, 0, 1, v.y, 0, 0, 1);
+  }
+
   public static scaling(x: number, y: number, z: number = 1): mat3 {
     return new mat3(x, 0, 0, 0, y, 0, 0, 0, z);
+  }
+
+  public static scalingv(v: ivec3): mat3 {
+    return new mat3(v.x, 0, 0, 0, v.y, 0, 0, 0, v.z);
+  }
+
+  public static scaling2(
+      x: number, y: number,
+      cx: number = 0, cy: number = 0): mat3
+  {
+    return new mat3(
+        x, 0, cx * (x - 1),
+        0, y, cy * (y - 1),
+        0, 0, 1);
+  }
+
+  public static scaling2v(v: ivec2, c: ivec2): mat3 {
+    return new mat3(
+        v.x, 0, v.x * c.x - v.x,
+        0, v.y, v.y * c.y - v.y,
+        0, 0, 1);
   }
 
   public toString(): string {
@@ -1496,11 +1530,27 @@ export class mat4 {
         0, 0, 0, 1);
   }
 
+  public static translationv(v: ivec3): mat4 {
+    return new mat4(
+        1, 0, 0, v.x,
+        0, 1, 0, v.y,
+        0, 0, 1, v.z,
+        0, 0, 0, 1);
+  }
+
   public static scaling(x: number, y: number, z: number): mat4 {
     return new mat4(
         x, 0, 0, 0,
         0, y, 0, 0,
         0, 0, z, 0,
+        0, 0, 0, 1);
+  }
+
+  public static scalingv(v: ivec3): mat4 {
+    return new mat4(
+        v.x, 0, 0, 0,
+        0, v.y, 0, 0,
+        0, 0, v.z, 0,
         0, 0, 0, 1);
   }
 
