@@ -954,6 +954,14 @@ export class mat2 {
     return [this.m00, this.m01, this.m10, this.m11];
   }
 
+  get x(): vec2 {
+    return new vec2(this.m00, this.m10);
+  }
+
+  get y(): vec2 {
+    return new vec2(this.m01, this.m11);
+  }
+
   public map_(
       fn: (x: number, i: number, j: number) => number,
       scope?: any): mat2
@@ -1300,6 +1308,18 @@ export class mat3 {
         this.m10, this.m11, this.m12,
         this.m20, this.m21, this.m22,
     ];
+  }
+
+  get x(): vec3 {
+    return new vec3(this.m00, this.m10, this.m20);
+  }
+
+  get y(): vec3 {
+    return new vec3(this.m01, this.m11, this.m21);
+  }
+
+  get z(): vec3 {
+    return new vec3(this.m02, this.m12, this.m22);
   }
 
   public map_(
@@ -1749,6 +1769,22 @@ export class mat4 {
         this.m20, this.m21, this.m22, this.m23,
         this.m30, this.m31, this.m32, this.m33,
     ];
+  }
+
+  get x(): vec4 {
+    return new vec4(this.m00, this.m10, this.m20, this.m30);
+  }
+
+  get y(): vec4 {
+    return new vec4(this.m01, this.m11, this.m21, this.m31);
+  }
+
+  get z(): vec4 {
+    return new vec4(this.m02, this.m12, this.m22, this.m32);
+  }
+
+  get w(): vec4 {
+    return new vec4(this.m03, this.m13, this.m23, this.m33);
   }
 
   public map_(
