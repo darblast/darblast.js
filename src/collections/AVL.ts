@@ -11,15 +11,7 @@ export class Index {
 }
 
 
-interface SchemaValidationResults {
-  reference: string[],
-  permutations: number[][];
-}
-
-
-function validateSchema(
-    fields: FieldDefinition[], indices: Index[]): SchemaValidationResults
-{
+function validateSchema(fields: FieldDefinition[], indices: Index[]): void {
   if (!fields.length) {
     throw new Error('at least one field must be specified');
   }
@@ -52,11 +44,6 @@ function validateSchema(
       throw new Error(`index ${JSON.stringify(indices[0].keys)} has different keys than ${JSON.stringify(indices[i].keys)}`);
     }
   }
-  return {
-    reference: reference,
-    permutations: indices.map(({keys}) => keys.map(
-        key => reference.indexOf(key))),
-  };
 }
 
 
@@ -83,7 +70,7 @@ function validateSchema(
 export const compileAVL = TemplateClass(
     (fields: FieldDefinition[], indices: Index[]): string =>
 {
-  const {reference, permutations} = validateSchema(fields, indices);
+  validateSchema(fields, indices);
 
   const allFields = fields.slice();
   indices.forEach((_, index) => {
@@ -1030,8 +1017,7 @@ export const compileAVL = TemplateClass(
 
       ${indices.map((_, index) => `
         _successor${index}(node) {
-          node = ${getField(`$right${index}`)};
-          for (let left = ${getField(`$left${index}`)}; left; node = left) {}
+          for (node = ${getField(`$right${index}`)}; node; node = ${getField(`$left${index}`)}) {}
           return node;
         }
 
@@ -1084,11 +1070,9 @@ export const compileAVL = TemplateClass(
           }
         }
 
-        remove${index}(...keys) {
+        remove${index}(${indices[index].keys.join(', ')}) {
           ${indices.map(({keys}, index2) => `
-            this._removeContext.keys${index2} = [${keys.map((_, i) =>
-                `keys[${permutations[index][permutations[index2].indexOf(i)]}]`
-                ).join(', ')}];
+            this._removeContext.keys${index2} = [${keys.join(', ')}];
           `).join('')}
           this._removeContext.node = 0;
           this._root${index} = this._remove${index}(0, this._root${index});
@@ -1102,8 +1086,8 @@ export const compileAVL = TemplateClass(
         }
       `).join('')}
 
-      remove(...keys) {
-        return this.remove0(...keys);
+      remove(${indices[0].keys.join(', ')}) {
+        return this.remove0(${indices[0].keys.join(', ')});
       }
 
       removeRecord(record) {
