@@ -1071,11 +1071,13 @@ export const compileAVL = TemplateClass(
         }
 
         remove${index}(${indices[index].keys.join(', ')}) {
-          ${indices.map(({keys}, index2) => `
-            this._removeContext.keys${index2} = [${keys.join(', ')}];
+          ${indices.map(({keys}, index) => `
+            this._removeContext.keys${index} = [${keys.join(', ')}];
           `).join('')}
           this._removeContext.node = 0;
-          this._root${index} = this._remove${index}(0, this._root${index});
+          ${indices.map((_, index) => `
+            this._root${index} = this._remove${index}(0, this._root${index});
+          `).join('')}
           const node = this._removeContext.node;
           if (node) {
             this._pop(node);
