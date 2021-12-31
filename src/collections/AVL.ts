@@ -1028,12 +1028,44 @@ export const compileAVL = TemplateClass(
             if (cmp < 0) {
               const child = this._remove${index}(
                   node, ${getField(`$left${index}`)});
-              ${setField(`$left${index}`, 'child')}
+              ${setNodeField('node', `$left${index}`, 'child')}
+              if (!this._removeContext.balanced) {
+                if (${getNodeField('node', `$balance${index}`)} > 0) {
+                  const right = ${getNodeField('node', `$right${index}`)};
+                  if (${getNodeField('right', `$balance${index}`)} < 0) {
+                    node = this._rotateRightLeft${index}(node, right);
+                  } else {
+                    node = this._rotateLeft${index}(node, right);
+                  }
+                  this._insertContext.balanced = true;
+                } else if (${getNodeField('node', `$balance${index}`)} < 0) {
+                  ${setNodeField('node', `$balance${index}`, '0')}
+                  this._insertContext.balanced = true;
+                } else {
+                  ${setNodeField('node', `$balance${index}`, '1')}
+                }
+              }
               return node;
             } else if (cmp > 0) {
               const child = this._remove${index}(
                   node, ${getField(`$right${index}`)});
               ${setField(`$right${index}`, 'child')}
+              if (!this._removeContext.balanced) {
+                const left = ${getNodeField('node', `$left${index}`)};
+                if (${getNodeField('node', `$balance${index}`)} < 0) {
+                  if (${getNodeField('left', `$balance${index}`)} > 0) {
+                    node = this._rotateLeftRight${index}(node, left);
+                  } else {
+                    node = this._rotateRight${index}(node, left);
+                  }
+                  this._insertContext.balanced = true;
+                } else if (${getNodeField('node', `$balance${index}`)} > 0) {
+                  ${setNodeField('node', `$balance${index}`, '0')}
+                  this._insertContext.balanced = true;
+                } else {
+                  ${setNodeField('node', `$balance${index}`, '-1')}
+                }
+              }
               return node;
             } else {
               this._removeContext.balanced = false;

@@ -321,6 +321,15 @@ describe('AVL', () => {
     const e = element();
     tree.insertOrUpdate(e);
     tree.removeRecord(e);
+    expect(tree.size).to.equal(0);
+  });
+
+  it('removes one element out of two', () => {
+    tree.insertOrUpdate(element());
+    const e = element();
+    tree.insertOrUpdate(e);
+    tree.removeRecord(e);
+    expect(tree.size).to.equal(1);
   });
 });
 
