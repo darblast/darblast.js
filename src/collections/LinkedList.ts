@@ -114,6 +114,53 @@ export class LinkedList<Element> implements Iterable<Element> {
       this._size++;
     }
   }
+
+  public forEach(callback: (element: Element) => void, scope?: any): void {
+    for (let node = this._head; node; node = node.next) {
+      callback.call(scope, node.element);
+    }
+  }
+
+  public map<NewElement>(
+      callback: (element: Element) => NewElement,
+      scope?: any): LinkedList<NewElement>
+  {
+    const newList = new LinkedList<NewElement>();
+    for (let node = this._head; node; node = node.next) {
+      newList.push(callback.call(scope, node.element));
+    }
+    return newList;
+  }
+
+  public every(predicate: (element: Element) => boolean, scope?: any): boolean {
+    for (let node = this._head; node; node = node.next) {
+      if (!predicate.call(scope, node.element)) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  public some(predicate: (element: Element) => boolean, scope?: any): boolean {
+    for (let node = this._head; node; node = node.next) {
+      if (predicate.call(scope, node.element)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  public reduce(
+      initial: Element,
+      callback: (accumulator: Element, element: Element) => Element,
+      scope?: any): Element
+  {
+    let result = initial;
+    for (let node = this._head; node; node = node.next) {
+      result = callback.call(scope, result, node.element);
+    }
+    return result;
+  }
 }
 
 
