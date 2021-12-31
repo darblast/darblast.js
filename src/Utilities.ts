@@ -117,7 +117,7 @@ export function flatten<Element>(array: (Element|Element[])[]): Element[] {
  *
  * Complexity: O(log(N)).
  *
- * @returns the index of the searched element, or -1 is the element is not
+ * @returns the index of the searched element, or -1 if the element is not
  *          found.
  */
 export function binarySearch<Element>(
@@ -148,7 +148,7 @@ export function binarySearch<Element>(
  *
  * Complexity: O(log(N)).
  *
- * @returns the index of the found element.
+ * @returns the index of the lower bound element.
  */
 export function lowerBound<Element>(array: Element[], value: Element): number {
   let i = 0, j = array.length;
