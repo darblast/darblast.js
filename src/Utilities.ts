@@ -112,6 +112,58 @@ export function flatten<Element>(array: (Element|Element[])[]): Element[] {
 }
 
 
+/**
+ * Performs a binary search over an ordered array.
+ *
+ * Complexity: O(log(N)).
+ *
+ * @returns the index of the searched element, or -1 is the element is not
+ *          found.
+ */
+export function binarySearch<Element>(
+    array: Element[], element: Element): number
+{
+  let i = 0, j = array.length;
+  while (j > i) {
+    const k = i + ((j - i) >>> 1);
+    if (array[k] < element) {
+      i = k + 1;
+    } else if (array[k] > element) {
+      j = k;
+    } else {
+      return k;
+    }
+  }
+  return -1;
+}
+
+
+/**
+ * Finds the first element that is greater than or equal to the provided
+ * `value`.
+ *
+ * If `value` is strictly greater than all the elements in the array this
+ * function returns `array.length`, while if it's strictly smaller or the array
+ * is empty 0 is returned.
+ *
+ * Complexity: O(log(N)).
+ *
+ * @returns the index of the found element.
+ */
+export function lowerBound<Element>(array: Element[], value: Element): number {
+  let i = 0, j = array.length;
+  while (j > i) {
+    const k = i + ((j - i) >>> 1);
+    if (array[k] < value) {
+      i = k + 1;
+    } else {
+      j = k;
+    }
+  }
+  return i;
+}
+
+
 export function TemplateClass(compiler: (...args: any[]) => string) {
   return (...args: any[]) => {
     const compiled = compiler.apply(null, args);
