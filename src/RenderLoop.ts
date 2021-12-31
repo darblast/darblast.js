@@ -78,13 +78,16 @@ export abstract class BaseRenderLoop {
  * {@link BaseRenderLoop.render} implementation as a callback function.
  */
 export class CallbackRenderLoop extends BaseRenderLoop {
+  private readonly _callback: (t: number) => any;
+
   /**
    * Constructs a CallbackRenderLoop.
    *
    * @param _callback  user-defined function called by {@link render}.
    */
-  public constructor(private readonly _callback: (t: number) => any) {
+  public constructor(callback: (t: number) => any, scope: any = null) {
     super();
+    this._callback = callback.bind(scope);
   }
 
   public render(t: number): void {
