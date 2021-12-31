@@ -5,25 +5,25 @@
 Installing dependencies:
 
 ```sh
-$ npm i
+npm i
 ```
 
 Building just the output JS files:
 
 ```sh
-$ gulp default
+gulp default
 ```
 
 Including the docs (in the `doc` directory):
 
 ```sh
-$ gulp all
+gulp all
 ```
 
 ## Testing
 
 ```sh
-$ gulp test
+gulp test
 ```
 
 ## Debugging
@@ -33,5 +33,5 @@ you want to debug, open [`chrome://inspect`](`chrome://inspect`) in Chrome, then
 run:
 
 ```sh
-$ npm --node-options --inspect test
+npm --node-options --inspect test
 ```
