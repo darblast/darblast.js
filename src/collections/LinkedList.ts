@@ -132,6 +132,19 @@ export class LinkedList<Element> implements Iterable<Element> {
     return newList;
   }
 
+  public filter(
+      predicate: (element: Element) => boolean,
+      scope?: any): LinkedList<Element>
+  {
+    const newList = new LinkedList<Element>();
+    for (let node = this._head; node; node = node.next) {
+      if (predicate.call(scope, node.element)) {
+        newList.push(node.element);
+      }
+    }
+    return newList;
+  }
+
   public every(predicate: (element: Element) => boolean, scope?: any): boolean {
     for (let node = this._head; node; node = node.next) {
       if (!predicate.call(scope, node.element)) {
