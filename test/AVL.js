@@ -331,6 +331,27 @@ describe('AVL', () => {
     tree.removeRecord(e);
     expect(tree.size).to.equal(1);
   });
+
+  it('removes first element and then second one', () => {
+    debugger;
+    const e1 = element();
+    const e2 = element();
+    tree.insertOrUpdate(e1);
+    tree.insertOrUpdate(e2);
+    tree.removeRecord(e1);
+    tree.removeRecord(e2);
+    expect(tree.size).to.equal(0);
+  });
+
+  it('removes second element and then first one', () => {
+    const e1 = element();
+    const e2 = element();
+    tree.insertOrUpdate(e1);
+    tree.insertOrUpdate(e2);
+    tree.removeRecord(e2);
+    tree.removeRecord(e1);
+    expect(tree.size).to.equal(0);
+  });
 });
 
 
@@ -423,5 +444,20 @@ describe('Stress-tested AVL', () => {
     for (let {value} of tree.reverse) {
       expect(value).to.equal(--i);
     }
+  });
+
+  it('stays balanced throughout insertion and removal', () => {
+    const elements = presetSequence || Utilities.shuffle(
+        Array.from({length: 1024}, (_, i) => i));
+    const tree = new TestAVL();
+    for (value of elements) {
+      tree.insertOrUpdate({value});
+      tree._checkConsistency();
+    }
+    for (value of elements.reverse()) {
+      tree.removeRecord({value});
+      tree._checkConsistency();
+    }
+    expect(tree.size).to.equal(0);
   });
 });

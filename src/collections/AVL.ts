@@ -726,6 +726,8 @@ export const compileAVL = TemplateClass(
             default:
               throw new Error('internal error');
             }
+          } else {
+            this._root${index} = node;
           }
           const left${index} = ${getField(`$left${index}`)};
           if (left${index}) {
@@ -1076,15 +1078,16 @@ export const compileAVL = TemplateClass(
               ${(index > 0) ? '' : `this._removeContext.node = node;`}
               if (left) {
                 if (right) {
-                  node = this._successor${index}(node);
+                  successor = this._successor${index}(node);
                   ${setNodeField(
-                      getField(`$parent${index}`), `$left${index}`,
-                      getField(`$right${index}`))}
-                  ${setField(`$parent${index}`, 'parent')}
-                  ${setField(`$left${index}`, 'left')}
-                  ${setField(`$right${index}`, 'right')}
-                  ${setField(`$balance${index}`, 'balance')}
-                  return node;
+                      getNodeField('successor', `$parent${index}`),
+                      `$left${index}`,
+                      getNodeField('successor', `$right${index}`))}
+                  ${setNodeField('successor', `$parent${index}`, 'parent')}
+                  ${setNodeField('successor', `$left${index}`, 'left')}
+                  ${setNodeField('successor', `$right${index}`, 'right')}
+                  ${setNodeField('successor', `$balance${index}`, 'balance')}
+                  return successor;
                 } else {
                   ${setNodeField('left', `$parent${index}`, 'parent')}
                   return left;
