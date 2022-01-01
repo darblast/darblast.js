@@ -868,7 +868,6 @@ export const compileAVL = TemplateClass(
       `).join('')}
 
       _insertContext = {
-        keys: [],
         record: null,
         node: 0,
         inserted: false,
