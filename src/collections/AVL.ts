@@ -875,11 +875,12 @@ export const compileAVL = TemplateClass(
         balanced: true,
       };
 
-      ${indices.map((_, index) => `
+      ${indices.map(({keys}, index) => `
         _insert${index}(parent, node) {
           if (node) {
-            const cmp = this._compare${index}(
-                node, ...this._insertContext.keys);
+            const record = this._insertContext.record;
+            const cmp = this._compare${index}(node, ${keys.map(
+                key => `record.${key}`).join(', ')});
             if (cmp < 0) {
               const child = this._insert${index}(
                   node, ${getField(`$left${index}`)});
@@ -949,23 +950,11 @@ export const compileAVL = TemplateClass(
         }
       `).join('')}
 
-      ${indices.map((_, index) => `
-        _getKeys${index}_() {
-          this._insertContext.keys.length = ${indices[index].keys.length};
-          ${indices[index].keys.map((key, i) => `
-            this._insertContext.keys[${i}] = this._insertContext.record.${
-                key};`).join('\n')}
-          return this._insertContext.keys;
-        }
-      `).join('')}
-
       insertOrUpdate(record) {
         this._insertContext.record = record;
-        this._getKeys0_();
         this._root0 = this._insert0(0, this._root0);
         if (this._insertContext.inserted) {
           ${indices.map((_, index) => index > 0 ? `
-            this._getKeys${index}_();
             this._root${index} = this._insert${index}(0, this._root${index});
           ` : '').join('')}
         }
