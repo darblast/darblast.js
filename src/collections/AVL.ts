@@ -998,14 +998,12 @@ export const compileAVL = TemplateClass(
       `).join('')}
 
       _removeContext = {
-        ${indices.map((_, index) => `
-          keys${index}: null,
-        `).join('')}
+        record: null,
         node: 0,
         balanced: true,
       };
 
-      ${indices.map((_, index) => `
+      ${indices.map(({keys}, index) => `
         _successor${index}(node) {
           for (node = ${getField(`$right${index}`)}; node; node = ${getField(`$left${index}`)}) {}
           return node;
@@ -1013,8 +1011,9 @@ export const compileAVL = TemplateClass(
 
         _remove${index}(parent, node) {
           if (node) {
+            const record = this._removeContext.record;
             const cmp = this._compare${index}(
-                node, ...this._removeContext.keys${index});
+                node, ${keys.map(key => `record.${key}`).join(', ')});
             if (cmp < 0) {
               const child = this._remove${index}(
                   node, ${getField(`$left${index}`)});
@@ -1093,10 +1092,8 @@ export const compileAVL = TemplateClass(
           }
         }
 
-        remove${index}(${indices[index].keys.join(', ')}) {
-          ${indices.map(({keys}, index) => `
-            this._removeContext.keys${index} = [${keys.join(', ')}];
-          `).join('')}
+        remove${index}(${keys.join(', ')}) {
+          this._removeContext.record = {${keys.join(', ')}};
           this._removeContext.node = 0;
           ${indices.map((_, index) => `
             this._root${index} = this._remove${index}(0, this._root${index});
