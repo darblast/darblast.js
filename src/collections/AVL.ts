@@ -740,22 +740,14 @@ export const compileAVL = TemplateClass(
         `).join('')}
       }
 
-      _swap(node1, node2) {
-        if (node1 === node2) {
-          return;
-        }
-        let t;
-        ${fields.map(({name}) => `
-          t = ${getNodeField('node1', name)};
-          ${setNodeField('node1', name, `${getNodeField('node2', name)}`)}
-          ${setNodeField('node2', name, 't')}
-        `).join('')}
-        this._relink(node1);
-        this._relink(node2);
-      }
-
       _pop(node) {
-        this._swap(node, this._size);
+        if (node !== this._size) {
+          this._views.uint8.copyWithin(
+              node * ${definition.byteSize},
+              this._size * ${definition.byteSize},
+              (this._size + 1) * ${definition.byteSize});
+          this._relink(node);
+        }
         return this._size--;
       }
 
@@ -1065,7 +1057,7 @@ export const compileAVL = TemplateClass(
               ${(index > 0) ? '' : `this._removeContext.node = node;`}
               if (left) {
                 if (right) {
-                  successor = this._successor${index}(node);
+                  const successor = this._successor${index}(node);
                   ${setNodeField(
                       getNodeField('successor', `$parent${index}`),
                       `$left${index}`,
