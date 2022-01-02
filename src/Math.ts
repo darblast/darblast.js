@@ -1833,6 +1833,23 @@ export class mat4 {
         fn.call(scope, this.m33, 3, 3));
   }
 
+  public determinant(): number {
+    const n01 = this.m20 * this.m31 - this.m21 * this.m30;
+    const n02 = this.m20 * this.m32 - this.m22 * this.m30;
+    const n03 = this.m20 * this.m33 - this.m23 * this.m30;
+    const n10 = this.m21 * this.m30 - this.m20 * this.m31;
+    const n12 = this.m21 * this.m32 - this.m22 * this.m31;
+    const n13 = this.m21 * this.m33 - this.m23 * this.m31;
+    const n20 = this.m22 * this.m30 - this.m20 * this.m32;
+    const n21 = this.m22 * this.m31 - this.m21 * this.m32;
+    const n23 = this.m22 * this.m33 - this.m23 * this.m32;
+    const m00 = this.m11 * n23 - this.m12 * n13 + this.m13 * n12;
+    const m01 = this.m10 * n23 - this.m12 * n03 + this.m13 * n02;
+    const m02 = this.m10 * n13 - this.m11 * n03 + this.m13 * n01;
+    const m03 = this.m10 * n12 - this.m11 * n02 + this.m12 * n01;
+    return this.m00 * m00 - this.m01 * m01 + this.m02 * m02 - this.m03 * m03;
+  }
+
   public transpose_(): mat4 {
     const m01 = this.m10;
     const m02 = this.m20;
