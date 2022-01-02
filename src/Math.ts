@@ -1361,6 +1361,41 @@ export class mat3 {
     return this.m00 * m00 - this.m01 * m01 + this.m02 * m02;
   }
 
+  public adjugate_(): mat3 {
+    const m00 = this.m11 * this.m22 - this.m12 * this.m21;
+    const m01 = this.m12 * this.m20 - this.m10 * this.m22;
+    const m02 = this.m10 * this.m21 - this.m11 * this.m20;
+    const m10 = this.m02 * this.m21 - this.m01 * this.m22;
+    const m11 = this.m00 * this.m22 - this.m02 * this.m20;
+    const m12 = this.m01 * this.m20 - this.m00 * this.m21;
+    const m20 = this.m01 * this.m12 - this.m02 * this.m11;
+    const m21 = this.m02 * this.m10 - this.m00 * this.m12;
+    const m22 = this.m00 * this.m11 - this.m01 * this.m10;
+    this.m00 = m00;
+    this.m01 = m10;
+    this.m02 = m20;
+    this.m10 = m01;
+    this.m11 = m11;
+    this.m12 = m21;
+    this.m20 = m02;
+    this.m21 = m12;
+    this.m22 = m22;
+    return this;
+  }
+
+  public adjugate(): mat3 {
+    const m00 = this.m11 * this.m22 - this.m12 * this.m21;
+    const m01 = this.m12 * this.m20 - this.m10 * this.m22;
+    const m02 = this.m10 * this.m21 - this.m11 * this.m20;
+    const m10 = this.m02 * this.m21 - this.m01 * this.m22;
+    const m11 = this.m00 * this.m22 - this.m02 * this.m20;
+    const m12 = this.m01 * this.m20 - this.m00 * this.m21;
+    const m20 = this.m01 * this.m12 - this.m02 * this.m11;
+    const m21 = this.m02 * this.m10 - this.m00 * this.m12;
+    const m22 = this.m00 * this.m11 - this.m01 * this.m10;
+    return new mat3(m00, m10, m20, m01, m11, m21, m02, m12, m22);
+  }
+
   public invert_(): mat3 {
     const d = this.determinant();
     const m00 = (this.m11 * this.m22 - this.m12 * this.m21) / d;
