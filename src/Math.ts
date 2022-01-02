@@ -37,7 +37,7 @@ export class vec2 implements ivec2 {
     return new vec2(v.x, v.y);
   }
 
-  public *[Symbol.iterator](): Generator<number> {
+  public *[Symbol.iterator](): Iterator<number> {
     yield this.x;
     yield this.y;
   }
@@ -252,7 +252,7 @@ export class vec3 implements ivec3 {
     return new vec3(v.x, v.y, v.z);
   }
 
-  public *[Symbol.iterator](): Generator<number> {
+  public *[Symbol.iterator](): Iterator<number> {
     yield this.x;
     yield this.y;
     yield this.z;
@@ -607,7 +607,7 @@ export class vec4 implements ivec4 {
     return new vec4(v.x, v.y, v.z, w);
   }
 
-  public *[Symbol.iterator](): Generator<number> {
+  public *[Symbol.iterator](): Iterator<number> {
     yield this.x;
     yield this.y;
     yield this.z;

@@ -106,7 +106,7 @@ export class PriorityQueue<Element> {
     return element;
   }
 
-  public *spread(): Generator<Element> {
+  public *spread(): Iterator<Element> {
     while (this._data.length) {
       yield this.pop();
     }
