@@ -37,6 +37,11 @@ export class vec2 implements ivec2 {
     return new vec2(v.x, v.y);
   }
 
+  public *[Symbol.iterator](): Generator<number> {
+    yield this.x;
+    yield this.y;
+  }
+
   public toString(): string {
     return `vec2<${this.x}, ${this.y}>`;
   }
@@ -245,6 +250,12 @@ export class vec3 implements ivec3 {
 
   public static fromVec4(v: ivec4): vec3 {
     return new vec3(v.x, v.y, v.z);
+  }
+
+  public *[Symbol.iterator](): Generator<number> {
+    yield this.x;
+    yield this.y;
+    yield this.z;
   }
 
   public toString(): string {
@@ -596,6 +607,13 @@ export class vec4 implements ivec4 {
     return new vec4(v.x, v.y, v.z, w);
   }
 
+  public *[Symbol.iterator](): Generator<number> {
+    yield this.x;
+    yield this.y;
+    yield this.z;
+    yield this.w;
+  }
+
   public toString(): string {
     return `vec4<${this.x}, ${this.y}, ${this.z}, ${this.w}>`;
   }
@@ -890,6 +908,12 @@ export class mat2 {
       public m10: number,
       public m11: number) {}
 
+  public static fromColumns(
+      m00: number, m10: number, m01: number, m11: number): mat2
+  {
+    return new mat2(m00, m01, m10, m11);
+  }
+
   public static identity(): mat2 {
     return new mat2(1, 0, 0, 1);
   }
@@ -1162,6 +1186,14 @@ export class mat3 {
       public m20: number,
       public m21: number,
       public m22: number) {}
+
+  public static fromColumns(
+      m00: number, m10: number, m20: number,
+      m01: number, m11: number, m21: number,
+      m02: number, m12: number, m22: number): mat3
+  {
+    return new mat3(m00, m01, m02, m10, m11, m12, m20, m21, m22);
+  }
 
   public static identity(): mat3 {
     return new mat3(1, 0, 0, 0, 1, 0, 0, 0, 1);
@@ -1647,6 +1679,19 @@ export class mat4 {
       public m31: number,
       public m32: number,
       public m33: number) {}
+
+  public static fromColumns(
+      m00: number, m10: number, m20: number, m30: number,
+      m01: number, m11: number, m21: number, m31: number,
+      m02: number, m12: number, m22: number, m32: number,
+      m03: number, m13: number, m23: number, m33: number): mat4
+  {
+    return new mat4(
+        m00, m01, m02, m03,
+        m10, m11, m12, m13,
+        m20, m21, m22, m23,
+        m30, m31, m32, m33);
+  }
 
   public static identity(): mat4 {
     return new mat4(
