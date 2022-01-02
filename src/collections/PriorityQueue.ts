@@ -99,12 +99,17 @@ export class PriorityQueue<Element> {
       throw new Error('pop invoked on empty heap');
     }
     const element = this._data[0];
-    this._data[0] = this._data[this._data.length - 1];
-    if (this._data.length > 1) {
-      this._data.length--;
+    if (--this._data.length) {
+      this._data[0] = this._data[this._data.length - 1];
+      this._siftDown(0);
     }
-    this._siftDown(0);
     return element;
+  }
+
+  public *spread(): Generator<Element> {
+    while (this._data.length) {
+      yield this.pop();
+    }
   }
 
   public clear(): void {
