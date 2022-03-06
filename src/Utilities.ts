@@ -23,7 +23,7 @@ export function almostEquals(a: number, b: number, e: number): boolean {
  *
  * The formula is:
  *
- * ```
+ * ```js
  * ((a % b) + b) % b
  * ```
  *
@@ -92,6 +92,60 @@ export function shuffle<Element>(array: Element[]): Element[] {
     array[j] = t;
   }
   return array;
+}
+
+
+/**
+ * Generates a random integer between `min` inclusive and `max` exclusive.
+ *
+ * For example, this generates a random integer from 0 to 99 inclusive:
+ *
+ * ```js
+ * Utilities.randomInt(0, 100);
+ * ```
+ *
+ * This function is NOT cryptographically secure.
+ *
+ * @returns an integer number in the range [min, max).
+ */
+export function randomInt(min: number, max: number): number {
+  return min + GlobalMath.floor(GlobalMath.random() * (max - min));
+}
+
+
+/**
+ * Generates `count` random numbers in the range `[min, max)` without repetitions.
+ *
+ * For example, to generate 6 numbers between 1 and 90 inclusive without repetitions, you can run:
+ *
+ * ```js
+ * const numbers = Utilities.randomIntsNoReps(6, 1, 91);
+ * console.log(numbers);  // Possible output: [ 66, 7, 80, 75, 29, 3 ]
+ * ```
+ *
+ * This is not the same as calling `Utilities.randomInts(1, 91)` six times because that wouldn't
+ * guarantee uniqueness ([randomInt](#randomInt) may generate the same number more than once).
+ *
+ * This function uses the [Knuth / Fisher-Yates shuffle
+ * algorithm](https://en.wikipedia.org/wiki/Fisher%E2%80%93Yates_shuffle) and has a complexity of
+ * `O(N)` with `N = max - min`.
+ *
+ * This function is NOT cryptographically secure.
+ *
+ * @return an array of length `count` containing the generated numbers.
+ */
+export function randomIntsNoReps(count: number, min: number, max: number): number[] {
+  const numbers = range(max - min, min);
+  for (let i = 0; i < count; i++) {
+    const j = randomInt(i, numbers.length);
+    if (j !== i) {
+      const t = numbers[i];
+      numbers[i] = numbers[j];
+      numbers[j] = t;
+    }
+  }
+  numbers.length = count;
+  return numbers;
 }
 
 
