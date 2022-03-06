@@ -1,6 +1,7 @@
 {
   "name": "darblast.js",
   "version": "0.1.0",
+  "main": "dist/darblast.min.js",
   "description": "Darblast Engine",
   "scripts": {
     "test": "mocha"
